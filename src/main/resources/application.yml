@@ -1,0 +1,39 @@
+server:
+port: 80
+
+#spring:
+#  servlet:
+#    multipart:
+#      enabled: true
+#      max-file-size: 10MB
+#      max-request-size: 10MB
+#
+#  datasource:
+#    url: jdbc:h2:mem:test
+#    driver-class-name: org.h2.Driver
+#    username: sa
+#    password:
+#
+#    jpa:
+#      hibernate:
+#        ddl-auto: update
+#      show-sql: true
+#      properties:
+#        hibernate:
+#          format_sql: true
+#          dialect: org.hibernate.dialect.H2Dialect
+#
+#file:
+#  upload-dir: ./uploads
+
+spring:
+  datasource:
+    driver-class-name: com.mysql.jdbc.Driver
+    url: jdbc:mysql://mytrophy-db.chqi0mcwgnzt.ap-northeast-2.rds.amazonaws.com:3306/mytrophy
+    username: myt
+    password: mytrophy1234
+  jpa:
+    hibernate:
+      ddl-auto: update
+      naming:
+        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
