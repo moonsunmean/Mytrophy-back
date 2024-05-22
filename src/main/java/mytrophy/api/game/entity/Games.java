@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Game {
+public class Games {
 
     // 게임 목록의 id를 그대로 entity 저장
     @Id
@@ -36,9 +36,6 @@ public class Game {
 
     @Column
     private String publishers;
-
-    @Column
-    private String suppotedLanguages;
 
     @Column
     private String pcRequirements;
