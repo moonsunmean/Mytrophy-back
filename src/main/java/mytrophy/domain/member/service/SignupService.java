@@ -16,7 +16,7 @@ public class SignupService {
         this.bCryptPasswordEncoder = bCryptPasswordEncoder;
     }
 
-    public void SignupProcess(SignupDto signupDto) {
+    public void SignupMember(SignupDto signupDto) {
         String username = signupDto.getUsername();
         String password = signupDto.getPassword();
 

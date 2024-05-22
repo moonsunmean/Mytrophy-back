@@ -14,6 +14,8 @@ public class CustomUserDetailsService implements UserDetailsService {
     public CustomUserDetailsService(MemberRepository memberRepository) {
         this.memberRepository = memberRepository;
     }
+
+    // 동일한 로그인 아이디가 있는지 검증
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         Member userData = memberRepository.findByUsername(username);
