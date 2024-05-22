@@ -29,7 +29,7 @@ public class Games {
     private String shortcutDescription;
 
     @Column
-    private String explain;
+    private String explanation;
 
     @Column
     private String developers;
