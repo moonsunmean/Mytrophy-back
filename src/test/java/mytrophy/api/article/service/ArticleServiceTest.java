@@ -123,4 +123,48 @@ class ArticleServiceTest {
         Mockito.verify(articleRepository, Mockito.times(1)).findById(1L);
     }
 
+    @Test
+    @DisplayName("말머리 별 게시글 리스트 조회 테스트")
+    void findAllByHeader() {
+        // given
+        articleService.createArticle(Header.FREE_BOARD, "자유 제목", "자유 내용");
+        articleService.createArticle(Header.INFORMATION, "정보 제목", "정보 내용");
+        articleService.createArticle(Header.GUIDE, "공략 제목", "공략 내용");
+        articleService.createArticle(Header.REVIEW, "리뷰 제목", "리뷰 내용");
+        articleService.createArticle(Header.CHATING, "채팅 제목", "채팅 내용");
+
+        List<Article> mockArticles = List.of(
+            new Article(Header.CHATING, "채팅 제목", "채팅 내용", 0)
+        );
+        when(articleRepository.findByHeader(Header.CHATING)).thenReturn(mockArticles);
+
+        // when
+        List<Article> articles = articleService.findAllByHeader(Header.CHATING);
+
+        // then
+        assertEquals(mockArticles.size(), articles.size());
+        Mockito.verify(articleRepository, Mockito.times(1)).findByHeader(Header.CHATING);
+    }
+
+    // 말머리 별 해당 게시글 조회 테스트
+    @Test
+    @DisplayName("말머리 별 해당 게시글 조회 테스트")
+    void findByIdAndHeader() {
+        // given
+        articleService.createArticle(Header.FREE_BOARD, "자유 제목", "자유 내용");
+        articleService.createArticle(Header.INFORMATION, "정보 제목", "정보 내용");
+        articleService.createArticle(Header.GUIDE, "공략 제목", "공략 내용");
+        articleService.createArticle(Header.REVIEW, "리뷰 제목", "리뷰 내용");
+        articleService.createArticle(Header.CHATING, "채팅 제목", "채팅 내용");
+
+        Article mockArticle = new Article(Header.GUIDE, "공략 제목", "공략 내용", 0);
+        when(articleRepository.findByIdAndHeader(1L, Header.GUIDE)).thenReturn(mockArticle);
+
+        // when
+        Article article = articleService.findByIdAndHeader(1L, Header.GUIDE);
+
+        //then
+        assertEquals(mockArticle, article);
+    }
+
 }
