@@ -36,6 +36,16 @@ public class ArticleService {
             .orElseThrow(() -> new IllegalArgumentException("해당 게시글이 존재하지 않습니다."));
     }
 
+    // 말머리 별 게시글 리스트 조회
+    public List<Article> findAllByHeader(Header header) {
+        return articleRepository.findByHeader(header);
+    }
+
+    // 말머리 별 해당 게시글 조회
+    public Article findByIdAndHeader(Long id, Header header) {
+        return articleRepository.findByIdAndHeader(id, header);
+    }
+
     // 게시글 수정
     @Transactional
     public Article updateArticle(Long id, Header header, String name, String content) {
