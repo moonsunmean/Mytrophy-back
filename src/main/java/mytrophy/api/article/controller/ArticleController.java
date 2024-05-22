@@ -63,7 +63,13 @@ public class ArticleController {
     // 말머리 별 해당 게시글 조회
     @GetMapping("/header/{header}/articles/{id}")
     public ResponseEntity getArticleByHeaderAndId(@PathVariable Long id, @PathVariable Header header) {
-        return ResponseEntity.ok().body(articleService.findByIdAndHeader(id, header));
+        Article article = articleService.findByIdAndHeader(id, header);
+
+        if (article == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        return ResponseEntity.ok().body(article);
     }
 
     // 게시글 수정
