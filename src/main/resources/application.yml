@@ -1,0 +1,35 @@
+# database ?? ??
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://34.64.52.132:53303/testdb
+    username: mytrophy
+    password: mytrophy
+
+#  mvc:
+#    static-path-pattern: /images/**
+#  web:
+#    resources:
+#      static-locations: classpath:/static/images/
+#  servlet:
+#    multipart:
+#      max-file-size: 30MB
+#      max-request-size: 30MB
+
+  jackson:
+    default-property-inclusion: non_null # DTO?? null ?? ?? ?? ??
+
+  # spring data jpa ??
+  jpa:
+    hibernate:
+      ddl-auto: update # create ?? ??? sql ??? ?? ???? none ?? ??
+    show-sql: true
+    defer-datasource-initialization: true
+    open-in-view: false
+
+    jackson:
+      default-property-inclusion: non_null
+
+  #-------------------------------- jwt ?? ---------------------------------------------------
+  jwt:
+    secret: vmfhaltmskdlstkfkdgodyroqkfwkdbalroqkfwkdbalaaaaaaaaaaaaaaaabbbbb
