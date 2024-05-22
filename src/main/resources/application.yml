@@ -1,0 +1,13 @@
+spring:
+  datasource:
+    driver-class-name: com.mysql.jdbc.Driver
+    url: jdbc:mysql://mytrophy-db.cz4umw04wglc.us-east-1.rds.amazonaws.com:3306/mytrophy
+    username: myt
+    password: mytrophy1234
+  jpa:
+    hibernate:
+      ddl-auto: update
+      naming:
+        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+  jwt:
+    secret: vmfhaltmsasdvdfhaertgaerfgsdfasdklfvhnsdjikonkl
