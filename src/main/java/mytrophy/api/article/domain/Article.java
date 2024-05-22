@@ -5,6 +5,9 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import mytrophy.api.image.domain.Image;
+
+import java.util.List;
 
 @Entity
 @Getter
@@ -24,8 +27,11 @@ public class Article {
     @Column(nullable = false)
     private String content;
 
-
     private int cntUp; // 좋아요 수
+
+    @OneToMany
+    @JoinColumn(name = "article_id")
+    private List<Image> image;
 
 
     @Builder // 빌더 패턴 적용
