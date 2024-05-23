@@ -1,18 +1,17 @@
-package mytrophy.api.article.domain;
+package mytrophy.api.article.entity;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import mytrophy.api.image.domain.Image;
+import mytrophy.api.common.base.BaseEntity;
 
-import java.util.List;
 
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED) // 생성자를 protected로 설정
-public class Article {
+public class Article extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY) // 자동 생성되는 값으로 설정
@@ -29,13 +28,8 @@ public class Article {
 
     private int cntUp; // 좋아요 수
 
-    @OneToMany
-    @JoinColumn(name = "article_id")
-    private List<Image> image;
-
-
     @Builder // 빌더 패턴 적용
-    public Article(Header header, String name, String content, int cntUp) {
+    public Article(Long id, Header header, String name, String content, int cntUp) {
         this.header = header;
         this.name = name;
         this.content = content;
