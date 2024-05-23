@@ -1,7 +1,7 @@
 package mytrophy.api.article.service;
 
-import mytrophy.api.article.domain.Article;
-import mytrophy.api.article.domain.Header;
+import mytrophy.api.article.entity.Article;
+import mytrophy.api.article.entity.Header;
 import mytrophy.api.article.repository.ArticleRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -44,11 +44,11 @@ class ArticleServiceTest {
         articleService.createArticle(Header.CHATING, "채팅 제목", "채팅 내용");
 
         List<Article> mockArticles = List.of(
-            new Article(Header.FREE_BOARD, "자유 제목", "자유 내용", 0),
-            new Article(Header.INFORMATION, "정보 제목", "정보 내용", 0),
-            new Article(Header.GUIDE, "공략 제목", "공략 내용", 0),
-            new Article(Header.REVIEW, "리뷰 제목", "리뷰 내용", 0),
-            new Article(Header.CHATING, "채팅 제목", "채팅 내용", 0)
+            new Article(1L, Header.FREE_BOARD, "자유 제목", "자유 내용", 0),
+            new Article(2L, Header.INFORMATION, "정보 제목", "정보 내용", 0),
+            new Article(3L, Header.GUIDE, "공략 제목", "공략 내용", 0),
+            new Article(4L, Header.REVIEW, "리뷰 제목", "리뷰 내용", 0),
+            new Article(5L, Header.CHATING, "채팅 제목", "채팅 내용", 0)
         );
         when(articleRepository.findAll()).thenReturn(mockArticles);
 
@@ -64,7 +64,7 @@ class ArticleServiceTest {
     @DisplayName("해당 게시글 조회 테스트")
     void findById() {
         // given
-        Article article = new Article(Header.FREE_BOARD, "자유 제목", "자유 내용", 0);
+        Article article = new Article(1L, Header.FREE_BOARD, "자유 제목", "자유 내용", 0);
         when(articleRepository.findById(1L)).thenReturn(java.util.Optional.of(article));
 
         // when
@@ -79,7 +79,7 @@ class ArticleServiceTest {
     @DisplayName("게시글 수정 테스트")
     void updateArticle() {
         // given
-        Article article = new Article(Header.FREE_BOARD, "자유 제목", "자유 내용", 0);
+        Article article = new Article(1L, Header.FREE_BOARD, "자유 제목", "자유 내용", 0);
         when(articleRepository.findById(1L)).thenReturn(java.util.Optional.of(article));
 
         // when
@@ -96,7 +96,7 @@ class ArticleServiceTest {
     @DisplayName("게시글 삭제 테스트")
     void deleteArticle() {
         // given
-        Article article = new Article(Header.FREE_BOARD, "자유 제목", "자유 내용", 0);
+        Article article = new Article(1L, Header.FREE_BOARD, "자유 제목", "자유 내용", 0);
         when(articleRepository.findById(1L)).thenReturn(java.util.Optional.of(article));
 
         // when
@@ -112,7 +112,7 @@ class ArticleServiceTest {
     @DisplayName("좋아요 증가 테스트")
     void upCntUp() {
         // given
-        Article article = new Article(Header.FREE_BOARD, "자유 제목", "자유 내용", 0);
+        Article article = new Article(1L, Header.FREE_BOARD, "자유 제목", "자유 내용", 0);
         when(articleRepository.findById(1L)).thenReturn(java.util.Optional.of(article));
 
         // when
@@ -134,7 +134,7 @@ class ArticleServiceTest {
         articleService.createArticle(Header.CHATING, "채팅 제목", "채팅 내용");
 
         List<Article> mockArticles = List.of(
-            new Article(Header.CHATING, "채팅 제목", "채팅 내용", 0)
+            new Article(5L, Header.CHATING, "채팅 제목", "채팅 내용", 0)
         );
         when(articleRepository.findByHeader(Header.CHATING)).thenReturn(mockArticles);
 
@@ -157,7 +157,7 @@ class ArticleServiceTest {
         articleService.createArticle(Header.REVIEW, "리뷰 제목", "리뷰 내용");
         articleService.createArticle(Header.CHATING, "채팅 제목", "채팅 내용");
 
-        Article mockArticle = new Article(Header.GUIDE, "공략 제목", "공략 내용", 0);
+        Article mockArticle = new Article(3L, Header.GUIDE, "공략 제목", "공략 내용", 0);
         when(articleRepository.findByIdAndHeader(1L, Header.GUIDE)).thenReturn(mockArticle);
 
         // when
