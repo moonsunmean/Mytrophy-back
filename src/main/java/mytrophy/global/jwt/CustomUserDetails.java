@@ -37,6 +37,10 @@ public class CustomUserDetails implements UserDetails {
         return member.getUsername();
     }
 
+    public Long getSteamId() {
+        return member.getSteam_id();
+    }
+
     @Override
     public boolean isAccountNonExpired() {
         return true;

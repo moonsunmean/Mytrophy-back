@@ -48,6 +48,7 @@ public class JWTFilter extends OncePerRequestFilter {
         //토큰에서 username과 role 획득
         String username = jwtUtil.getUsername(token);
         String role = jwtUtil.getRole(token);
+        String steam_id = jwtUtil.getSteamId(token);
 
         // memberEntity를 생성하여 값 set
         Member member = new Member();
