@@ -1,8 +1,8 @@
 package mytrophy.api.article.controller;
 
 import lombok.RequiredArgsConstructor;
-import mytrophy.api.article.domain.Article;
-import mytrophy.api.article.domain.Header;
+import mytrophy.api.article.entity.Article;
+import mytrophy.api.article.entity.Header;
 import mytrophy.api.article.dto.ArticleRequest;
 import mytrophy.api.article.service.ArticleService;
 import org.springframework.http.ResponseEntity;
