@@ -14,30 +14,33 @@ import java.time.LocalDate;
 @Entity
 @Getter
 @Setter
-@Builder
 public class Member {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false)
     private String name;
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     private String nickname;
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = true, unique = true)
     private String email;
 
     @Column(nullable = true, unique = true)
-    private String steam_id;
+    private String steamId;
 
     @Column(nullable = true)
-    private String profile_image;
+    private String loginType;
+
+
+    @Column(nullable = true)
+    private String profileImage;
 
     @Column(nullable = false, unique = true)
-    private String login_id;
+    private String loginId;
 
     @Column(nullable = true)
     private String password;

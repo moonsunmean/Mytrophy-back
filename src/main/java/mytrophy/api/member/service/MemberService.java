@@ -2,7 +2,6 @@ package mytrophy.api.member.service;
 
 
 import lombok.RequiredArgsConstructor;
-import mytrophy.api.member.entity.Member;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;

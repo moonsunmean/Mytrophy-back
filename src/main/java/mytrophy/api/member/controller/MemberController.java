@@ -3,7 +3,6 @@ package mytrophy.api.member.controller;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import mytrophy.api.member.entity.Member;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -21,15 +20,15 @@ import java.util.Collections;
 public class MemberController {
     private final MemberService memberService;
 
-    @PostMapping("/signup")
-    public ResponseEntity<?> signUp(@RequestBody MemberSignupDto memberSignupDto) throws Exception {
-        Member member = memberService.signUp(memberSignupDto);
-        if (member != null) {
-            return ResponseEntity.ok(Collections.singletonMap("name", member.getName()));
-        } else {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("회원가입 실패");
-        }
-    }
+//    @PostMapping("/signup")
+//    public ResponseEntity<?> signUp(@RequestBody MemberSignupDto memberSignupDto) throws Exception {
+//        Member member = memberService.signUp(memberSignupDto);
+//        if (member != null) {
+//            return ResponseEntity.ok(Collections.singletonMap("name", member.getName()));
+//        } else {
+//            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("회원가입 실패");
+//        }
+//    }
 
 
 }
