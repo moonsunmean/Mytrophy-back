@@ -1,6 +1,6 @@
 package mytrophy.api.game.controller;
 
-import mytrophy.api.game.service.GameService;
+import mytrophy.api.game.service.GameDataService;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -8,9 +8,9 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api")
 public class GameController {
 
-    private final GameService gameService;
+    private final GameDataService gameDataService;
 
-    public GameController(GameService gameService) {
-        this.gameService = gameService;
+    public GameController(GameDataService gameDataService) {
+        this.gameDataService = gameDataService;
     }
 }

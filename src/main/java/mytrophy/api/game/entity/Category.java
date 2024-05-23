@@ -6,18 +6,24 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Entity
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Screenshots {
+public class Category {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column
-    private String imagePath;
+    private String koName;
 
+    @Column
+    private String enName;
+
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "category")
+    private List<GameCategory> gameCategoryList;
 }

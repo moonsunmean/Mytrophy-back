@@ -7,12 +7,17 @@ spring:
   jpa:
     hibernate:
       ddl-auto: update
+      naming:
+        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
     show-sql: true
     defer-datasource-initialization: true
     open-in-view: false
 
     jackson:
       default-property-inclusion: non_null
+
+    jwt:
+      secret: vmfhaltmsasdvdfhaertgaerfgsdfasdklfvhnsdjikonkl
 
 steam:
   api-key: E747BF736400A81DFDF11557E236014E
