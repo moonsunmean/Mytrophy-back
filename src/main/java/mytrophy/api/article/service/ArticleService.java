@@ -4,8 +4,8 @@ package mytrophy.api.article.service;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import mytrophy.api.article.domain.Article;
-import mytrophy.api.article.domain.Header;
+import mytrophy.api.article.entity.Article;
+import mytrophy.api.article.entity.Header;
 import mytrophy.api.article.repository.ArticleRepository;
 import org.springframework.stereotype.Service;
 
