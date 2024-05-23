@@ -1,8 +1,8 @@
-package mytrophy.domain.member.service;
+package mytrophy.api.member.service;
 
-import mytrophy.domain.member.dto.SignupDto;
-import mytrophy.domain.member.entity.Member;
-import mytrophy.domain.member.repository.MemberRepository;
+import mytrophy.api.member.dto.SignupDto;
+import mytrophy.api.member.entity.Member;
+import mytrophy.api.member.repository.MemberRepository;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 

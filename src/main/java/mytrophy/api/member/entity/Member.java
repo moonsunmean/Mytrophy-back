@@ -1,4 +1,4 @@
-package mytrophy.domain.member.entity;
+package mytrophy.api.member.entity;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -15,8 +15,7 @@ public class Member {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
-    // 여기서 username 이 로그인할 때 입력하는 로그인 아이디
-    private String username;
+    private String username; // 여기서 username 이 로그인할 때 입력하는 로그인 아이디
     private String password;
     private String role;
 }

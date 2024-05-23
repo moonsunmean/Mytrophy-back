@@ -1,4 +1,4 @@
-package mytrophy.domain.member.dto;
+package mytrophy.api.member.dto;
 
 import lombok.Getter;
 import lombok.Setter;

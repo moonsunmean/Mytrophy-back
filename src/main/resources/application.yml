@@ -1,13 +1,16 @@
 spring:
   datasource:
-    driver-class-name: com.mysql.jdbc.Driver
-    url: jdbc:mysql://mytrophy-db.chqi0mcwgnzt.ap-northeast-2.rds.amazonaws.com:3306/mytrophy
-    username: myt
-    password: mytrophy1234
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://34.64.52.132:3306/mytrophy_db
+    username: mytrophy
+    password: mytrophy
   jpa:
     hibernate:
       ddl-auto: update
-      naming:
-        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+#      naming:
+#        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+#    show-sql: true
+#    defer-datasource-initialization: true
+#    open-in-view: false
   jwt:
     secret: vmfhaltmsasdvdfhaertgaerfgsdfasdklfvhnsdjikonkl

@@ -1,6 +1,6 @@
 package mytrophy.global.jwt;
 
-import mytrophy.domain.member.entity.Member;
+import mytrophy.api.member.entity.Member;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 

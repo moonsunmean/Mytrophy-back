@@ -1,4 +1,4 @@
-package mytrophy.domain.member.controller;
+package mytrophy.api.member.controller;
 
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;

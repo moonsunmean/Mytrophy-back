@@ -1,9 +1,8 @@
-package mytrophy.domain.member.controller;
+package mytrophy.api.member.controller;
 
-import mytrophy.domain.member.dto.LoginDto;
-import mytrophy.domain.member.dto.SignupDto;
-import mytrophy.domain.member.service.LoginService;
-import mytrophy.domain.member.service.SignupService;
+import mytrophy.api.member.dto.SignupDto;
+import mytrophy.api.member.service.LoginService;
+import mytrophy.api.member.service.SignupService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;

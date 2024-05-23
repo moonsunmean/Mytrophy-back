@@ -1,7 +1,7 @@
 package mytrophy.global.jwt;
 
-import mytrophy.domain.member.entity.Member;
-import mytrophy.domain.member.repository.MemberRepository;
+import mytrophy.api.member.entity.Member;
+import mytrophy.api.member.repository.MemberRepository;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
