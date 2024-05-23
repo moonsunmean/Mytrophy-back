@@ -22,34 +22,7 @@ public class Games {
     @Column
     private String name;
 
-    @Column
-    private String detailedDescription;
-
-    @Column
-    private String shortcutDescription;
-
-    @Column
-    private String explanation;
-
-    @Column
-    private String developers;
-
-    @Column
-    private String publishers;
-
-    @Column
-    private String pcRequirements;
-
-    @Column
-    private String price;
-
-    @Column
-    private LocalDateTime releaseDate;
-
-    @Column
-    private int recommendations;
-
-    @Column
-    private String headerImagePath;
+    @OneToOne(mappedBy = "Games", fetch = FetchType.LAZY)
+    GameDetails gameDetails;
 
 }
