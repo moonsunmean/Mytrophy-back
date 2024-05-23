@@ -1,7 +1,7 @@
 package mytrophy.api.article.dto;
 
 import lombok.Getter;
-import mytrophy.api.article.domain.Header;
+import mytrophy.api.article.entity.Header;
 
 @Getter
 public class ArticleRequest {
