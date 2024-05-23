@@ -1,4 +1,4 @@
-package mytrophy.api.member.Dto;
+package mytrophy.api.member.dto;
 
 
 import lombok.Data;

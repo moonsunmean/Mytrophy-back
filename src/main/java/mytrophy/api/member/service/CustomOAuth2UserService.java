@@ -2,7 +2,7 @@ package mytrophy.api.member.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import mytrophy.api.member.Dto.*;
+import mytrophy.api.member.dto.*;
 import mytrophy.api.member.entity.Member;
 import mytrophy.api.member.repository.MemberRepository;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;

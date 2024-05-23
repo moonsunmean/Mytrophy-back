@@ -1,4 +1,4 @@
-package mytrophy.api.member.Dto;
+package mytrophy.api.member.dto;
 
 public interface OAuth2Response {
     //제공자 (Ex. naver, google, ...)

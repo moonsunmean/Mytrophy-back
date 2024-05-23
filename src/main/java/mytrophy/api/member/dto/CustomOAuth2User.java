@@ -1,4 +1,4 @@
-package mytrophy.api.member.Dto;
+package mytrophy.api.member.dto;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
@@ -11,13 +11,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class CustomOAuth2User implements OAuth2User {
 
-
     private final MemberDto memberDto;
-
-//    public CustomOAuth2User(UserDto userDTO) {
-//
-//        this.userDTO = userDTO;
-//    }
 
     @Override
     public Map<String, Object> getAttributes() {
