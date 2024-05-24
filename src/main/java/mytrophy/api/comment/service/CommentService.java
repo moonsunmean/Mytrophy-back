@@ -9,7 +9,7 @@ import mytrophy.api.comment.repository.CommentRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -19,6 +19,8 @@ import java.util.stream.Collectors;
 public class CommentService {
 
     private final CommentRepository commentRepository;
+    //회원별 추천한 댓글 저장
+    private final Map<Long, Set<Long>> likedComments = new HashMap<>();
 
     //댓글 작성
     public CommentDto createComment(Long articleId, CreateCommentDto createCommentDto) {
@@ -71,16 +73,30 @@ public class CommentService {
     //댓글 추천
     //memberId는 테스트
     public void likeComment(Long commentId, Long memberId) {
-        Comment comment = commentRepository.findById(commentId)
-                .orElseThrow(() -> new RuntimeException("댓글을 찾을 수 없습니다."));
-        comment.incrementCntUp();
+        Set<Long> likedCommentsForMember = likedComments.computeIfAbsent(memberId, k -> new HashSet<>());
+        if (!likedCommentsForMember.contains(commentId)) {
+            Comment comment = commentRepository.findById(commentId)
+                    .orElseThrow(() -> new RuntimeException("댓글을 찾을 수 없습니다."));
+            comment.incrementCntUp();
+            likedCommentsForMember.add(commentId); // 해당 회원이 해당 댓글을 추천한 정보 저장
+        } else {
+            log.warn("이미 추천한 댓글입니다.");
+            throw new RuntimeException("이미 추천한 댓글입니다.");
+        }
     }
 
     // 댓글 추천 취소
     public void unlikeComment(Long commentId, Long memberId) {
-        Comment comment = commentRepository.findById(commentId)
-                .orElseThrow(() -> new RuntimeException("댓글을 찾을 수 없습니다."));
-        comment.decrementCntUp();
+        Set<Long> likedCommentsForMember = likedComments.get(memberId);
+        if (likedCommentsForMember != null && likedCommentsForMember.contains(commentId)) {
+            Comment comment = commentRepository.findById(commentId)
+                    .orElseThrow(() -> new RuntimeException("댓글을 찾을 수 없습니다."));
+            comment.decrementCntUp();
+            likedCommentsForMember.remove(commentId); // 해당 회원이 해당 댓글을 추천한 정보 삭제
+        } else {
+            log.warn("해당 댓글을 추천하지 않았습니다.");
+            throw new RuntimeException("해당 댓글을 추천하지 않았습니다.");
+        }
     }
 
     //댓글 수정,삭제 권한 확인

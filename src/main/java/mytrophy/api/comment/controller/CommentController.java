@@ -69,18 +69,26 @@ public class CommentController {
     }
 
     //댓글 추천
-    //세션에서 추천 로직 확인해서 중복추천 방지 추가하기
+    //회원 연결하면 로직 수정하기 -> 앱실행할때마다 중복 초기화됨
     @PostMapping("/comments/{id}/like")
-    public ResponseEntity<Void> likeComment(@PathVariable("id") Long commentId, @RequestBody Long memberId) {
-        commentService.likeComment(commentId, memberId);
-        return ResponseEntity.ok().build();
+    public ResponseEntity<String> likeComment(@PathVariable("id") Long commentId, @RequestBody Long memberId) {
+        try {
+            commentService.likeComment(commentId, memberId);
+            return ResponseEntity.ok("댓글을 추천했습니다.");
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("이미 추천한 댓글입니다.");
+        }
     }
 
     //댓글 추천 취소
     @PostMapping("comments/{id}/unlike")
-    public ResponseEntity<Void> unlikeComment(@PathVariable("id") Long commentId, @RequestBody Long memberId) {
-        commentService.unlikeComment(commentId, memberId);
-        return ResponseEntity.ok().build();
+    public ResponseEntity<String> unlikeComment(@PathVariable("id") Long commentId, @RequestBody Long memberId) {
+        try {
+            commentService.unlikeComment(commentId, memberId);
+            return ResponseEntity.ok("댓글 추천이 취소되었습니다.");
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("해당 댓글을 추천하지 않았습니다.");
+        }
     }
 
 }
