@@ -5,11 +5,15 @@ import mytrophy.api.article.entity.Article;
 import mytrophy.api.article.entity.Header;
 import mytrophy.api.article.dto.ArticleRequest;
 import mytrophy.api.article.service.ArticleService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api")
@@ -20,12 +24,22 @@ public class ArticleController {
 
     // 게시글 생성
     @PostMapping("/articles")
-    public ResponseEntity<?> createArticle(@RequestBody ArticleRequest articleRequest) { // RequestBody:HTTP 요청의 본문을 자바 객체로 전달받을 때 사용
-        // 게시글 생성 로직 수행
-        Article article = articleService.createArticle(articleRequest.getHeader(), articleRequest.getName(), articleRequest.getContent());
-
-        // ResponseEntity 객체를 통해 HTTP 응답 반환
-        return ResponseEntity.ok().body(Collections.singletonMap("id", article.getId())); // singletonMap:단일 키-값 쌍을 가지는 맵을 생성
+    public ResponseEntity<Map<String, Object>> createArticle(@ModelAttribute ArticleRequest articleRequest,
+                                                             @RequestPart (value = "file", required = false) MultipartFile file) {
+        try {
+            String imagePath = null;
+            if (file != null && !file.isEmpty()) {
+                imagePath = articleService.uploadImage(file);
+                if (imagePath == null) {
+                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+                }
+            }
+            Article article = articleService.createArticle(articleRequest, imagePath);
+            return ResponseEntity.ok().body(Collections.singletonMap("id", article.getId()));
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
     }
 
     // 게시글 리스트 조회
