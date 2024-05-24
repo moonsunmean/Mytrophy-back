@@ -2,6 +2,8 @@ package mytrophy.api.member.dto;
 
 import java.util.Map;
 
+// window.location.href = "http://localhost:8080/oauth2/authorization/naver"
+// -> 프론트단에서 로그인 버튼 클릭시 하이퍼 링크로 리다이렉트 해줘여함
 public class NaverResponse implements OAuth2Response{
 
     private final Map<String, Object> attribute;

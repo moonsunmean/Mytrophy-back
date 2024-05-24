@@ -11,6 +11,6 @@ public class MyController {
     @ResponseBody
     public String myAPI() {
 
-        return "my route";
+        return "after login page";
     }
 }
