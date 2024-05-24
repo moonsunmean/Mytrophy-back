@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -44,7 +45,7 @@ public class GameDataService {
     }
 
     // 스팀 게임 목록을 받아와 DB에 저장하는 메서드
-    public void receiveSteamGameList() throws JsonProcessingException {
+    public void receiveSteamGameList(int type,int size) throws JsonProcessingException {
         RestTemplate restTemplate = new RestTemplate();
         String url = "http://api.steampowered.com/ISteamApps/GetAppList/v2/";
         ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, null, String.class);
@@ -52,14 +53,21 @@ public class GameDataService {
         JsonNode appsNode = rootNode.get("applist").get("apps");
 
         int count = 1;
-        for (JsonNode appNode : appsNode) {
-            int appId = appNode.get("appid").asInt();
-            System.out.println(appId);
+        if (type == 0) {
+            for (JsonNode appNode : appsNode) {
+                int appId = appNode.get("appid").asInt();
+                System.out.println(appId);
+                System.out.println(count);
+                gameDetail(appId);
+                if (count >= size) break;
+                count++;
+            }
+        } else {
+            System.out.println(type);
             System.out.println(count);
-            gameDetail(440);
-            count++;
-            if (count > 200) break;
+            gameDetail(type);
         }
+
     }
 
     // 특정 게임의 상세 정보를 받아와 DB에 저장하는 메서드
@@ -88,19 +96,24 @@ public class GameDataService {
     }
 
     // 주어진 URL로부터 JSON 데이터를 받아와서 해당 앱의 노드를 반환
-    private JsonNode getAppNodeFromUrl(String url, String strId) throws JsonProcessingException {
-        ResponseEntity<String> response = new RestTemplate().exchange(url, HttpMethod.GET, null, String.class);
-        JsonNode rootNode = new ObjectMapper().readTree(response.getBody());
-        return rootNode.get(strId);
+    private JsonNode getAppNodeFromUrl(String url, String strId) {
+        try {
+            ResponseEntity<String> response = new RestTemplate().exchange(url, HttpMethod.GET, null, String.class);
+            if (response.getStatusCode() == HttpStatus.OK) {
+                JsonNode rootNode = new ObjectMapper().readTree(response.getBody());
+                if(strId.equals("0")){
+                    return rootNode.get("game");
+                }
+                return rootNode.get(strId);
+            } else {
+                // 서버에서 OK 상태 코드를 반환하지 않았을 때는 null을 반환
+                return null;
+            }
+        } catch (Exception e) {
+            // 예외가 발생했을 때는 null을 반환
+            return null;
+        }
     }
-
-    // 주어진 URL로부터 JSON 데이터를 받아와서 해당 앱의 노드를 반환
-    private JsonNode getAppNodeFromUrl2(String url, String strId) throws JsonProcessingException {
-        ResponseEntity<String> response = new RestTemplate().exchange(url, HttpMethod.GET, null, String.class);
-        JsonNode rootNode = new ObjectMapper().readTree(response.getBody());
-        return rootNode.get("game");
-    }
-
     // JSON 데이터에서 게임 정보를 추출하여 게임 엔티티를 생성
     private Game createGameFromJson(JsonNode appNode, int appId) {
         Long id = Long.valueOf(appId);
@@ -160,14 +173,20 @@ public class GameDataService {
     }
 
     // 게임 업적을 받아와서 업적 리스트를 반환하는 메서드
-    private List<Achievement> saveGameAchievement(int appId) throws JsonProcessingException {
-        String url = "https://api.steampowered.com/ISteamUserStats/GetSchemaForGame/v2/?key=" + steamKey + "&appid=" + appId + "&l=koreana";
-        JsonNode rootNode = getAppNodeFromUrl2(url, String.valueOf(appId));
-        JsonNode achievementsNode = (rootNode != null && rootNode.has("availableGameStats")) ?
-                rootNode.get("availableGameStats").get("achievements") :
-                null;
-        return achievementsNode != null ? parseAchievements(achievementsNode) : Collections.emptyList();
+    private List<Achievement> saveGameAchievement(int appId) {
+        try {
+            String url = "https://api.steampowered.com/ISteamUserStats/GetSchemaForGame/v2/?key=" + steamKey + "&appid=" + appId + "&l=koreana";
+            JsonNode rootNode = getAppNodeFromUrl(url, "0");
+            JsonNode achievementsNode = (rootNode != null && rootNode.has("availableGameStats")) ?
+                    rootNode.get("availableGameStats").get("achievements") :
+                    null;
+            return achievementsNode != null ? parseAchievements(achievementsNode) : Collections.emptyList();
+        } catch (Exception e) {
+            // 서버에서 OK 상태 코드를 반환하지 않았을 때는 null을 반환
+            return null;
+        }
     }
+
 
     // JSON 데이터에서 업적 정보를 추출하여 업적 리스트를 반환하는 메서드
     private List<Achievement> parseAchievements(JsonNode achievementsNode) {

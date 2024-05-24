@@ -15,4 +15,9 @@ spring:
 
   jwt:
     secret: vmfhaltmsasdvdfhaertgaerfgsdfasdklfvhnsdjikonkl
+steam:
+  api-key: E747BF736400A81DFDF11557E236014E
 
+#logging:
+#  level:
+#    root: DEBUG
