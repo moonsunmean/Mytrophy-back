@@ -3,13 +3,8 @@ package mytrophy.api.game.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import mytrophy.api.game.entity.Achievement;
-import mytrophy.api.game.entity.Game;
-import mytrophy.api.game.entity.Screenshot;
-import mytrophy.api.game.repository.AchievementRepository;
-import mytrophy.api.game.repository.CategoryRepository;
-import mytrophy.api.game.repository.GameRepository;
-import mytrophy.api.game.repository.ScreenshotRepository;
+import mytrophy.api.game.entity.*;
+import mytrophy.api.game.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
@@ -22,9 +17,7 @@ import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 @Service
 public class GameDataService {
@@ -33,6 +26,7 @@ public class GameDataService {
     private final AchievementRepository achievementRepository;
     private final CategoryRepository categoryRepository;
     private final ScreenshotRepository screenshotRepository;
+    private final GameCategoryRepository gameCategoryRepository;
 
     // application.properties에서 설정된 값 주입
     @Value("${steam.api-key}")
@@ -40,11 +34,13 @@ public class GameDataService {
 
     @Autowired
     public GameDataService(GameRepository gameRepository, AchievementRepository achievementRepository,
-                           CategoryRepository categoryRepository, ScreenshotRepository screenshotRepository) {
+                           CategoryRepository categoryRepository, ScreenshotRepository screenshotRepository,
+                           GameCategoryRepository gameCategoryRepository) {
         this.gameRepository = gameRepository;
         this.achievementRepository = achievementRepository;
         this.categoryRepository = categoryRepository;
         this.screenshotRepository = screenshotRepository;
+        this.gameCategoryRepository = gameCategoryRepository;
     }
 
     // 스팀 게임 목록을 받아와 DB에 저장하는 메서드
@@ -55,13 +51,14 @@ public class GameDataService {
         JsonNode rootNode = new ObjectMapper().readTree(response.getBody());
         JsonNode appsNode = rootNode.get("applist").get("apps");
 
-        int count = 0;
+        int count = 1;
         for (JsonNode appNode : appsNode) {
             int appId = appNode.get("appid").asInt();
             System.out.println(appId);
-            gameDetail(appId);
+            System.out.println(count);
+            gameDetail(440);
             count++;
-            if (count > 999) break;
+            if (count > 200) break;
         }
     }
 
@@ -84,21 +81,32 @@ public class GameDataService {
         Game game = createGameFromJson(appNode.get("data"), appId);
         game.setAchievementList(achievementRepository.saveAll(saveGameAchievement(appId)));
         game.setScreenshotList(screenshotRepository.saveAll(saveGameScreenshot(appNode.get("data").get("screenshots"))));
-        gameRepository.save(game);
+        game = gameRepository.save(game);
+
+        // 받아온 게임의 카테고리 연결하여 DB에 저장
+        saveGameCategory(appNode.get("data").get("genres"),game);
     }
 
-    // 주어진 URL로부터 JSON 데이터를 받아와서 해당 앱의 노드를 반환하는 메서드
+    // 주어진 URL로부터 JSON 데이터를 받아와서 해당 앱의 노드를 반환
     private JsonNode getAppNodeFromUrl(String url, String strId) throws JsonProcessingException {
         ResponseEntity<String> response = new RestTemplate().exchange(url, HttpMethod.GET, null, String.class);
         JsonNode rootNode = new ObjectMapper().readTree(response.getBody());
         return rootNode.get(strId);
     }
 
-    // JSON 데이터에서 게임 정보를 추출하여 게임 엔티티를 생성하는 메서드
+    // 주어진 URL로부터 JSON 데이터를 받아와서 해당 앱의 노드를 반환
+    private JsonNode getAppNodeFromUrl2(String url, String strId) throws JsonProcessingException {
+        ResponseEntity<String> response = new RestTemplate().exchange(url, HttpMethod.GET, null, String.class);
+        JsonNode rootNode = new ObjectMapper().readTree(response.getBody());
+        return rootNode.get("game");
+    }
+
+    // JSON 데이터에서 게임 정보를 추출하여 게임 엔티티를 생성
     private Game createGameFromJson(JsonNode appNode, int appId) {
         Long id = Long.valueOf(appId);
         String name = appNode.hasNonNull("name") ? appNode.get("name").asText() : null;
         String description = appNode.hasNonNull("short_description") ? appNode.get("short_description").asText() : null;
+
         // 게임 개발사
         String gameDeveloper = "";
         JsonNode developersNode = appNode.get("developers");
@@ -154,18 +162,22 @@ public class GameDataService {
     // 게임 업적을 받아와서 업적 리스트를 반환하는 메서드
     private List<Achievement> saveGameAchievement(int appId) throws JsonProcessingException {
         String url = "https://api.steampowered.com/ISteamUserStats/GetSchemaForGame/v2/?key=" + steamKey + "&appid=" + appId + "&l=koreana";
-        JsonNode rootNode = getAppNodeFromUrl(url, String.valueOf(appId));
-        JsonNode achievementsNode = rootNode != null ? rootNode.get("availableGameStats").get("achievements") : null;
+        JsonNode rootNode = getAppNodeFromUrl2(url, String.valueOf(appId));
+        JsonNode achievementsNode = (rootNode != null && rootNode.has("availableGameStats")) ?
+                rootNode.get("availableGameStats").get("achievements") :
+                null;
         return achievementsNode != null ? parseAchievements(achievementsNode) : Collections.emptyList();
     }
 
     // JSON 데이터에서 업적 정보를 추출하여 업적 리스트를 반환하는 메서드
     private List<Achievement> parseAchievements(JsonNode achievementsNode) {
         List<Achievement> achievementList = new ArrayList<>();
+        boolean isExist;
         for (JsonNode achievementNode : achievementsNode) {
             String name = achievementNode.get("displayName").asText();
             String imagePath = achievementNode.get("icon").asText();
-            achievementList.add(new Achievement(null, name, imagePath));
+            isExist = achievementRepository.existsByName(name);
+            if(!isExist)achievementList.add(new Achievement(null, name, imagePath));
         }
         return achievementList;
     }
@@ -173,13 +185,15 @@ public class GameDataService {
     // JSON 데이터에서 스크린샷 정보를 추출하여 스크린샷 리스트를 반환하는 메서드
     private List<Screenshot> saveGameScreenshot(JsonNode appsNode) {
         List<Screenshot> screenshotList = new ArrayList<>();
+        boolean isExist;
         if (appsNode == null) {
             return Collections.emptyList();
         }
         for (JsonNode appNode : appsNode) {
             String thumbnailImagePath = appNode.get("path_thumbnail").asText();
             String fullImagePath = appNode.get("path_full").asText();
-            screenshotList.add(new Screenshot(null, thumbnailImagePath, fullImagePath));
+            isExist = screenshotRepository.existsByThumbnailImagePathAndFullImagePath(thumbnailImagePath, fullImagePath);
+            if(!isExist) screenshotList.add(new Screenshot(null, thumbnailImagePath, fullImagePath));
         }
         return screenshotList;
     }
@@ -219,16 +233,44 @@ public class GameDataService {
         return list;
     }
 
-    public void saveCategoryList() {
+    public void readCategoryList() {
         ObjectMapper objectMapper = new ObjectMapper();
         try {
-            Resource resource = new ClassPathResource("static/json/category.json");
+            Resource resource = new ClassPathResource("static/json/genres.json");
             InputStream inputStream = resource.getInputStream();
             JsonNode jsonNode = objectMapper.readTree(inputStream);
-            System.out.println(jsonNode);
-            // 이제 jsonNode를 사용하여 데이터를 처리합니다.
+
+            Map<Integer, String> idNameMap = new HashMap<>();
+            jsonNode.fields().forEachRemaining(entry -> {
+                idNameMap.put(Integer.parseInt(entry.getKey()), entry.getValue().asText());
+            });
+
+            idNameMap.forEach((id, name) -> categoryRepository.save(saveCategoryToDb(id,name)));
+
         } catch (IOException e) {
             e.printStackTrace();
+        }
+    }
+
+    public Category saveCategoryToDb(int receiveId,String name) {
+        Long id = Long.valueOf(receiveId);
+        return new Category(id, name,null);
+    }
+
+    private void saveGameCategory(JsonNode appsNode, Game game) {
+        // null 값이면 바로 종료
+        if (appsNode == null) return;
+
+        // 게임과 카테고리 연결
+        for (JsonNode appNode : appsNode) {
+            Long categoryId = appNode.get("id").asLong();
+            if(!gameCategoryRepository.existsByGameIdAndCategoryId(game.getId(), categoryId)){
+                Category existingCategory = categoryRepository.findById(categoryId).orElse(null);
+                GameCategory gameCategory = new GameCategory();
+                gameCategory.setGame(game);
+                gameCategory.setCategory(existingCategory);
+                gameCategoryRepository.save(gameCategory);
+            }
         }
     }
 }

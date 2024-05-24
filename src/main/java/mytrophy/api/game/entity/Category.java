@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -19,11 +20,9 @@ public class Category {
     private Long id;
 
     @Column
-    private String koName;
-
-    @Column
-    private String enName;
+    private String name;
 
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "category")
-    private List<GameCategory> gameCategoryList;
+    private List<GameCategory> gameCategoryList = new ArrayList<>();
+
 }

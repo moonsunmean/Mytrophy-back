@@ -18,8 +18,12 @@ public class GameApplicationListener implements ApplicationListener<ContextRefre
     @Override
     public void onApplicationEvent(ContextRefreshedEvent event) {
         // 실행하고자 하는 코드 작성
-        //            gameDataService.receiveSteamGameList();
-        gameDataService.saveCategoryList();
+        try {
+            gameDataService.receiveSteamGameList();
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+//        gameDataService.readCategoryList();
 
 
     }

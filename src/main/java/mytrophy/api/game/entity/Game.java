@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -55,7 +56,7 @@ public class Game {
     private Boolean jpIsPosible;
 
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "game")
-    private List<GameCategory> gameCategoryList;
+    private List<GameCategory> gameCategoryList = new ArrayList<>();
 
     // 카테고리를 제외한 나머지는 단방향 맵핑
     @OneToMany(fetch = FetchType.LAZY)
