@@ -50,23 +50,32 @@ public class ArticleService {
     }
 
     // 파일 업로드
-    public byte[] getFile(String imagePath) {
-        return bucket.get("files/" + imagePath).getContent();
-    }
-
-    // 파일 입력 및 저장
-    public List<String> uploadFiles(List<MultipartFile> files) throws IOException{
-        // file 저장위치 선언
-        String blob = "files/";
-
+   public List<String> uploadFiles(List<MultipartFile> files) throws IOException {
         // 파일을 Bucket에 저장
         List<String> urls = new ArrayList<>();
 
         for (MultipartFile file : files) {
             String uuid = UUID.randomUUID().toString();
-            String url = blob + uuid;
-            bucket.create(url, file.getBytes());
-            urls.add("/" + url);
+            String blobPath = "files/" + uuid;
+
+            // 파일의 MIME 유형 가져오기
+            String contentType = file.getContentType();
+
+            // BlobInfo 객체 생성
+            BlobInfo blobInfo = BlobInfo.newBuilder(bucket.getName(), blobPath)
+                .setContentType(contentType)
+                .build();
+
+            // BlobInfo 객체에서 Blob 이름과 컨텐츠 유형 가져오기
+            String blobName = blobInfo.getName();
+            String blobContentType = blobInfo.getContentType();
+
+            // 파일을 Bucket에 저장
+            bucket.create(blobName, file.getBytes(), blobContentType);
+
+            // 파일의 경로(urls) 추가
+            String url = "https://storage.googleapis.com/" + bucket.getName() + "/" + blobPath;
+            urls.add(url);
         }
         return urls;
     }
