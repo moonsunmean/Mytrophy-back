@@ -1,15 +1,23 @@
 package mytrophy.api.article.service;
 
 
+import com.google.cloud.storage.BlobId;
+import com.google.cloud.storage.BlobInfo;
+import com.google.cloud.storage.Storage;
+import com.google.firebase.cloud.StorageClient;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import mytrophy.api.article.dto.ArticleRequest;
 import mytrophy.api.article.entity.Article;
 import mytrophy.api.article.entity.Header;
 import mytrophy.api.article.repository.ArticleRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor // final 필드를 파라미터로 받는 생성자를 생성
@@ -20,9 +28,30 @@ public class ArticleService {
 
     // 게시글 생성
     @Transactional // 트랜잭션 처리
-    public Article createArticle(Header header, String name, String content) {
-        Article article = Article.createArticle(header, name, content);
+    public Article createArticle(ArticleRequest articleRequest, String imagePath) throws IOException {
+        Article article = Article.createArticle(articleRequest);
+
+        if (imagePath != null) {
+            article.setImagePath(imagePath);
+        }
         return articleRepository.save(article);
+    }
+
+    // 파일 업로드
+    public String uploadImage(MultipartFile file) throws IOException{
+        Storage storage = StorageClient.getInstance().bucket().getStorage();
+        String fileName = generateFileName(file.getOriginalFilename());
+        BlobId blobId = BlobId.of("mytrophy-fcaa2.appspot.com", fileName);
+        BlobInfo blobInfo = BlobInfo.newBuilder(blobId).build();
+        storage.create(blobInfo, file.getBytes());
+
+        return "https://storage.googleapis.com/" + blobId.getBucket() + "/" + blobId.getName();
+    }
+
+    public String generateFileName(String originalFileName) {
+        String uuid = UUID.randomUUID().toString();
+        String extension = originalFileName.substring(originalFileName.lastIndexOf("."));
+        return uuid + extension;
     }
 
     // 게시글 리스트 조회
