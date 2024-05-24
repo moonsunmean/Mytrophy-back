@@ -1,14 +1,16 @@
 spring:
   datasource:
-    url: jdbc:mysql://localhost:3306/mytrophy
-    username: root
-    password: 0308
     driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://34.64.52.132:3306/mytrophy_db
+    username: mytrophy
+    password: mytrophy
   jpa:
     hibernate:
       ddl-auto: update
-    properties:
-      hibernate:
-        dialect: org.hibernate.dialect.MySQL8Dialect
+      naming:
+        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+    show-sql: true
+    defer-datasource-initialization: true
+    open-in-view: false
   jwt:
     secret: vmfhaltmsasdvdfhaertgaerfgsdfasdklfvhnsdjikonkl
