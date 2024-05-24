@@ -96,4 +96,17 @@ public class ArticleController {
         articleService.deleteArticle(id);
         return ResponseEntity.ok().build();
     }
+
+    // 파일만 업로드
+    @PostMapping("/articles/files")
+    public ResponseEntity uploadFiles(@RequestPart (value = "file", required = false) List<MultipartFile> files) throws IOException {
+        return ResponseEntity.ok().body(articleService.uploadFiles(files));
+    }
+
+    // 파일 삭제
+    @DeleteMapping("/articles/files")
+    public ResponseEntity removeFiles(List<String> files) {
+        articleService.fileRemove(files);
+        return ResponseEntity.ok().build();
+    }
 }
