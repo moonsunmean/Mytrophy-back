@@ -10,10 +10,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api")
@@ -24,22 +23,11 @@ public class ArticleController {
 
     // 게시글 생성
     @PostMapping("/articles")
-    public ResponseEntity<Map<String, Object>> createArticle(@ModelAttribute ArticleRequest articleRequest,
-                                                             @RequestPart (value = "file", required = false) MultipartFile file) {
-        try {
-            String imagePath = null;
-            if (file != null && !file.isEmpty()) {
-                imagePath = articleService.uploadImage(file);
-                if (imagePath == null) {
-                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
-                }
-            }
-            Article article = articleService.createArticle(articleRequest, imagePath);
-            return ResponseEntity.ok().body(Collections.singletonMap("id", article.getId()));
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
-        }
+    public ResponseEntity<Article> createArticle(@ModelAttribute ArticleRequest articleRequest,
+                                                 @RequestPart (value = "file", required = false) List<MultipartFile> files) throws IOException {
+        return ResponseEntity.status(HttpStatus.OK)
+            .body(articleService.createArticle(articleRequest, files));
+
     }
 
     // 게시글 리스트 조회
@@ -88,7 +76,7 @@ public class ArticleController {
 
     // 게시글 수정
     @PatchMapping("/articles/{id}")
-    public ResponseEntity updateArticle(@PathVariable Long id, @RequestBody ArticleRequest articleRequest) {
+    public ResponseEntity updateArticle(@PathVariable Long id, ArticleRequest articleRequest) {
         Article article = articleService.findById(id);
         if (article == null) {
             return ResponseEntity.notFound().build();
