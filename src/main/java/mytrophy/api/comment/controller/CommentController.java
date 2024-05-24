@@ -3,6 +3,7 @@ package mytrophy.api.comment.controller;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import mytrophy.api.comment.dto.CommentDto;
+import mytrophy.api.comment.dto.CreateCommentDto;
 import mytrophy.api.comment.service.CommentService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,21 +20,21 @@ public class CommentController {
 
     //댓글 등록
     @PostMapping("/articles/{id}/comments")
-    public ResponseEntity<CommentDto> createComment(@PathVariable("id") Long articleId, @RequestBody CommentDto commentDto) {
-        CommentDto createdComment = commentService.createComment(commentDto);
+    public ResponseEntity<CommentDto> createComment(@PathVariable("id") Long articleId, @RequestBody CreateCommentDto createCommentDto) {
+        CommentDto createdComment = commentService.createComment(articleId, createCommentDto);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdComment);
     }
 
     //댓글 수정
-    @PatchMapping("/articles/{id}/comments/{commentId}")
-    public ResponseEntity<CommentDto> updateComment(@PathVariable("id") Long articleId, @PathVariable("commentId") Long commentId, @RequestBody String content) {
+    @PatchMapping("/comments/{commentId}")
+    public ResponseEntity<CommentDto> updateComment(@PathVariable("commentId") Long commentId, @RequestBody String content) {
         CommentDto updatedComment = commentService.updateComment(commentId, content);
         return ResponseEntity.ok(updatedComment);
     }
 
     //댓글 삭제
-    @DeleteMapping("/articles/{id}/comments/{commentId}")
-    public ResponseEntity<Void> deleteComment(@PathVariable("id") Long articleId, @PathVariable("commentId") Long commentId){
+    @DeleteMapping("/comments/{commentId}")
+    public ResponseEntity<Void> deleteComment(@PathVariable("commentId") Long commentId){
         commentService.deleteComment(commentId);
         return ResponseEntity.noContent().build();
     }

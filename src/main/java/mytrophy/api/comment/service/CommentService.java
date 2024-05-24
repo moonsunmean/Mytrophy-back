@@ -3,6 +3,7 @@ package mytrophy.api.comment.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import mytrophy.api.comment.dto.CommentDto;
+import mytrophy.api.comment.dto.CreateCommentDto;
 import mytrophy.api.comment.entity.Comment;
 import mytrophy.api.comment.repository.CommentRepository;
 import org.springframework.stereotype.Service;
@@ -20,8 +21,9 @@ public class CommentService {
     private final CommentRepository commentRepository;
 
     //댓글 작성
-    public CommentDto createComment(CommentDto commentDto) {
-        Comment comment = dtoToEntity(commentDto);
+    public CommentDto createComment(Long articleId, CreateCommentDto createCommentDto) {
+
+        Comment comment = dtoToEntity(createCommentDto, articleId);
         Comment createdComment = commentRepository.save(comment);
         return entityToDto(createdComment);     //dto로 반환
     }
@@ -80,12 +82,12 @@ public class CommentService {
     }
 
     //dto -> 엔티티
-    private Comment dtoToEntity(CommentDto commentDto) {
+    private Comment dtoToEntity(CreateCommentDto createCommentDto, Long articleId) {
         return Comment.builder()
-                .content(commentDto.getContent())
-                .memberId(commentDto.getMemberId())
-                .articleId(commentDto.getArticleId())
-                .cntUp(commentDto.getCntUp())
+                .content(createCommentDto.getContent())
+                .memberId(createCommentDto.getMemberId())
+                .articleId(articleId) // articleId 설정
+                .cntUp(createCommentDto.getCntUp())
                 .build();
     }
 
