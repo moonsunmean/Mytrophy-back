@@ -1,15 +1,15 @@
 package mytrophy.api.article.entity;
 
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
+import mytrophy.api.article.dto.ArticleRequest;
 import mytrophy.api.common.base.BaseEntity;
+import org.springframework.web.multipart.MultipartFile;
 
 
 @Entity
 @Getter
+@Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED) // 생성자를 protected로 설정
 public class Article extends BaseEntity {
 
@@ -28,8 +28,12 @@ public class Article extends BaseEntity {
 
     private int cntUp; // 좋아요 수
 
+    private String imagePath; // 이미지 경로
+
+
     @Builder // 빌더 패턴 적용
     public Article(Long id, Header header, String name, String content, int cntUp) {
+        this.id = id;
         this.header = header;
         this.name = name;
         this.content = content;
@@ -37,11 +41,11 @@ public class Article extends BaseEntity {
     }
 
     // 게시글 생성 로직
-    public static Article createArticle(Header header, String name, String content) {
+    public static Article createArticle(ArticleRequest articleRequest) {
         return Article.builder()
-            .header(header)
-            .name(name)
-            .content(content)
+            .header(articleRequest.getHeader())
+            .name(articleRequest.getName())
+            .content(articleRequest.getContent())
             .cntUp(0)
             .build();
     }
@@ -57,4 +61,5 @@ public class Article extends BaseEntity {
     public void upCntUp() {
         this.cntUp++;
     }
+
 }
