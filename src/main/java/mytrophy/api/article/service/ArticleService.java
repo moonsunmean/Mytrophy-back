@@ -3,6 +3,7 @@ package mytrophy.api.article.service;
 
 import com.google.cloud.storage.BlobId;
 import com.google.cloud.storage.BlobInfo;
+import com.google.cloud.storage.Bucket;
 import com.google.cloud.storage.Storage;
 import com.google.firebase.cloud.StorageClient;
 import jakarta.transaction.Transactional;
@@ -16,6 +17,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -25,33 +29,53 @@ import java.util.UUID;
 public class ArticleService {
 
     private final ArticleRepository articleRepository;
+    private final Bucket bucket;
 
     // 게시글 생성
     @Transactional // 트랜잭션 처리
-    public Article createArticle(ArticleRequest articleRequest, String imagePath) throws IOException {
-        Article article = Article.createArticle(articleRequest);
+    public Article createArticle(ArticleRequest articleRequest, List<MultipartFile> files) throws IOException {
 
-        if (imagePath != null) {
-            article.setImagePath(imagePath);
+        Article article = Article.builder()
+            .header(articleRequest.getHeader())
+            .name(articleRequest.getName())
+            .content(articleRequest.getContent())
+            .build();
+
+        if (files != null) {
+            List<String> urls = uploadFiles(files);
+            article.setImagePath(urls.toString());
         }
+
         return articleRepository.save(article);
     }
 
     // 파일 업로드
-    public String uploadImage(MultipartFile file) throws IOException{
-        Storage storage = StorageClient.getInstance().bucket().getStorage();
-        String fileName = generateFileName(file.getOriginalFilename());
-        BlobId blobId = BlobId.of("mytrophy-fcaa2.appspot.com", fileName);
-        BlobInfo blobInfo = BlobInfo.newBuilder(blobId).build();
-        storage.create(blobInfo, file.getBytes());
-
-        return "https://storage.googleapis.com/" + blobId.getBucket() + "/" + blobId.getName();
+    public byte[] getFile(String imagePath) {
+        return bucket.get("files/" + imagePath).getContent();
     }
 
-    public String generateFileName(String originalFileName) {
-        String uuid = UUID.randomUUID().toString();
-        String extension = originalFileName.substring(originalFileName.lastIndexOf("."));
-        return uuid + extension;
+    // 파일 입력 및 저장
+    public List<String> uploadFiles(List<MultipartFile> files) throws IOException{
+        // file 저장위치 선언
+        String blob = "files/";
+
+        // 파일을 Bucket에 저장
+        List<String> urls = new ArrayList<>();
+
+        for (MultipartFile file : files) {
+            String uuid = UUID.randomUUID().toString();
+            String url = blob + uuid;
+            bucket.create(url, file.getBytes());
+            urls.add("/" + url);
+        }
+        return urls;
+    }
+
+    // 파일 삭제
+    public void fileRemove(List<String> files) {
+        for (String imagePath : files) {
+            articleRepository.deleteByImagePath(URLDecoder.decode(imagePath, StandardCharsets.UTF_8));
+        }
     }
 
     // 게시글 리스트 조회
