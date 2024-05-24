@@ -14,7 +14,6 @@ server:
   port: 8080
 
 spring:
-
   datasource:
     driver-class-name: org.h2.Driver
     url: 'jdbc:h2:mem:test'   # H2 DB 연결 주소 (In-Memory Mode)
@@ -35,3 +34,9 @@ spring:
         dialect: org.hibernate.dialect.H2Dialect
         format_sql: true      # 쿼리 로그 포맷 (정렬)
         show_sql: true        # 쿼리 로그 출력
+
+  servlet:
+    multipart:
+      enabled: true           # 멀티파트 요청 활성화
+      max-file-size: 10MB     # 업로드 파일의 최대 크기
+      max-request-size: 10MB  # 전체 요청의 최대 크기
