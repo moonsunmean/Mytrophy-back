@@ -13,21 +13,22 @@ import org.springframework.core.io.Resource;
 
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 
 @Configuration
 public class FirebaseConfig {
 
     @Bean
     public FirebaseApp firebaseApp() throws IOException {
-        Resource resource = new ClassPathResource("serviceAccountKey.json");
-        FileInputStream serviceAccount = new FileInputStream(resource.getFile());
+        ClassPathResource resource = new ClassPathResource("serviceAccountKey.json");
 
         FirebaseOptions options = new FirebaseOptions.Builder()
-            .setCredentials(GoogleCredentials.fromStream(serviceAccount))
+            .setCredentials(GoogleCredentials.fromStream(resource.getInputStream()))
             .setStorageBucket("mytrophy-fcaa2.appspot.com")
             .build();
+        FirebaseApp app = FirebaseApp.initializeApp(options);
 
-        return FirebaseApp.initializeApp(options);
+        return app;
     }
 
     @Bean
