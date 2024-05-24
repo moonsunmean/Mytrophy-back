@@ -13,4 +13,6 @@ public interface ArticleRepository extends JpaRepository<Article, Long> {
     List<Article> findByHeader(Header header);
 
     Article findByIdAndHeader(Long id, Header header);
+
+    List<String> deleteByImagePath(String imagePath);
 }
