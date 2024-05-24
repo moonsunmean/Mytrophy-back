@@ -48,6 +48,9 @@ dependencies {
 
     // h2
     runtimeOnly 'com.h2database:h2'
+
+    // firebase
+    implementation group: 'com.google.firebase', name: 'firebase-admin', version: '8.0.1'
 }
 
 tasks.named('test') {
