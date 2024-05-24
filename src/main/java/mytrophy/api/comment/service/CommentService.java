@@ -69,6 +69,26 @@ public class CommentService {
     }
 
     //댓글 추천
+    //memberId는 테스트
+    public void likeComment(Long commentId, Long memberId) {
+        Comment comment = commentRepository.findById(commentId)
+                .orElseThrow(() -> new RuntimeException("댓글을 찾을 수 없습니다."));
+        comment.incrementCntUp();
+    }
+
+    // 댓글 추천 취소
+    public void unlikeComment(Long commentId, Long memberId) {
+        Comment comment = commentRepository.findById(commentId)
+                .orElseThrow(() -> new RuntimeException("댓글을 찾을 수 없습니다."));
+        comment.decrementCntUp();
+    }
+
+    //댓글 수정,삭제 권한 확인
+    public boolean isAuthorizedToUpdate(Long commentId, Long memberId) {
+        Comment comment = commentRepository.findById(commentId)
+                .orElseThrow(() -> new RuntimeException("댓글을 찾을 수 없습니다."));
+        return comment.getMemberId().equals(memberId);
+    }
 
     //엔티티 -> dto
     private CommentDto entityToDto(Comment comment) {

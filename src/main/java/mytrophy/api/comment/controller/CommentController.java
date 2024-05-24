@@ -27,14 +27,22 @@ public class CommentController {
 
     //댓글 수정
     @PatchMapping("/comments/{commentId}")
-    public ResponseEntity<CommentDto> updateComment(@PathVariable("commentId") Long commentId, @RequestBody String content) {
+    public ResponseEntity<CommentDto> updateComment(@PathVariable("commentId") Long commentId, @RequestParam("memberId") Long memberId, @RequestBody String content) {
+        if (!commentService.isAuthorizedToUpdate(commentId, memberId)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build(); // 403 Forbidden 에러 반환
+        }
+
         CommentDto updatedComment = commentService.updateComment(commentId, content);
         return ResponseEntity.ok(updatedComment);
     }
 
     //댓글 삭제
     @DeleteMapping("/comments/{commentId}")
-    public ResponseEntity<Void> deleteComment(@PathVariable("commentId") Long commentId){
+    public ResponseEntity<Void> deleteComment(@PathVariable("commentId") Long commentId, @RequestParam("memberId") Long memberId){
+        if (!commentService.isAuthorizedToUpdate(commentId, memberId)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build(); // 403 Forbidden 에러 반환
+        }
+
         commentService.deleteComment(commentId);
         return ResponseEntity.noContent().build();
     }
@@ -58,6 +66,21 @@ public class CommentController {
     public ResponseEntity<Integer> countCommentsByArticleId(@PathVariable("id") Long articleId) {
         int count = commentService.countByArticleId(articleId);
         return ResponseEntity.ok(count);
+    }
+
+    //댓글 추천
+    //세션에서 추천 로직 확인해서 중복추천 방지 추가하기
+    @PostMapping("/comments/{id}/like")
+    public ResponseEntity<Void> likeComment(@PathVariable("id") Long commentId, @RequestBody Long memberId) {
+        commentService.likeComment(commentId, memberId);
+        return ResponseEntity.ok().build();
+    }
+
+    //댓글 추천 취소
+    @PostMapping("comments/{id}/unlike")
+    public ResponseEntity<Void> unlikeComment(@PathVariable("id") Long commentId, @RequestBody Long memberId) {
+        commentService.unlikeComment(commentId, memberId);
+        return ResponseEntity.ok().build();
     }
 
 }
