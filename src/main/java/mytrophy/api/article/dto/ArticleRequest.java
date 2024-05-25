@@ -1,13 +1,15 @@
 package mytrophy.api.article.dto;
 
+import lombok.Data;
 import lombok.Getter;
-import mytrophy.api.article.entity.Header;
+import mytrophy.api.article.enumentity.Header;
 
-@Getter
+@Data
 public class ArticleRequest {
     private Header header;
     private String name;
     private String content;
+    private String imagePath;
 
     public ArticleRequest(Header header, String name, String content) {
         this.header = header;

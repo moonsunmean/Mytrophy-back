@@ -1,7 +1,7 @@
 package mytrophy.api.article.repository;
 
 import mytrophy.api.article.entity.Article;
-import mytrophy.api.article.entity.Header;
+import mytrophy.api.article.enumentity.Header;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -14,5 +14,4 @@ public interface ArticleRepository extends JpaRepository<Article, Long> {
 
     Article findByIdAndHeader(Long id, Header header);
 
-    List<String> deleteByImagePath(String imagePath);
 }
