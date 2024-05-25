@@ -3,8 +3,8 @@ package mytrophy.api.article.entity;
 import jakarta.persistence.*;
 import lombok.*;
 import mytrophy.api.article.dto.ArticleRequest;
+import mytrophy.api.article.enumentity.Header;
 import mytrophy.api.common.base.BaseEntity;
-import org.springframework.web.multipart.MultipartFile;
 
 
 @Entity
@@ -60,6 +60,11 @@ public class Article extends BaseEntity {
     // 좋아요 증가
     public void upCntUp() {
         this.cntUp++;
+    }
+
+    // 좋아요 감소
+    public void CntUpDown() {
+        this.cntUp--;
     }
 
 }
