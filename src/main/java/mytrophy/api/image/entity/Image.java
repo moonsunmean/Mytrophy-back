@@ -1,17 +1,15 @@
 package mytrophy.api.image.entity;
 
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.ManyToOne;
+import jakarta.persistence.*;
 import mytrophy.api.article.entity.Article;
 
+@Entity
 public class Image {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private String url;
+    private String imagePath;
     private String name;
 
     @ManyToOne
