@@ -1,6 +1,6 @@
 package mytrophy.api.article.dto;
 
-import mytrophy.api.article.entity.Header;
+import mytrophy.api.article.enumentity.Header;
 
 public class ArticleResponse {
     private Long id;

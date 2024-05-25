@@ -2,9 +2,10 @@ package mytrophy.api.article.controller;
 
 import lombok.RequiredArgsConstructor;
 import mytrophy.api.article.entity.Article;
-import mytrophy.api.article.entity.Header;
+import mytrophy.api.article.enumentity.Header;
 import mytrophy.api.article.dto.ArticleRequest;
 import mytrophy.api.article.service.ArticleService;
+import mytrophy.api.image.service.ImageService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -20,11 +21,18 @@ import java.util.List;
 public class ArticleController {
 
     private final ArticleService articleService;
+    private final ImageService imageService;
 
     // 게시글 생성
     @PostMapping("/articles")
     public ResponseEntity<Article> createArticle(@ModelAttribute ArticleRequest articleRequest,
                                                  @RequestPart (value = "file", required = false) List<MultipartFile> files) throws IOException {
+
+        if (files != null) {
+            List<String> url = imageService.uploadFiles(files);
+            articleRequest.setImagePath(url.toString());
+        }
+
         return ResponseEntity.status(HttpStatus.OK)
             .body(articleService.createArticle(articleRequest, files));
 
@@ -99,14 +107,29 @@ public class ArticleController {
 
     // 파일만 업로드
     @PostMapping("/articles/files")
-    public ResponseEntity uploadFiles(@RequestPart (value = "file", required = false) List<MultipartFile> files) throws IOException {
-        return ResponseEntity.ok().body(articleService.uploadFiles(files));
+    public ResponseEntity uploadOnlyFiles(@RequestPart (value = "file", required = false) List<MultipartFile> files) throws IOException {
+        return ResponseEntity.ok().body(imageService.uploadFiles(files));
     }
 
-    // 파일 삭제
+    // 파일만 삭제
     @DeleteMapping("/articles/files")
-    public ResponseEntity removeFiles(List<String> files) {
-        articleService.fileRemove(files);
+    public ResponseEntity removeOnlyFiles(List<String> files) {
+        imageService.fileRemove(files);
         return ResponseEntity.ok().build();
     }
+
+    // 좋아요 증가
+    @PatchMapping("/articles/{id}/upCnt")
+    public ResponseEntity upCntUp(@PathVariable("id") Long id) {
+        articleService.upCntUp(id);
+        return ResponseEntity.ok().build();
+    }
+
+    // 좋아요 감소
+    @PatchMapping("/articles/{id}/downCnt")
+    public ResponseEntity CntUpDown(@PathVariable("id") Long id) {
+        articleService.CntUpDown(id);
+        return ResponseEntity.ok().build();
+    }
+
 }
