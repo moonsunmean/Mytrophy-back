@@ -1,4 +1,4 @@
-package mytrophy.api.config;
+package mytrophy.global.config;
 
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.cloud.storage.Bucket;
