@@ -7,6 +7,7 @@ import jakarta.persistence.Id;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
 
@@ -30,4 +31,6 @@ public class Member {
 
     @CreationTimestamp
     private LocalDateTime created_at; // 생성날짜
+    @UpdateTimestamp
+    private LocalDateTime update_at; // 생성날짜
 }
