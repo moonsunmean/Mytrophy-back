@@ -1,13 +1,10 @@
 package mytrophy.api.member.service;
 
 import mytrophy.api.member.dto.MemberDto;
-import mytrophy.api.member.dto.SignupDto;
 import mytrophy.api.member.entity.Member;
 import mytrophy.api.member.repository.MemberRepository;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 @Service
 public class MemberService {
@@ -20,23 +17,27 @@ public class MemberService {
     }
 
     // 회원가입
-    public void SignupMember(SignupDto signupDto) {
-        String username = signupDto.getUsername();
-        String password = signupDto.getPassword();
+    public void SignupMember(MemberDto memberDto) {
 
-        Boolean isExist = memberRepository.existsByUsername(username);
+        Boolean isExist = memberRepository.existsByUsername(memberDto.getUsername());
 
         if (isExist) {
             return;
         }
 
         // 만약 회원가입 정보가 없으면 (처음 회원가입하면)
-        Member createMember = new Member();
-        createMember.setUsername(username);
-        createMember.setPassword(bCryptPasswordEncoder.encode(password));
-        createMember.setRole("ROLE_USER");
+        Member signupMember = new Member();
+        signupMember.setUsername(memberDto.getUsername());
+        signupMember.setPassword(bCryptPasswordEncoder.encode(memberDto.getPassword()));
+        signupMember.setRole("ROLE_USER");
+        signupMember.setName(memberDto.getName());
+        signupMember.setNickname(memberDto.getNickname());
+        signupMember.setEmail(memberDto.getEmail());
+        signupMember.setSteam_id(memberDto.getSteam_id());
+        signupMember.setLogin_type(memberDto.getLogin_type());
+        signupMember.setProfile_image(memberDto.getProfile_image());
 
-        memberRepository.save(createMember);
+        memberRepository.save(signupMember);
     }
 
     // 회원 조회
@@ -51,6 +52,12 @@ public class MemberService {
         updateMember.setId(id);
         updateMember.setPassword(bCryptPasswordEncoder.encode(memberDto.getPassword()));
         updateMember.setRole("ROLE_USER");
+        updateMember.setName(memberDto.getName());
+        updateMember.setNickname(memberDto.getNickname());
+        updateMember.setEmail(memberDto.getEmail());
+        updateMember.setSteam_id(memberDto.getSteam_id());
+        updateMember.setLogin_type(memberDto.getLogin_type());
+        updateMember.setProfile_image(memberDto.getProfile_image());
 
         memberRepository.save(updateMember);
     }

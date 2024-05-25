@@ -1,7 +1,6 @@
 package mytrophy.api.member.controller;
 
 import mytrophy.api.member.dto.MemberDto;
-import mytrophy.api.member.dto.SignupDto;
 import mytrophy.api.member.entity.Member;
 import mytrophy.api.member.service.MemberService;
 import org.springframework.http.HttpStatus;
@@ -19,8 +18,8 @@ public class MemberController {
 
     // 회원 가입
     @PostMapping("/signup")
-    public ResponseEntity<String> signupMember(SignupDto signupDto) {
-        memberService.SignupMember(signupDto);
+    public ResponseEntity<String> signupMember(MemberDto memberDto) {
+        memberService.SignupMember(memberDto);
 
         return new ResponseEntity<>("회원 가입 성공", HttpStatus.CREATED);
     }
