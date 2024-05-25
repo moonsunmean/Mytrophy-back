@@ -16,8 +16,8 @@ public class MemberService {
         this.bCryptPasswordEncoder = bCryptPasswordEncoder;
     }
 
-    // 회원가입
-    public void SignupMember(MemberDto memberDto) {
+    // 회원 가입
+    public void signupMember(MemberDto memberDto) {
 
         Boolean isExist = memberRepository.existsByUsername(memberDto.getUsername());
 
@@ -41,33 +41,37 @@ public class MemberService {
     }
 
     // 회원 조회
-    public Member GetMember(Long id) {
+    public Member findMemberById(Long id) {
         return memberRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("다음 ID에 해당하는 회원을 찾을 수 없습니다: " + id));
     }
 
     // 회원 수정
-    public void UpdateMemberById(Long id, MemberDto memberDto) {
-        Member updateMember = new Member();
-        updateMember.setId(id);
-        updateMember.setPassword(bCryptPasswordEncoder.encode(memberDto.getPassword()));
-        updateMember.setRole("ROLE_USER");
-        updateMember.setName(memberDto.getName());
-        updateMember.setNickname(memberDto.getNickname());
-        updateMember.setEmail(memberDto.getEmail());
-        updateMember.setSteam_id(memberDto.getSteam_id());
-        updateMember.setLogin_type(memberDto.getLogin_type());
-        updateMember.setProfile_image(memberDto.getProfile_image());
-
-        memberRepository.save(updateMember);
+    public boolean updateMemberById(Long id, MemberDto memberDto) {
+        if (memberRepository.existsById(id)) {
+            Member member = memberRepository.findById(id).get();
+            member.setName(memberDto.getName());
+            member.setEmail(memberDto.getEmail());
+            member.setPassword(bCryptPasswordEncoder.encode(memberDto.getPassword()));
+            member.setRole("ROLE_USER");
+            member.setName(memberDto.getName());
+            member.setNickname(memberDto.getNickname());
+            member.setEmail(memberDto.getEmail());
+            member.setSteam_id(memberDto.getSteam_id());
+            member.setLogin_type(memberDto.getLogin_type());
+            member.setProfile_image(memberDto.getProfile_image());
+            memberRepository.save(member);
+            return true;
+        }
+        return false;
     }
 
     // 회원 삭제
-    public void DeleteMemberById(Long id) {
-        if(memberRepository.existsById(id)) {
+    public boolean deleteMemberById(Long id) {
+        if (memberRepository.existsById(id)) {
             memberRepository.deleteById(id);
-        } else {
-            throw new IllegalArgumentException("다음 ID에 해당하는 회원을 찾을 수 없습니다: " + id);
+            return true;
         }
+        return false;
     }
 }
