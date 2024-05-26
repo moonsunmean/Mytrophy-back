@@ -1,0 +1,29 @@
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://34.64.52.132:3306/mytrophy_db
+    username: mytrophy
+    password: mytrophy
+  jpa:
+    hibernate:
+      ddl-auto: update
+      naming:
+        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+    show-sql: true
+    defer-datasource-initialization: true
+    open-in-view: false
+
+    servlet:
+      multipart:
+        enabled: true           # 멀티파트 요청 활성화
+        max-file-size: 10MB     # 업로드 파일의 최대 크기
+        max-request-size: 10MB  # 전체 요청의 최대 크기
+
+  jwt:
+    secret: vmfhaltmsasdvdfhaertgaerfgsdfasdklfvhnsdjikonkl
+steam:
+  api-key: E747BF736400A81DFDF11557E236014E
+
+#logging:
+#  level:
+#    root: DEBUG
