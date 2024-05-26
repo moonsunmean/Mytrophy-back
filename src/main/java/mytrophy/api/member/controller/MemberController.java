@@ -40,9 +40,8 @@ public class MemberController {
         boolean isUpdated = memberService.updateMemberById(id, memberDto);
         if (isUpdated) {
             return new ResponseEntity<>("회원 수정 성공", HttpStatus.OK);
-        } else {
-            return new ResponseEntity<>("회원 수정 실패", HttpStatus.NOT_FOUND);
         }
+        return new ResponseEntity<>("회원 수정 실패", HttpStatus.NOT_FOUND);
     }
 
     // 회원 삭제
@@ -51,8 +50,7 @@ public class MemberController {
         boolean isDeleted = memberService.deleteMemberById(id);
         if (isDeleted) {
             return new ResponseEntity<>("회원 삭제 성공", HttpStatus.OK);
-        } else {
-            return new ResponseEntity<>("회원 삭제 실패", HttpStatus.NOT_FOUND);
         }
+        return new ResponseEntity<>("회원 삭제 실패", HttpStatus.NOT_FOUND);
     }
 }
