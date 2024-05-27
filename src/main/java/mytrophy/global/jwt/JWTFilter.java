@@ -4,6 +4,7 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.extern.java.Log;
 import mytrophy.api.member.entity.Member;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -48,13 +49,14 @@ public class JWTFilter extends OncePerRequestFilter {
         //토큰에서 username과 role 획득
         String username = jwtUtil.getUsername(token);
         String role = jwtUtil.getRole(token);
-        String steam_id = jwtUtil.getSteamId(token);
+        Long steam_id = Long.valueOf(jwtUtil.getSteamId(token));
 
-        // memberEntity를 생성하여 값 set
+        // member를 생성하여 값 set
         Member member = new Member();
         member.setUsername(username);
         member.setPassword("temppassword");
         member.setRole(role);
+        member.setSteam_id(steam_id);
 
         // UserDetails에 회원 정보 객체 담기
         CustomUserDetails customUserDetails = new CustomUserDetails(member);
