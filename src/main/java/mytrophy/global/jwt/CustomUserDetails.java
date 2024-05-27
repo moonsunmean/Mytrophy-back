@@ -38,7 +38,7 @@ public class CustomUserDetails implements UserDetails {
     }
 
     public Long getSteamId() {
-        return member.getSteam_id();
+        return member.getSteamId();
     }
 
     @Override

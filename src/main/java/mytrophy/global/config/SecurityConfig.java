@@ -52,7 +52,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests((auth) -> auth
                         .requestMatchers("/", "/login", "/api/**", "/v3/api-docs/**", "/swagger-ui/**").permitAll()
                         .requestMatchers("/**").permitAll() // 테스트를 위해 모든 경로에 대해 허용
-//                        .requestMatchers("/admin").hasRole("ADMIN")
+                        .requestMatchers("/admin").hasRole("ADMIN")
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(new JWTFilter(jwtUtil), LoginFilter.class)
