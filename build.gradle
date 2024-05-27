@@ -50,7 +50,9 @@ dependencies {
     implementation 'io.jsonwebtoken:jjwt-impl:0.12.3'
     implementation 'io.jsonwebtoken:jjwt-jackson:0.12.3'
 
-    // swagger (http://localhost:8080/swagger-ui/index.html)
+    // swagger
+    // UI: http://localhost:8080/swagger-ui/index.html
+    // docs: http://localhost:8080/v3/api-docs
     implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.4.0'
 
     // firebase
