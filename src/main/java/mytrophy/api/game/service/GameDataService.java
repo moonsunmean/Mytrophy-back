@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import mytrophy.api.game.entity.*;
+import mytrophy.api.game.enums.ReadType;
 import mytrophy.api.game.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -45,7 +46,7 @@ public class GameDataService {
     }
 
     // 스팀 게임 목록을 받아와 DB에 저장하는 메서드
-    public void receiveSteamGameList(int type,int size) throws JsonProcessingException {
+    public void receiveSteamGameList(int size) throws JsonProcessingException {
         RestTemplate restTemplate = new RestTemplate();
         String url = "http://api.steampowered.com/ISteamApps/GetAppList/v2/";
         ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, null, String.class);
@@ -53,21 +54,43 @@ public class GameDataService {
         JsonNode appsNode = rootNode.get("applist").get("apps");
 
         int count = 1;
-        if (type == 0) {
-            for (JsonNode appNode : appsNode) {
-                int appId = appNode.get("appid").asInt();
-                System.out.println(appId);
-                System.out.println(count);
-                gameDetail(appId);
-                if (count >= size) break;
-                count++;
-            }
-        } else {
-            System.out.println(type);
-            System.out.println(count);
-            gameDetail(type);
-        }
 
+        for (JsonNode appNode : appsNode) {
+            int appId = appNode.get("appid").asInt();
+            System.out.println(appId);
+            System.out.println(count);
+            gameDetail(appId);
+            if (count >= size) break;
+            count++;
+        }
+    }
+
+    // 스팀 게임 top100 목록을 저장하는 메서드
+    public List<Long> receiveTopSteamGameList(int size, String type) throws JsonProcessingException {
+
+        RestTemplate restTemplate = new RestTemplate();
+        String url = "https://steamspy.com/api.php?request=top100in2weeks";
+        ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, null, String.class);
+        JsonNode rootNode = new ObjectMapper().readTree(response.getBody());
+
+        int count = 1;
+        List<Long> appList = new ArrayList<>();
+
+        for (JsonNode appNode : rootNode) {
+            int appId = appNode.get("appid").asInt();
+            System.out.println(appId);
+            System.out.println(count);
+            if(type.equals("read")){
+                gameDetail(appId);
+            }
+            else {
+                appList.add(Long.valueOf(appId));
+            }
+
+            if (count >= size) break;
+            count++;
+        }
+        return appList;
     }
 
     // 특정 게임의 상세 정보를 받아와 DB에 저장하는 메서드

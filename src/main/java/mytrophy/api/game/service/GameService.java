@@ -1,7 +1,9 @@
 package mytrophy.api.game.service;
 
+import mytrophy.api.game.dto.ResponseDTO;
 import mytrophy.api.game.dto.ResponseDTO.GetGameAchievementDTO;
 import mytrophy.api.game.dto.ResponseDTO.GetGameScreenshotDTO;
+import mytrophy.api.game.dto.ResponseDTO.GetTopGameDTO;
 import mytrophy.api.game.dto.ResponseDTO.GetAllGameDTO;
 import mytrophy.api.game.dto.ResponseDTO.GetGameCategoryDTO;
 import mytrophy.api.game.dto.ResponseDTO.GetGameDetailDTO;
@@ -12,10 +14,7 @@ import mytrophy.api.game.entity.Game;
 import mytrophy.api.game.entity.Screenshot;
 import mytrophy.api.game.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -44,6 +43,28 @@ public class GameService {
         return gameRepository.findAll(PageRequest.of(page, size, Sort.by("id").descending())).map(
                 game -> new GetAllGameDTO(game.getId(), game.getName(), game.getHeaderImagePath())
         );
+    }
+
+    public Page<GetTopGameDTO> getTopGameDTO(int page, int size,List<Long> appList) {
+        int rank = 1;
+        List<GetTopGameDTO> topGameDTOList = new ArrayList<>();
+        for (Long appid : appList) {
+            Game game = gameRepository.findById(appid).orElse(null);
+            GetTopGameDTO dto;
+            if (game != null) {
+                dto = new GetTopGameDTO(game.getId(), game.getName(), game.getHeaderImagePath(), rank);
+            } else {
+                dto = new GetTopGameDTO(null, null, null, rank);
+            }
+            topGameDTOList.add(dto);
+            rank++;
+        }
+
+        int start = page * size;
+        int end = Math.min(start + size, topGameDTOList.size());
+        List<GetTopGameDTO> pageList = topGameDTOList.subList(start, end);
+
+        return new PageImpl<>(pageList, PageRequest.of(page, size), pageList.size());
     }
 
     @Transactional
