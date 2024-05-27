@@ -5,6 +5,8 @@ import mytrophy.api.member.entity.Member;
 import mytrophy.api.member.repository.MemberRepository;
 import mytrophy.api.member.service.MemberService;
 import mytrophy.api.member.service.SteamService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
@@ -14,13 +16,23 @@ import java.util.Map;
 import java.util.Optional;
 
 @Component
-@RequiredArgsConstructor
 public class SteamAuthenticationProvider implements AuthenticationProvider {
 
-    private final MemberService memberService;
+    @Lazy
+    private MemberService memberService;
     private final SteamService steamService;
     private final MemberRepository memberRepository;
 
+    @Autowired
+    public SteamAuthenticationProvider(SteamService steamService, MemberRepository memberRepository) {
+        this.steamService = steamService;
+        this.memberRepository = memberRepository;
+    }
+    @Autowired
+    @Lazy
+    public void setMemberService(MemberService memberService) {
+        this.memberService = memberService;
+    }
 
     @Override
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {

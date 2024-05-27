@@ -3,9 +3,11 @@ package mytrophy.api.global.config;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import mytrophy.api.global.jwt.CustomSuccessHandler;
+import mytrophy.api.global.jwt.JWTFilter;
 import mytrophy.api.global.jwt.JWTUtil;
 import mytrophy.api.member.security.SteamAuthenticationProvider;
 import mytrophy.api.member.service.CustomOAuth2UserService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -16,6 +18,8 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.oauth2.client.web.OAuth2LoginAuthenticationFilter;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
@@ -35,13 +39,20 @@ public class SecurityConfig {
     private final CustomSuccessHandler customSuccessHandler;
     private final JWTUtil jwtUtil;
     @Bean
+    public BCryptPasswordEncoder bCryptPasswordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
+
+    @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+
 
         //disable 설정
         http
                 .csrf((auth) -> auth.disable())//csrf disable
                 .formLogin((auth) -> auth.disable())//From 로그인 방식 disable
                 .httpBasic((auth) -> auth.disable())//HTTP Basic 인증 방식 disable
+
                     //프론트단과 Json데이토 통신을 위환 cors설정
                 .cors(corsCustomizer -> corsCustomizer.configurationSource(new CorsConfigurationSource() {
 
@@ -61,7 +72,10 @@ public class SecurityConfig {
 
                         return configuration;
                     }
-                }));;
+                }));
+        http
+                .addFilterBefore(new JWTFilter(jwtUtil), UsernamePasswordAuthenticationFilter.class);
+                //.addFilterAfter(new JWTFilter(jwtUtil), OAuth2LoginAuthenticationFilter.class);
 
         //oauth2
         http
@@ -72,10 +86,12 @@ public class SecurityConfig {
                         .successHandler(customSuccessHandler)
                 );
 
+
         //경로별 인가 작업
         http
                 .authorizeHttpRequests((auth) -> auth
-                        .requestMatchers("/","/my", "/login/**","steam/login", "steam/login/redirect", "steam/failed").permitAll()
+                        .requestMatchers("/","/my", "/login/**","/login/steam/**", "/steam/failed","/api/**", "/v3/api-docs/**", "/swagger-ui/**").permitAll()
+                        .requestMatchers("/admin").hasRole("ADMIN")
                         .anyRequest().authenticated()); // 로그인 사용자만 접근가능
 
         //세션 설정 : STATELESS
@@ -86,6 +102,10 @@ public class SecurityConfig {
         authenticationManagerBuilder.authenticationProvider(steamAuthenticationProvider);
 
         return http.build();
+    }
+    @Autowired
+    public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
+        auth.authenticationProvider(steamAuthenticationProvider);
     }
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
