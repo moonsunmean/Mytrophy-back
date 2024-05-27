@@ -69,4 +69,13 @@ public class ResponseDTO {
         private String fullImagePath;
     }
 
+    @Data
+    @AllArgsConstructor
+    public static class GetTopGameDTO{
+        private Long id;
+        private String name;
+        private String headerImagePath;
+        private Integer rank;
+    }
+
 }
