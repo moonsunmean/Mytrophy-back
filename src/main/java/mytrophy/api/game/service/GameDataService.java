@@ -126,7 +126,7 @@ public class GameDataService {
         if (developersNode != null && developersNode.isArray() && developersNode.size() > 0) {
             for (JsonNode developerNode : developersNode) {
                 gameDeveloper += developerNode.asText();
-                gameDeveloper += ",";
+                gameDeveloper += "&";
             }
         }
 
