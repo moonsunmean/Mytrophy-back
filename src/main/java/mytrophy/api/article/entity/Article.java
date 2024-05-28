@@ -34,7 +34,7 @@ public class Article extends BaseEntity {
 
     private String imagePath; // 이미지 경로
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "member_id")
     private Member member; // 게시글 작성자
 
