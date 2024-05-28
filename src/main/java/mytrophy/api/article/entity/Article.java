@@ -42,7 +42,7 @@ public class Article extends BaseEntity {
     private List<Comment> comments;
 
     @Builder // 빌더 패턴 적용
-    public Article(Long id, Header header, String name, String content, int cntUp, String imagePath, Member member, List<Comment> comments) {
+    public Article(Long id, Header header, String name, String content, int cntUp, String imagePath, Member member) {
         this.id = id;
         this.header = header;
         this.name = name;
@@ -50,7 +50,6 @@ public class Article extends BaseEntity {
         this.cntUp = cntUp;
         this.imagePath = imagePath;
         this.member = member;
-        this.comments = comments;
     }
 
     // 게시글 생성 로직
