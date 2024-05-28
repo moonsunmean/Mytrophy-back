@@ -34,5 +34,4 @@ public class Member {
     private LocalDateTime created_at; // 생성날짜
     @UpdateTimestamp
     private LocalDateTime update_at; // 생성날짜
-
 }
