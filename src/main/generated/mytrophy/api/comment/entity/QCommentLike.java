@@ -11,24 +11,20 @@ import com.querydsl.core.types.dsl.PathInits;
 
 
 /**
- * QComment is a Querydsl query type for Comment
+ * QCommentLike is a Querydsl query type for CommentLike
  */
 @Generated("com.querydsl.codegen.DefaultEntitySerializer")
-public class QComment extends EntityPathBase<Comment> {
+public class QCommentLike extends EntityPathBase<CommentLike> {
 
-    private static final long serialVersionUID = 1249587017L;
+    private static final long serialVersionUID = 796165760L;
 
     private static final PathInits INITS = PathInits.DIRECT2;
 
-    public static final QComment comment = new QComment("comment");
+    public static final QCommentLike commentLike = new QCommentLike("commentLike");
 
     public final mytrophy.api.common.base.QBaseEntity _super = new mytrophy.api.common.base.QBaseEntity(this);
 
-    public final mytrophy.api.article.entity.QArticle article;
-
-    public final NumberPath<Integer> cntUp = createNumber("cntUp", Integer.class);
-
-    public final StringPath content = createString("content");
+    public final QComment comment;
 
     //inherited
     public final DateTimePath<java.time.LocalDateTime> createdAt = _super.createdAt;
@@ -40,25 +36,25 @@ public class QComment extends EntityPathBase<Comment> {
     //inherited
     public final DateTimePath<java.time.LocalDateTime> updatedAt = _super.updatedAt;
 
-    public QComment(String variable) {
-        this(Comment.class, forVariable(variable), INITS);
+    public QCommentLike(String variable) {
+        this(CommentLike.class, forVariable(variable), INITS);
     }
 
-    public QComment(Path<? extends Comment> path) {
+    public QCommentLike(Path<? extends CommentLike> path) {
         this(path.getType(), path.getMetadata(), PathInits.getFor(path.getMetadata(), INITS));
     }
 
-    public QComment(PathMetadata metadata) {
+    public QCommentLike(PathMetadata metadata) {
         this(metadata, PathInits.getFor(metadata, INITS));
     }
 
-    public QComment(PathMetadata metadata, PathInits inits) {
-        this(Comment.class, metadata, inits);
+    public QCommentLike(PathMetadata metadata, PathInits inits) {
+        this(CommentLike.class, metadata, inits);
     }
 
-    public QComment(Class<? extends Comment> type, PathMetadata metadata, PathInits inits) {
+    public QCommentLike(Class<? extends CommentLike> type, PathMetadata metadata, PathInits inits) {
         super(type, metadata, inits);
-        this.article = inits.isInitialized("article") ? new mytrophy.api.article.entity.QArticle(forProperty("article"), inits.get("article")) : null;
+        this.comment = inits.isInitialized("comment") ? new QComment(forProperty("comment"), inits.get("comment")) : null;
         this.member = inits.isInitialized("member") ? new mytrophy.api.member.entity.QMember(forProperty("member")) : null;
     }
 

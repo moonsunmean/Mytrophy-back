@@ -26,6 +26,8 @@ public class QArticle extends EntityPathBase<Article> {
 
     public final NumberPath<Integer> cntUp = createNumber("cntUp", Integer.class);
 
+    public final ListPath<mytrophy.api.comment.entity.Comment, mytrophy.api.comment.entity.QComment> comments = this.<mytrophy.api.comment.entity.Comment, mytrophy.api.comment.entity.QComment>createList("comments", mytrophy.api.comment.entity.Comment.class, mytrophy.api.comment.entity.QComment.class, PathInits.DIRECT2);
+
     public final StringPath content = createString("content");
 
     //inherited
