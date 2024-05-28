@@ -6,5 +6,8 @@ import java.util.List;
 
 public interface ArticleQueryService {
 
+    List<Article> findAll();
+
     List<Article> findArticleWithCommentsOrderedByLatest(Long articleId);
+
 }
