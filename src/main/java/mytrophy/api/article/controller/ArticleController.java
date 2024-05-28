@@ -6,9 +6,12 @@ import mytrophy.api.article.enumentity.Header;
 import mytrophy.api.article.dto.ArticleRequest;
 import mytrophy.api.article.service.ArticleService;
 import mytrophy.api.image.service.ImageService;
+import mytrophy.api.member.entity.Member;
 import mytrophy.api.querydsl.service.ArticleQueryService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -29,6 +32,12 @@ public class ArticleController {
     @PostMapping("/articles")
     public ResponseEntity<Article> createArticle(@ModelAttribute ArticleRequest articleRequest,
                                                  @RequestPart (value = "file", required = false) List<MultipartFile> files) throws IOException {
+        // 현재 로그인된 사용자 정보 가져오기
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        Member member = (Member) authentication.getPrincipal();
+
+        // 현재 로그인된 사용자의 memberId 설정
+        articleRequest.setMemberId(member.getId());
 
         // 이미지 업로드 및 경로 설정
         List<String> url = null;
@@ -38,7 +47,7 @@ public class ArticleController {
         }
 
         // Article 생성
-        Article article = articleService.createArticle(articleRequest, files);
+        Article article = articleService.createArticle(member.getId(), articleRequest, files);
         if (url != null) {
             article.setImagePath(url.toString());
         }
@@ -96,6 +105,13 @@ public class ArticleController {
     public ResponseEntity updateArticle(@PathVariable("id") Long id,
                                         @ModelAttribute ArticleRequest articleRequest,
                                         @RequestPart (value = "file", required = false) List<MultipartFile> files) throws IOException {
+        // 현재 로그인된 사용자 정보 가져오기
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        Member member = (Member) authentication.getPrincipal();
+
+        // 현재 로그인된 사용자의 memberId 설정
+        articleRequest.setMemberId(member.getId());
+
         if (articleRequest.getHeader() == null || articleRequest.getName() == null || articleRequest.getContent() == null) {
             return ResponseEntity.badRequest().build();
         }
