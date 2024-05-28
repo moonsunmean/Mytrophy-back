@@ -23,7 +23,7 @@ import java.util.UUID;
 public interface ArticleService {
 
     // 게시글 생성
-    Article createArticle(ArticleRequest articleRequest, List<MultipartFile> files) throws IOException;
+    Article createArticle(Long memberId, ArticleRequest articleRequest, List<MultipartFile> files) throws IOException;
 
     // 게시글 리스트 조회
     List<Article> findAll();
