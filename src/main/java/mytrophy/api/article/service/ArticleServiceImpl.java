@@ -7,6 +7,8 @@ import mytrophy.api.article.dto.ArticleRequest;
 import mytrophy.api.article.entity.Article;
 import mytrophy.api.article.enumentity.Header;
 import mytrophy.api.article.repository.ArticleRepository;
+import mytrophy.api.member.entity.Member;
+import mytrophy.api.member.repository.MemberRepository;
 import mytrophy.global.handler.resourcenotfound.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -16,14 +18,18 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-@Slf4j
 public class ArticleServiceImpl implements ArticleService {
 
     private final ArticleRepository articleRepository;
+    private final MemberRepository memberRepository;
 
     // 게시글 생성
+    @Override
     @Transactional // 트랜잭션 처리
-    public Article createArticle(ArticleRequest articleRequest, List<MultipartFile> urls) throws IOException {
+    public Article createArticle(Long memberId, ArticleRequest articleRequest, List<MultipartFile> urls) throws IOException {
+        // 회원 정보 가져오기
+        Member member = memberRepository.findById(memberId)
+            .orElseThrow(() -> new RuntimeException("회원 정보를 찾을 수 없습니다."));
 
         // 이미지 경로 설정
         if (urls == null) {
@@ -42,15 +48,19 @@ public class ArticleServiceImpl implements ArticleService {
             .imagePath(articleRequest.getImagePath()) // 이미지 경로 설정
             .build();
 
-        return articleRepository.save(article);
+        Article createArticle = article.createArticle(articleRequest, member);
+
+        return articleRepository.save(createArticle);
     }
 
     // 게시글 리스트 조회
+    @Override
     public List<Article> findAll() {
         return articleRepository.findAll();
     }
 
     // 해당 게시글 조회
+    @Override
     public Article findById(Long id) {
         Article article = articleRepository.findById(id)
             .orElseThrow(() -> new IllegalArgumentException("해당 게시글이 존재하지 않습니다."));
@@ -58,16 +68,19 @@ public class ArticleServiceImpl implements ArticleService {
     }
 
     // 말머리 별 게시글 리스트 조회
+    @Override
     public List<Article> findAllByHeader(Header header) {
         return articleRepository.findByHeader(header);
     }
 
     // 말머리 별 해당 게시글 조회
+    @Override
     public Article findByIdAndHeader(Long id, Header header) {
         return articleRepository.findByIdAndHeader(id, header);
     }
 
     // 게시글 수정
+    @Override
     @Transactional
     public Article updateArticle(Long id, ArticleRequest articleRequest) {
         Article article = findById(id);
@@ -83,6 +96,7 @@ public class ArticleServiceImpl implements ArticleService {
     }
 
     // 게시글 삭제
+    @Override
     @Transactional
     public void deleteArticle(Long id) {
         Article article = findById(id);
@@ -96,6 +110,7 @@ public class ArticleServiceImpl implements ArticleService {
     }
 
     // 좋아요 증가
+    @Override
     @Transactional
     public void upCntUp(Long id) {
         Article article = findById(id);
@@ -103,6 +118,7 @@ public class ArticleServiceImpl implements ArticleService {
     }
 
     // 좋아요 감소
+    @Override
     @Transactional
     public void CntUpDown(Long id) {
         Article article = findById(id);
