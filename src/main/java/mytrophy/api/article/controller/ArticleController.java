@@ -7,10 +7,14 @@ import mytrophy.api.article.dto.ArticleRequest;
 import mytrophy.api.article.service.ArticleService;
 import mytrophy.api.image.service.ImageService;
 import mytrophy.api.member.entity.Member;
+import mytrophy.api.member.repository.MemberRepository;
 import mytrophy.api.querydsl.service.ArticleQueryService;
+import mytrophy.global.jwt.CustomUserDetails;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -27,35 +31,29 @@ public class ArticleController {
     private final ArticleService articleService;
     private final ImageService imageService;
     private final ArticleQueryService articleQueryService;
+    private final MemberRepository memberRepository;
 
     // 게시글 생성
     @PostMapping("/articles")
-    public ResponseEntity<Article> createArticle(@ModelAttribute ArticleRequest articleRequest,
-                                                 @RequestPart (value = "file", required = false) List<MultipartFile> files) throws IOException {
-        // 현재 로그인된 사용자 정보 가져오기
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        Member member = (Member) authentication.getPrincipal();
-
-        // 현재 로그인된 사용자의 memberId 설정
-        articleRequest.setMemberId(member.getId());
+    public ResponseEntity<Article> createArticle(@AuthenticationPrincipal CustomUserDetails userInfo,
+                                                 @RequestBody ArticleRequest articleRequest,
+                                                 @RequestParam(value = "imagePath", required = false) List<String> imagePath) throws IOException {
+        //토큰에서 username 빼내기
+        String username = userInfo.getUsername();
+        Long memberId = memberRepository.findByUsername(username).getId();
 
         // 이미지 업로드 및 경로 설정
-        List<String> url = null;
-        if (files != null && !files.isEmpty()) {
-            url = imageService.uploadFiles(files);
-            articleRequest.setImagePath(url.toString());
+        if (imagePath != null) {
+            articleRequest.setImagePath(String.join(",", imagePath));
         }
 
         // Article 생성
-        Article article = articleService.createArticle(member.getId(), articleRequest, files);
-        if (url != null) {
-            article.setImagePath(url.toString());
-        }
+        Article article = articleService.createArticle(memberId, articleRequest, imagePath);
 
-        return ResponseEntity.status(HttpStatus.CREATED) // 생성시에는 CREATED 상태 코드 반환
-            .body(article);
+        return ResponseEntity.status(HttpStatus.CREATED).body(article);
     }
 
+    // TODO : 게시글 조회 시 JWT 토큰 만료되는 상황 해결 필요 (생성은 완료)
     // 게시글 리스트 조회
     @GetMapping("/articles")
     public ResponseEntity<List<Article>> getAllArticles() {
