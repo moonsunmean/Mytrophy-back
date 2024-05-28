@@ -8,9 +8,6 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
-import static mytrophy.api.article.entity.QArticle.article;
-import static mytrophy.api.comment.entity.QComment.comment;
-
 @Repository
 public class ArticleQueryRepository {
 
@@ -22,12 +19,14 @@ public class ArticleQueryRepository {
         this.jpaQueryFactory = jpaQueryFactory;
     }
 
-    public List<Article> findAllWithCommentsOrderedByLatest() {
+    public List<Article> findArticleWithCommentsOrderedByLatest(Long articleId) {
         return jpaQueryFactory
             .selectFrom(qArticle)
-            .leftJoin(qComment).fetchJoin()
-            .orderBy(qComment.createdAt.desc()) // 댓글 작성일자를 기준으로 내림차순 정렬
+            .leftJoin(qArticle.comments, qComment).fetchJoin()
+            .where(qArticle.id.eq(articleId))
+            .orderBy(qComment.createdAt.desc())
             .fetch();
     }
+
 
 }
