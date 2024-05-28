@@ -15,6 +15,7 @@ import java.time.LocalDateTime;
 @Setter
 @Entity
 public class Member {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -33,4 +34,5 @@ public class Member {
     private LocalDateTime created_at; // 생성날짜
     @UpdateTimestamp
     private LocalDateTime update_at; // 생성날짜
+
 }
