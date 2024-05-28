@@ -19,7 +19,6 @@ public class ArticleRequest {
     private String content;
     private String imagePath;
     private Long memberId;
-    private List<Comment> comments;
 
     @Builder
     public ArticleRequest(Header header, String name, String content) {
