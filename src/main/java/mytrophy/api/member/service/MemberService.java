@@ -76,11 +76,13 @@ public class MemberService {
         member.setSteamId(memberDto.getSteamId());
         member.setLoginType(memberDto.getLoginType());
         member.setImagePath(memberDto.getImagePath());
-        List<Category> categories = memberDto.getCategoryIds().stream()
+        if (memberDto.getCategoryIds() != null) {
+            List<Category> categories = memberDto.getCategoryIds().stream()
                 .map(categoryId -> categoryRepository.findById(categoryId)
-                        .orElseThrow(() -> new IllegalArgumentException("Invalid category ID: " + categoryId)))
+                    .orElseThrow(() -> new IllegalArgumentException("Invalid category ID: " + categoryId)))
                 .collect(Collectors.toList());
-        member.setCategories(categories);
+            member.setCategories(categories);
+        }
     }
 
     private String encodePassword(String password) {
