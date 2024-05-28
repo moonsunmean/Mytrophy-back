@@ -6,6 +6,7 @@ import mytrophy.api.article.enumentity.Header;
 import mytrophy.api.article.dto.ArticleRequest;
 import mytrophy.api.article.service.ArticleService;
 import mytrophy.api.image.service.ImageService;
+import mytrophy.api.querydsl.service.ArticleQueryService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -22,6 +23,7 @@ public class ArticleController {
 
     private final ArticleService articleService;
     private final ImageService imageService;
+    private final ArticleQueryService articleQueryService;
 
     // 게시글 생성
     @PostMapping("/articles")
@@ -54,7 +56,7 @@ public class ArticleController {
     // 해당 게시글 조회
     @GetMapping("/articles/{id}")
     public ResponseEntity getArticleById(@PathVariable("id") Long id) { // PathVariable:URL 경로에 있는 값을 파라미터로 받을 때 사용
-        return ResponseEntity.ok().body(articleService.findById(id));
+        return ResponseEntity.ok().body(articleQueryService.findArticleWithCommentsOrderedByLatest(id));
     }
 
     // 말머리 별 게시글 리스트 조회
