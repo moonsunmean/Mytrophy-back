@@ -34,7 +34,7 @@ public class Article extends BaseEntity {
 
     private String imagePath; // 이미지 경로
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id")
     private Member member; // 게시글 작성자
 
@@ -54,13 +54,14 @@ public class Article extends BaseEntity {
     }
 
     // 게시글 생성 로직
-    public static Article createArticle(ArticleRequest articleRequest) {
+    public static Article createArticle(ArticleRequest articleRequest, Member member) {
         return Article.builder()
             .header(articleRequest.getHeader())
             .name(articleRequest.getName())
             .content(articleRequest.getContent())
             .cntUp(0)
             .imagePath(articleRequest.getImagePath())
+            .member(member)
             .build();
     }
 
