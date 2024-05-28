@@ -38,11 +38,11 @@ public class Article extends BaseEntity {
     @JoinColumn(name = "member_id")
     private Member member; // 게시글 작성자
 
-//    @OneToMany(mappedBy = "article", cascade = CascadeType.ALL)
-//    private List<Comment> comments;
+    @OneToMany(mappedBy = "article", cascade = CascadeType.ALL)
+    private List<Comment> comments;
 
     @Builder // 빌더 패턴 적용
-    public Article(Long id, Header header, String name, String content, int cntUp, String imagePath, Member member) {
+    public Article(Long id, Header header, String name, String content, int cntUp, String imagePath, Member member, List<Comment> comments) {
         this.id = id;
         this.header = header;
         this.name = name;
@@ -50,7 +50,7 @@ public class Article extends BaseEntity {
         this.cntUp = cntUp;
         this.imagePath = imagePath;
         this.member = member;
-//        this.comments = comments;
+        this.comments = comments;
     }
 
     // 게시글 생성 로직
