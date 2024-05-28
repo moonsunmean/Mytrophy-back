@@ -26,13 +26,13 @@ public class ArticleServiceImpl implements ArticleService {
     // 게시글 생성
     @Override
     @Transactional // 트랜잭션 처리
-    public Article createArticle(Long memberId, ArticleRequest articleRequest, List<MultipartFile> urls) throws IOException {
+    public Article createArticle(Long memberId, ArticleRequest articleRequest, List<String> imagePath) throws IOException {
         // 회원 정보 가져오기
         Member member = memberRepository.findById(memberId)
             .orElseThrow(() -> new RuntimeException("회원 정보를 찾을 수 없습니다."));
 
         // 이미지 경로 설정
-        if (urls == null) {
+        if (imagePath == null) {
             Article article = Article.builder()
                 .header(articleRequest.getHeader())
                 .name(articleRequest.getName())
