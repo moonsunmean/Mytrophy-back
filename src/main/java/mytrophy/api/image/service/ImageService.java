@@ -11,6 +11,6 @@ public interface ImageService {
     List<String> uploadFiles(List<MultipartFile> files) throws IOException;
 
     // 파일 삭제
-    void fileRemove(List<String> files);
+    void removeFile(List<String> files);
 
 }
