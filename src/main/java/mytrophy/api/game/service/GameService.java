@@ -41,7 +41,7 @@ public class GameService {
 
     public Page<GetAllGameDTO> getAllGameDTO(int page, int size) {
         return gameRepository.findAll(PageRequest.of(page, size, Sort.by("id").descending())).map(
-                game -> new GetAllGameDTO(game.getId(), game.getName(), game.getHeaderImagePath())
+                game -> new GetAllGameDTO(game.getAppId(), game.getName(), game.getHeaderImagePath())
         );
     }
 
@@ -52,7 +52,7 @@ public class GameService {
             Game game = gameRepository.findById(appid).orElse(null);
             GetTopGameDTO dto;
             if (game != null) {
-                dto = new GetTopGameDTO(game.getId(), game.getName(), game.getHeaderImagePath(), rank);
+                dto = new GetTopGameDTO(game.getAppId(), game.getName(), game.getHeaderImagePath(), rank);
             } else {
                 dto = new GetTopGameDTO(null, null, null, rank);
             }
@@ -68,8 +68,8 @@ public class GameService {
     }
 
     @Transactional
-    public GetGameDetailDTO getGameDetailDTO(Long id) {
-        Game game = gameRepository.findById(id).orElse(null);
+    public GetGameDetailDTO getGameDetailDTO(Integer id) {
+        Game game = gameRepository.findByAppId(id);
 
         List<Category> categoryList = new ArrayList<>();
         game.getGameCategoryList().forEach(gameCategory -> categoryList.add(gameCategory.getCategory()));
@@ -91,7 +91,7 @@ public class GameService {
                 .collect(Collectors.toList());
 
         return new GetGameDetailDTO(
-                game.getId(),
+                game.getAppId(),
                 game.getName(),
                 game.getDescription(),
                 game.getDeveloper(),
@@ -114,10 +114,10 @@ public class GameService {
         Pageable pageable = PageRequest.of(page, size, Sort.by("id").descending());
         if(categoryId == 0){
             return gameRepository.findGameByNameContaining(keyword == null ? "" : keyword, pageable).map(
-                    game -> new GetSearchGameDTO(game.getId(), game.getName(), game.getHeaderImagePath()));
+                    game -> new GetSearchGameDTO(game.getAppId(), game.getName(), game.getHeaderImagePath()));
 
         }
         return gameRepository.findGameByNameContainingByCategoryId(keyword == null ? "" : keyword , pageable,categoryId).map(
-                game -> new GetSearchGameDTO(game.getId(), game.getName(), game.getHeaderImagePath()));
+                game -> new GetSearchGameDTO(game.getAppId(), game.getName(), game.getHeaderImagePath()));
     }
 }

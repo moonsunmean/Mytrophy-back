@@ -19,6 +19,7 @@ import java.util.List;
 public class Category {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.AUTO) // 기본 키 자동 생성 안 함
     private Long id;
 
     @Column
