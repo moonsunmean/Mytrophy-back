@@ -102,13 +102,13 @@ public class ArticleServiceImpl implements ArticleService {
     // 게시글 삭제
     @Override
     @Transactional
-    public void deleteArticle(Long memberId, Long articleId) {
+    public void deleteArticle(Long memberId, Long id) {
         // 로그인한 유저의 정보 가져오기
         Member member = memberRepository.findById(memberId)
             .orElseThrow(() -> new RuntimeException("로그인한 회원 정보를 찾을 수 없습니다."));
 
         // 게시글 정보 가져오기
-        Article article = findById(articleId);
+        Article article = findById(id);
         if (article == null) {
             throw new ResourceNotFoundException("해당 게시글이 존재하지 않습니다.");
         }
@@ -119,7 +119,7 @@ public class ArticleServiceImpl implements ArticleService {
         // 로그인한 유저와 게시글을 작성한 유저의 ID가 일치하는지 확인
         if (member.getId().equals(author.getId())) {
             // 일치하면 게시글 삭제
-            articleRepository.delete(article);
+            articleRepository.deleteById(article.getId());
         } else {
             // 일치하지 않으면 권한 없음 예외 발생
             throw new RuntimeException("게시글 삭제 권한이 없습니다.");
