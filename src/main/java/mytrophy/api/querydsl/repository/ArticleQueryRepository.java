@@ -30,7 +30,7 @@ public class ArticleQueryRepository {
     public List<Article> findArticleWithCommentsOrderedByLatest(Long articleId) {
         return jpaQueryFactory
             .selectFrom(qArticle)
-            .leftJoin(qArticle.comments, qComment).fetchJoin()
+            .leftJoin(qArticle.comments, qComment)
             .where(qArticle.id.eq(articleId))
             .orderBy(qComment.createdAt.desc())
             .fetch();
