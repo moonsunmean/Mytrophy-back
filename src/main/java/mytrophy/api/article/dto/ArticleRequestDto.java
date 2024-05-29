@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import mytrophy.api.article.entity.Article;
 import mytrophy.api.article.enumentity.Header;
 import mytrophy.api.comment.entity.Comment;
+import mytrophy.api.member.dto.MemberDto;
 import mytrophy.api.member.entity.Member;
 
 import java.util.List;
@@ -18,11 +19,6 @@ public class ArticleRequestDto {
     private String name;
     private String content;
     private String imagePath;
+    private Long memberId;
 
-    @Builder
-    public ArticleRequestDto(Header header, String name, String content) {
-        this.header = header;
-        this.name = name;
-        this.content = content;
-    }
 }
