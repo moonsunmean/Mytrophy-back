@@ -30,7 +30,7 @@ public interface ArticleService {
     Article updateArticle(Long memberId, Long id, ArticleRequestDto articleRequestDto);
 
     // 게시글 삭제
-    void deleteArticle(Long id);
+    void deleteArticle(Long memberId, Long id);
 
     // 유저 권한 확인
     boolean isAuthorized(Long id, Long memberId);
