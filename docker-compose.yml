@@ -5,8 +5,8 @@ services:
     restart: always
     environment:
       MYSQL_DATABASE: "mytrophy_db"
-      MYSQL_ROOT_HOST: "mytrophy"
-      MYSQL_ROOT_PASSWORD: "mytrophy"
+      MYSQL_ROOT_HOST: 'root'
+      MYSQL_ROOT_PASSWORD:
       TZ: 'Asia/Seoul'
     ports:
       - "3306:3306"
@@ -22,9 +22,9 @@ services:
       dockerfile: Dockerfile
     #    restart: always
     environment:
-      SPRING_DATASOURCE_URL: jdbc:mysql://mysql_db:3306/nomoke?useSSL=false&allowPublicKeyRetrieval=true
-      SPRING_DATASOURCE_USERNAME: "root"
-      SPRING_DATASOURCE_PASSWORD: "1234"
+      SPRING_DATASOURCE_URL: jdbc:mysql://34.64.52.132:3306/mytrophy_db
+      SPRING_DATASOURCE_USERNAME: "mytrophy"
+      SPRING_DATASOURCE_PASSWORD: "mytrophy"
     ports:
       - "8080:8080"
     depends_on:
