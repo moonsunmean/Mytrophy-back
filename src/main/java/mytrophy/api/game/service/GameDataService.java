@@ -20,9 +20,9 @@ import org.springframework.web.client.RestTemplate;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
+@Transactional
 public class GameDataService {
 
     private final GameRepository gameRepository;
@@ -52,7 +52,6 @@ public class GameDataService {
     }
 
     // 스팀 게임 목록을 받아와 DB에 저장하는 메서드
-    @Transactional
     public void receiveSteamGameList() throws JsonProcessingException {
         RestTemplate restTemplate = new RestTemplate();
         String url = "http://api.steampowered.com/ISteamApps/GetAppList/v2/";
@@ -73,7 +72,6 @@ public class GameDataService {
         gameDataRepository.saveAll(gameDataList);
     }
 
-    @Transactional
     public Boolean receiveSteamGameListByDb(int size, boolean isContinue) throws JsonProcessingException {
         // 마지막에 저장한 appId 불러오기
         GameRead gameRead = gameReadRepository.findById(1L).orElse(null);
@@ -148,7 +146,6 @@ public class GameDataService {
     }
 
     // 특정 게임의 상세 정보를 받아와 DB에 저장하는 메서드
-    @Transactional
     public void gameDetail(int appId) throws JsonProcessingException {
         String url = "https://store.steampowered.com/api/appdetails?appids=" + appId + "&l=korean";
         JsonNode appNode = getAppNodeFromUrl(url, String.valueOf(appId));
