@@ -18,7 +18,6 @@ services:
       - "--collation-server=utf8mb4_unicode_ci"
   backend:
     build:
-      context: ./backend
       dockerfile: Dockerfile
     #    restart: always
     environment:
