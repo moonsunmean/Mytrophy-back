@@ -114,7 +114,7 @@ public class ArticleController {
     // 파일만 삭제
     @DeleteMapping("/articles/files")
     public ResponseEntity removeOnlyFiles(List<String> files) {
-        imageService.fileRemove(files);
+        imageService.removeFile(files);
         return ResponseEntity.ok().build();
     }
 
