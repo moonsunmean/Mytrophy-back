@@ -29,26 +29,28 @@ public class ArticleServiceImpl implements ArticleService {
         Member member = memberRepository.findById(memberId)
             .orElseThrow(() -> new RuntimeException("회원 정보를 찾을 수 없습니다."));
 
-        // 이미지 경로 설정
-        if (imagePath == null) {
-            Article article = Article.builder()
+        Article article;
+
+        // 이미지 경로가 null이 아닌 경우
+        if (imagePath != null && !imagePath.isEmpty()) {
+            article = Article.builder()
                 .header(articleRequestDto.getHeader())
                 .name(articleRequestDto.getName())
                 .content(articleRequestDto.getContent())
+                .imagePath(articleRequestDto.getImagePath()) // 이미지 경로 설정
+                .member(member)
+                .build();
+        } else {
+            // 이미지 경로가 null이거나 비어있는 경우
+            article = Article.builder()
+                .header(articleRequestDto.getHeader())
+                .name(articleRequestDto.getName())
+                .content(articleRequestDto.getContent())
+                .member(member)
                 .build();
         }
 
-        // Article 생성
-        Article article = Article.builder()
-            .header(articleRequestDto.getHeader())
-            .name(articleRequestDto.getName())
-            .content(articleRequestDto.getContent())
-            .imagePath(articleRequestDto.getImagePath()) // 이미지 경로 설정
-            .build();
-
-        Article createArticle = article.createArticle(articleRequestDto, member);
-
-        return articleRepository.save(createArticle);
+        return articleRepository.save(article);
     }
 
     // 게시글 리스트 조회
@@ -100,15 +102,28 @@ public class ArticleServiceImpl implements ArticleService {
     // 게시글 삭제
     @Override
     @Transactional
-    public void deleteArticle(Long id) {
-        Article article = findById(id);
-        if (article != null) {
-            articleRepository.delete(article);
-        } else {
+    public void deleteArticle(Long memberId, Long articleId) {
+        // 로그인한 유저의 정보 가져오기
+        Member member = memberRepository.findById(memberId)
+            .orElseThrow(() -> new RuntimeException("로그인한 회원 정보를 찾을 수 없습니다."));
+
+        // 게시글 정보 가져오기
+        Article article = findById(articleId);
+        if (article == null) {
             throw new ResourceNotFoundException("해당 게시글이 존재하지 않습니다.");
         }
 
-        articleRepository.delete(article);
+        // 게시글을 작성한 유저의 정보 가져오기
+        Member author = article.getMember();
+
+        // 로그인한 유저와 게시글을 작성한 유저의 ID가 일치하는지 확인
+        if (member.getId().equals(author.getId())) {
+            // 일치하면 게시글 삭제
+            articleRepository.delete(article);
+        } else {
+            // 일치하지 않으면 권한 없음 예외 발생
+            throw new RuntimeException("게시글 삭제 권한이 없습니다.");
+        }
     }
 
     // 유저 권한 확인
