@@ -1,11 +1,13 @@
 package mytrophy.api.article.controller;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import mytrophy.api.article.dto.ArticleRequestDto;
 import mytrophy.api.article.entity.Article;
 import mytrophy.api.article.enumentity.Header;
 import mytrophy.api.article.service.ArticleService;
 import mytrophy.api.image.service.ImageService;
+import mytrophy.api.member.entity.Member;
 import mytrophy.api.member.service.MemberService;
 import mytrophy.api.querydsl.service.ArticleQueryService;
 import mytrophy.global.jwt.CustomUserDetails;
@@ -21,6 +23,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api")
 @RequiredArgsConstructor // final 필드를 파라미터로 받는 생성자를 생성
+@Slf4j
 public class ArticleController {
 
     private final ArticleService articleService;
@@ -35,7 +38,8 @@ public class ArticleController {
                                                  @RequestParam(value = "imagePath", required = false) List<String> imagePath) throws IOException {
         //토큰에서 username 빼내기
         String username = userInfo.getUsername();
-        Long memberId = memberService.findMemberByUsername(username).getId();
+        Member member = memberService.findMemberByUsername(username);
+        log.info("memberId: {}", member.getId());
 
         // 이미지 업로드 및 경로 설정
         if (imagePath != null) {
@@ -43,7 +47,7 @@ public class ArticleController {
         }
 
         // Article 생성
-        Article articleRequest = articleService.createArticle(memberId, articleRequestDto, imagePath);
+        Article articleRequest = articleService.createArticle(member.getId(), articleRequestDto, imagePath);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(articleRequest);
     }
@@ -132,8 +136,8 @@ public class ArticleController {
 
     // 게시글 삭제
     @DeleteMapping("/articles/{id}")
-    public ResponseEntity deleteArticle(@PathVariable Long id,
-                                        @AuthenticationPrincipal CustomUserDetails userInfo) {
+    public ResponseEntity deleteArticle(@AuthenticationPrincipal CustomUserDetails userInfo,
+                                        @PathVariable("id") Long id) {
         //토큰에서 username 빼내기
         String username = userInfo.getUsername();
         Long memberId = memberService.findMemberByUsername(username).getId();
@@ -143,7 +147,8 @@ public class ArticleController {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
 
-        articleService.deleteArticle(id);
+        articleService.deleteArticle(memberId, id);
+        log.info("게시글 삭제 완료");
         return ResponseEntity.ok().build();
     }
 
