@@ -82,7 +82,11 @@ public class ArticleServiceImpl implements ArticleService {
     // 게시글 수정
     @Override
     @Transactional
-    public Article updateArticle(Long id, ArticleRequest articleRequest) {
+    public Article updateArticle(Long memberId, Long id, ArticleRequest articleRequest) {
+        // 회원 정보 가져오기
+        Member member = memberRepository.findById(memberId)
+            .orElseThrow(() -> new RuntimeException("회원 정보를 찾을 수 없습니다."));
+
         Article article = findById(id);
 
         if (article == null) {
@@ -107,6 +111,12 @@ public class ArticleServiceImpl implements ArticleService {
         }
 
         articleRepository.delete(article);
+    }
+
+    // 유저 권한 확인
+    public boolean isAuthorized(Long id, Long memberId) {
+        Article article = findById(id);
+        return article.getMember().getId().equals(memberId);
     }
 
     // 좋아요 증가
