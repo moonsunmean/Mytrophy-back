@@ -1,6 +1,8 @@
 package mytrophy.api.member.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -32,6 +34,7 @@ public class Member {
     private String imagePath; // 프로필 이미지
 
     @OneToMany(mappedBy = "member", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @JsonIgnoreProperties("member") // 순환 참조 방지
     private List<Article> articles = new ArrayList<>();
 
     @ManyToMany(fetch = FetchType.EAGER)
