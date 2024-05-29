@@ -1,5 +1,7 @@
 package mytrophy.api.article.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.*;
 import mytrophy.api.article.dto.ArticleRequestDto;
@@ -36,6 +38,7 @@ public class Article extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "member_id")
+    @JsonIgnoreProperties("articles") // 순환 참조 방지
     private Member member; // 게시글 작성자
 
     @OneToMany(mappedBy = "article", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
