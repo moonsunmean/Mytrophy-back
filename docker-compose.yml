@@ -1,0 +1,40 @@
+services:
+  database:
+    container_name: mysql_db
+    image: mysql
+    restart: always
+    environment:
+      MYSQL_DATABASE: "mytrophy_db"
+      MYSQL_ROOT_HOST: "mytrophy"
+      MYSQL_ROOT_PASSWORD: "mytrophy"
+      TZ: 'Asia/Seoul'
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./mysql/conf.d:/etc/mysql/conf.d # MySQL 설정 파일 위치
+    command:
+      - "mysqld"
+      - "--character-set-server=utf8mb4"
+      - "--collation-server=utf8mb4_unicode_ci"
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    #    restart: always
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql_db:3306/nomoke?useSSL=false&allowPublicKeyRetrieval=true
+      SPRING_DATASOURCE_USERNAME: "root"
+      SPRING_DATASOURCE_PASSWORD: "1234"
+    ports:
+      - "8080:8080"
+    depends_on:
+      - database
+#  frontend:
+#    build:
+#      context: /frontend
+#      dockerfile: Dockerfile
+#    restart: always
+#    ports:
+#      - "3000:3000"
+#    depends_on:
+#      - database
