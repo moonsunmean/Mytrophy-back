@@ -88,4 +88,9 @@ public class MemberService {
     private String encodePassword(String password) {
         return bCryptPasswordEncoder.encode(password);
     }
+
+    // 회원 username으로 조회
+    public Member findMemberByUsername(String username) {
+        return memberRepository.findByUsername(username);
+    }
 }
