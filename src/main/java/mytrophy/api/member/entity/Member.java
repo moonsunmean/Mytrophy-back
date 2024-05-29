@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import mytrophy.api.article.entity.Article;
 import mytrophy.api.game.entity.Category;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -29,6 +30,9 @@ public class Member {
     private Long steamId; // 스팀 ID 값
     private String loginType; // 로그인 형태 (소셜로그인, 일반로그인)
     private String imagePath; // 프로필 이미지
+
+    @OneToMany(mappedBy = "member", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    private List<Article> articles = new ArrayList<>();
 
     @ManyToMany(fetch = FetchType.EAGER)
     private List<Category> categories;
