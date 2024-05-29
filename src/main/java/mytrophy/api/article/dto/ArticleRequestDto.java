@@ -13,15 +13,14 @@ import java.util.List;
 
 @Data
 @NoArgsConstructor
-public class ArticleRequest {
+public class ArticleRequestDto {
     private Header header;
     private String name;
     private String content;
     private String imagePath;
-    private Long memberId;
 
     @Builder
-    public ArticleRequest(Header header, String name, String content) {
+    public ArticleRequestDto(Header header, String name, String content) {
         this.header = header;
         this.name = name;
         this.content = content;
