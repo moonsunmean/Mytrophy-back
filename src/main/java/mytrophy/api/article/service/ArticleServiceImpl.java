@@ -2,8 +2,7 @@ package mytrophy.api.article.service;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import mytrophy.api.article.dto.ArticleRequest;
+import mytrophy.api.article.dto.ArticleRequestDto;
 import mytrophy.api.article.entity.Article;
 import mytrophy.api.article.enumentity.Header;
 import mytrophy.api.article.repository.ArticleRepository;
@@ -11,7 +10,6 @@ import mytrophy.api.member.entity.Member;
 import mytrophy.api.member.repository.MemberRepository;
 import mytrophy.global.handler.resourcenotfound.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.List;
@@ -26,7 +24,7 @@ public class ArticleServiceImpl implements ArticleService {
     // 게시글 생성
     @Override
     @Transactional // 트랜잭션 처리
-    public Article createArticle(Long memberId, ArticleRequest articleRequest, List<String> imagePath) throws IOException {
+    public Article createArticle(Long memberId, ArticleRequestDto articleRequestDto, List<String> imagePath) throws IOException {
         // 회원 정보 가져오기
         Member member = memberRepository.findById(memberId)
             .orElseThrow(() -> new RuntimeException("회원 정보를 찾을 수 없습니다."));
@@ -34,21 +32,21 @@ public class ArticleServiceImpl implements ArticleService {
         // 이미지 경로 설정
         if (imagePath == null) {
             Article article = Article.builder()
-                .header(articleRequest.getHeader())
-                .name(articleRequest.getName())
-                .content(articleRequest.getContent())
+                .header(articleRequestDto.getHeader())
+                .name(articleRequestDto.getName())
+                .content(articleRequestDto.getContent())
                 .build();
         }
 
         // Article 생성
         Article article = Article.builder()
-            .header(articleRequest.getHeader())
-            .name(articleRequest.getName())
-            .content(articleRequest.getContent())
-            .imagePath(articleRequest.getImagePath()) // 이미지 경로 설정
+            .header(articleRequestDto.getHeader())
+            .name(articleRequestDto.getName())
+            .content(articleRequestDto.getContent())
+            .imagePath(articleRequestDto.getImagePath()) // 이미지 경로 설정
             .build();
 
-        Article createArticle = article.createArticle(articleRequest, member);
+        Article createArticle = article.createArticle(articleRequestDto, member);
 
         return articleRepository.save(createArticle);
     }
@@ -82,7 +80,7 @@ public class ArticleServiceImpl implements ArticleService {
     // 게시글 수정
     @Override
     @Transactional
-    public Article updateArticle(Long memberId, Long id, ArticleRequest articleRequest) {
+    public Article updateArticle(Long memberId, Long id, ArticleRequestDto articleRequestDto) {
         // 회원 정보 가져오기
         Member member = memberRepository.findById(memberId)
             .orElseThrow(() -> new RuntimeException("회원 정보를 찾을 수 없습니다."));
@@ -94,7 +92,7 @@ public class ArticleServiceImpl implements ArticleService {
         }
 
         // 게시글 정보 업데이트
-        article.updateArticle(articleRequest.getHeader(), articleRequest.getName(), articleRequest.getContent(), articleRequest.getImagePath());
+        article.updateArticle(articleRequestDto.getHeader(), articleRequestDto.getName(), articleRequestDto.getContent(), articleRequestDto.getImagePath());
 
         return articleRepository.save(article);
     }
