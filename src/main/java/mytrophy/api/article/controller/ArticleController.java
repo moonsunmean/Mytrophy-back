@@ -1,9 +1,9 @@
 package mytrophy.api.article.controller;
 
 import lombok.RequiredArgsConstructor;
+import mytrophy.api.article.dto.ArticleRequestDto;
 import mytrophy.api.article.entity.Article;
 import mytrophy.api.article.enumentity.Header;
-import mytrophy.api.article.dto.ArticleRequest;
 import mytrophy.api.article.service.ArticleService;
 import mytrophy.api.image.service.ImageService;
 import mytrophy.api.member.service.MemberService;
@@ -31,7 +31,7 @@ public class ArticleController {
     // 게시글 생성
     @PostMapping("/articles")
     public ResponseEntity<Article> createArticle(@AuthenticationPrincipal CustomUserDetails userInfo,
-                                                 @RequestBody ArticleRequest articleRequest,
+                                                 @RequestBody ArticleRequestDto articleRequestDto,
                                                  @RequestParam(value = "imagePath", required = false) List<String> imagePath) throws IOException {
         //토큰에서 username 빼내기
         String username = userInfo.getUsername();
@@ -39,19 +39,20 @@ public class ArticleController {
 
         // 이미지 업로드 및 경로 설정
         if (imagePath != null) {
-            articleRequest.setImagePath(String.join(",", imagePath));
+            articleRequestDto.setImagePath(String.join(",", imagePath));
         }
 
         // Article 생성
-        Article article = articleService.createArticle(memberId, articleRequest, imagePath);
+        Article articleRequest = articleService.createArticle(memberId, articleRequestDto, imagePath);
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(article);
+        return ResponseEntity.status(HttpStatus.CREATED).body(articleRequest);
     }
 
     // 게시글 리스트 조회
     @GetMapping("/articles")
     public ResponseEntity<List<Article>> getAllArticles() {
-        return ResponseEntity.ok().body(articleService.findAll());
+        List<Article> articles = articleService.findAll();
+        return ResponseEntity.ok().body(articles);
     }
 
     // 해당 게시글 조회
@@ -92,11 +93,14 @@ public class ArticleController {
         return ResponseEntity.ok().body(article);
     }
 
+    // 회원 별 게시글 리스트 조회
+
+
     // 게시글 수정
     @PatchMapping("/articles/{id}")
     public ResponseEntity updateArticle(@AuthenticationPrincipal CustomUserDetails userInfo,
                                         @PathVariable("id") Long id,
-                                        @RequestBody ArticleRequest articleRequest,
+                                        @RequestBody ArticleRequestDto articleRequestDto,
                                         @RequestParam(value = "imagePath", required = false) List<String> imagePath) throws IOException {
         //토큰에서 username 빼내기
         String username = userInfo.getUsername();
@@ -107,22 +111,22 @@ public class ArticleController {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
 
-        if (articleRequest.getHeader() == null || articleRequest.getName() == null || articleRequest.getContent() == null) {
+        if (articleRequestDto.getHeader() == null || articleRequestDto.getName() == null || articleRequestDto.getContent() == null) {
             return ResponseEntity.badRequest().build();
         }
 
         // 이미지 업로드 및 경로 설정
         if (imagePath != null) {
-            articleRequest.setImagePath(String.join(",", imagePath));
+            articleRequestDto.setImagePath(String.join(",", imagePath));
         }
 
         // 파일을 변경하지 않았을 경우
-        if (articleRequest.getImagePath() == null) {
+        if (articleRequestDto.getImagePath() == null) {
             Article article = articleService.findById(id);
-            articleRequest.setImagePath(article.getImagePath());
+            articleRequestDto.setImagePath(article.getImagePath());
         }
 
-        articleService.updateArticle(memberId, id, articleRequest);
+        articleService.updateArticle(memberId, id, articleRequestDto);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
