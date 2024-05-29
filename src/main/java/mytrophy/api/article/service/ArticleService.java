@@ -38,10 +38,13 @@ public interface ArticleService {
     Article findByIdAndHeader(Long id, Header header);
 
     // 게시글 수정
-    Article updateArticle(Long id, ArticleRequest articleRequest);
+    Article updateArticle(Long memberId, Long id, ArticleRequest articleRequest);
 
     // 게시글 삭제
     void deleteArticle(Long id);
+
+    // 유저 권한 확인
+    boolean isAuthorized(Long id, Long memberId);
 
     // 좋아요 증가
     void upCntUp(Long id);
