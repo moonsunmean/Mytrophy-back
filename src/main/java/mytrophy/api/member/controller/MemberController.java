@@ -1,9 +1,12 @@
 package mytrophy.api.member.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import mytrophy.api.image.service.ImageService;
 import mytrophy.api.member.dto.MemberDto;
 import mytrophy.api.member.entity.Member;
 import mytrophy.api.member.service.MemberService;
+import mytrophy.api.member.service.MemberSteamService;
+import org.hibernate.mapping.Any;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -18,26 +21,22 @@ import java.util.Optional;
 public class MemberController {
 
     private final MemberService memberService;
+    private final MemberSteamService memberSteamService;
     private final ImageService imageService;
 
-    public MemberController(MemberService memberService, ImageService imageService) {
+    public MemberController(MemberService memberService, MemberSteamService memberSteamService, ImageService imageService) {
         this.memberService = memberService;
         this.imageService = imageService;
+        this.memberSteamService = memberSteamService;
     }
 
     // 회원 가입
     @PostMapping("/signup")
-    public ResponseEntity<Member> signupMember(@ModelAttribute MemberDto memberDto,
-                                               @RequestPart(value = "file", required = false) List<MultipartFile> files) throws IOException {
-
-        if (files != null) {
-            List<String> url = imageService.uploadFiles(files);
-            memberDto.setImagePath(url.toString());
-        }
-
-        return ResponseEntity.status(HttpStatus.OK)
-                .body(memberService.signupMember(memberDto));
+    public ResponseEntity<String> signupMember(@RequestBody MemberDto memberDto) {
+        memberService.signupMember(memberDto);
+        return new ResponseEntity<>("회원 가입 성공", HttpStatus.CREATED);
     }
+
 
 
     // 회원 조회
@@ -58,7 +57,19 @@ public class MemberController {
         return new ResponseEntity<>("회원 수정 실패", HttpStatus.NOT_FOUND);
     }
 
+    // 회원 사진 추가
+    @PostMapping("/files")
+    public ResponseEntity<String> uploadOnlyFiles(@RequestPart(value = "file", required = false) List<MultipartFile> files) throws IOException {
+        imageService.uploadFiles(files);
+        return ResponseEntity.ok("파일 업로드 성공");
+    }
 
+    // 회원 사진 삭제
+    @DeleteMapping("/files")
+    public ResponseEntity<String> removeOnlyFiles(List<String> files) {
+        imageService.removeFile(files);
+        return ResponseEntity.ok("파일 삭제 성공");
+    }
 
     // 회원 삭제
     @DeleteMapping("/{id}")
@@ -68,5 +79,16 @@ public class MemberController {
             return new ResponseEntity<>("회원 삭제 성공", HttpStatus.OK);
         }
         return new ResponseEntity<>("회원 삭제 실패", HttpStatus.NOT_FOUND);
+    }
+
+    // 회원 게임 목록
+    @PostMapping("/mygames/{id}")
+    public ResponseEntity<Any> readMemberSteamGames(@PathVariable("id") Long id) {
+        try {
+            memberSteamService.receiveMemberSteamGameList(id);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+        return ResponseEntity.ok(null);
     }
 }
