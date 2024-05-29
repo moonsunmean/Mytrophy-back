@@ -1,29 +1,18 @@
 package mytrophy.api.article.service;
 
 
-import com.google.cloud.storage.BlobInfo;
-import com.google.cloud.storage.Bucket;
-import jakarta.transaction.Transactional;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import mytrophy.api.article.dto.ArticleRequest;
+
+import mytrophy.api.article.dto.ArticleRequestDto;
 import mytrophy.api.article.entity.Article;
 import mytrophy.api.article.enumentity.Header;
-import mytrophy.api.article.repository.ArticleRepository;
-import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 public interface ArticleService {
 
     // 게시글 생성
-    Article createArticle(Long memberId, ArticleRequest articleRequest, List<String> imagePath) throws IOException;
+    Article createArticle(Long memberId, ArticleRequestDto articleRequestDto, List<String> imagePath) throws IOException;
 
     // 게시글 리스트 조회
     List<Article> findAll();
@@ -38,7 +27,7 @@ public interface ArticleService {
     Article findByIdAndHeader(Long id, Header header);
 
     // 게시글 수정
-    Article updateArticle(Long memberId, Long id, ArticleRequest articleRequest);
+    Article updateArticle(Long memberId, Long id, ArticleRequestDto articleRequestDto);
 
     // 게시글 삭제
     void deleteArticle(Long id);
