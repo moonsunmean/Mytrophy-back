@@ -6,21 +6,16 @@ import mytrophy.api.article.enumentity.Header;
 import mytrophy.api.article.dto.ArticleRequest;
 import mytrophy.api.article.service.ArticleService;
 import mytrophy.api.image.service.ImageService;
-import mytrophy.api.member.entity.Member;
-import mytrophy.api.member.repository.MemberRepository;
+import mytrophy.api.member.service.MemberService;
 import mytrophy.api.querydsl.service.ArticleQueryService;
 import mytrophy.global.jwt.CustomUserDetails;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.Collections;
 import java.util.List;
 
 @RestController
@@ -31,7 +26,7 @@ public class ArticleController {
     private final ArticleService articleService;
     private final ImageService imageService;
     private final ArticleQueryService articleQueryService;
-    private final MemberRepository memberRepository;
+    private final MemberService memberService;
 
     // 게시글 생성
     @PostMapping("/articles")
@@ -40,7 +35,7 @@ public class ArticleController {
                                                  @RequestParam(value = "imagePath", required = false) List<String> imagePath) throws IOException {
         //토큰에서 username 빼내기
         String username = userInfo.getUsername();
-        Long memberId = memberRepository.findByUsername(username).getId();
+        Long memberId = memberService.findMemberByUsername(username).getId();
 
         // 이미지 업로드 및 경로 설정
         if (imagePath != null) {
@@ -53,7 +48,6 @@ public class ArticleController {
         return ResponseEntity.status(HttpStatus.CREATED).body(article);
     }
 
-    // TODO : 게시글 조회 시 JWT 토큰 만료되는 상황 해결 필요 (생성은 완료)
     // 게시글 리스트 조회
     @GetMapping("/articles")
     public ResponseEntity<List<Article>> getAllArticles() {
@@ -100,43 +94,51 @@ public class ArticleController {
 
     // 게시글 수정
     @PatchMapping("/articles/{id}")
-    public ResponseEntity updateArticle(@PathVariable("id") Long id,
-                                        @ModelAttribute ArticleRequest articleRequest,
-                                        @RequestPart (value = "file", required = false) List<MultipartFile> files) throws IOException {
-        // 현재 로그인된 사용자 정보 가져오기
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        Member member = (Member) authentication.getPrincipal();
+    public ResponseEntity updateArticle(@AuthenticationPrincipal CustomUserDetails userInfo,
+                                        @PathVariable("id") Long id,
+                                        @RequestBody ArticleRequest articleRequest,
+                                        @RequestParam(value = "imagePath", required = false) List<String> imagePath) throws IOException {
+        //토큰에서 username 빼내기
+        String username = userInfo.getUsername();
+        Long memberId = memberService.findMemberByUsername(username).getId();
 
-        // 현재 로그인된 사용자의 memberId 설정
-        articleRequest.setMemberId(member.getId());
+        // 유저 권한 확인
+        if (!articleService.isAuthorized(id, memberId)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
 
         if (articleRequest.getHeader() == null || articleRequest.getName() == null || articleRequest.getContent() == null) {
             return ResponseEntity.badRequest().build();
         }
 
         // 이미지 업로드 및 경로 설정
-        List<String> url = null;
-        if (files != null && !files.isEmpty()) {
-            url = imageService.uploadFiles(files);
-            articleRequest.setImagePath(url.toString());
+        if (imagePath != null) {
+            articleRequest.setImagePath(String.join(",", imagePath));
         }
 
         // 파일을 변경하지 않았을 경우
-        if (url == null && articleRequest.getImagePath() == null) {
-            // 기존 이미지 경로 가져오기
-            Article existingArticle = articleService.findById(id);
-            if (existingArticle != null) {
-                articleRequest.setImagePath(existingArticle.getImagePath());
-            }
+        if (articleRequest.getImagePath() == null) {
+            Article article = articleService.findById(id);
+            articleRequest.setImagePath(article.getImagePath());
         }
 
-        articleService.updateArticle(id, articleRequest);
+        articleService.updateArticle(memberId, id, articleRequest);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
     // 게시글 삭제
     @DeleteMapping("/articles/{id}")
-    public ResponseEntity deleteArticle(@PathVariable Long id) {
+    public ResponseEntity deleteArticle(@PathVariable Long id,
+                                        @AuthenticationPrincipal CustomUserDetails userInfo) {
+        //토큰에서 username 빼내기
+        String username = userInfo.getUsername();
+        Long memberId = memberService.findMemberByUsername(username).getId();
+
+        // 유저 권한 확인
+        if (!articleService.isAuthorized(id, memberId)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+
         articleService.deleteArticle(id);
         return ResponseEntity.ok().build();
     }
