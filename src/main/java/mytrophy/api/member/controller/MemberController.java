@@ -2,10 +2,12 @@ package mytrophy.api.member.controller;
 
 
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import mytrophy.api.global.jwt.CustomSuccessHandler;
 import mytrophy.api.member.dto.MemberDto;
 import mytrophy.api.member.dto.SteamOpenidLoginDto;
 import mytrophy.api.member.entity.Member;
@@ -34,7 +36,7 @@ public class MemberController {
     private final AuthenticationManager authenticationManager;
     private final SteamService steamService;
     private final MemberService memberService;
-
+    private final CustomSuccessHandler successHandler;
     // 회원 가입
     @PostMapping("/signup")
     public ResponseEntity<String> signupMember(@RequestBody MemberDto memberDto) {
@@ -75,13 +77,13 @@ public class MemberController {
     }
 
 
-    @GetMapping("/login/steam")
+    @GetMapping("/steam/login")
     public ModelAndView login() {
         return new ModelAndView("steam", steamService.getOpenIdAttributes());
     }
 
-    @GetMapping("/login/steam/redirect")
-    public ModelAndView loginRedirect(HttpServletRequest request, @RequestParam Map<String, String> allRequestParams) {
+    @GetMapping("/steam/login/redirect")
+    public ModelAndView loginRedirect(HttpServletRequest request, HttpServletResponse response, @RequestParam Map<String, String> allRequestParams) {
         SteamOpenidLoginDto dto = new SteamOpenidLoginDto(
                 allRequestParams.get("openid.ns"),
                 allRequestParams.get("openid.op_endpoint"),
@@ -100,18 +102,20 @@ public class MemberController {
             Authentication auth        = authenticationManager.authenticate(authReq);
             SecurityContext sc          = SecurityContextHolder.getContext();
             sc.setAuthentication(auth);
-            HttpSession session = request.getSession(true);
-            session.setAttribute(SPRING_SECURITY_CONTEXT_KEY, sc);
+//            HttpSession session = request.getSession(true);
+//            session.setAttribute(SPRING_SECURITY_CONTEXT_KEY, sc);
+            successHandler.onAuthenticationSuccess(request,response, auth);
+            return null;
 
         } catch (Exception e) {
             e.printStackTrace();
-            return new ModelAndView("redirect:/steam/failed");
+            return new ModelAndView("redirect:/steam/login/failed");
         }
 
-        return new ModelAndView("redirect:/steam/profile");
+        //return new ModelAndView("redirect:/steam/login/profile");
     }
 
-    @GetMapping("/steam/profile")
+    @GetMapping("/steam/login/profile")
     @ResponseBody
     public ResponseEntity<Object> success() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -124,14 +128,7 @@ public class MemberController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized");
         }
     }
-//    @GetMapping("/steam/profile")
-//    @ResponseBody
-//    public ResponseEntity<Object> success() {
-//        SteamAutenticationToken authentication = (SteamAutenticationToken) SecurityContextHolder.getContext().getAuthentication();
-//        SteamUserPrincipal principal      = authentication.getPrincipal();
-//
-//        return ResponseEntity.ok(principal);
-//    }
+
 
     @GetMapping("/steam/failed")
     public String failed() {

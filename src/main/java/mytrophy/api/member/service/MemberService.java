@@ -46,7 +46,7 @@ public class MemberService {
         signupMember.setNickname(memberDto.getNickname());
         signupMember.setEmail(memberDto.getEmail());
         signupMember.setSteamId(memberDto.getSteamId());
-        signupMember.setLoginType(memberDto.getLoginType());
+        signupMember.setLoginType("mytrophy");
         signupMember.setProfileImage(memberDto.getProfileImage());
 
         memberRepository.save(signupMember);

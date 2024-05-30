@@ -41,7 +41,6 @@ public class SteamAuthenticationProvider implements AuthenticationProvider {
         Map<String, Object> userAttributes;
         try {
             userAttributes = steamService.getUserData(steamId);
-            System.out.println(userAttributes);
         } catch (Exception e) {
             e.printStackTrace();
             return null;

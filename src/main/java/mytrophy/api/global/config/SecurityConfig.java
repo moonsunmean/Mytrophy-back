@@ -39,7 +39,7 @@ import java.util.Collections;
 public class SecurityConfig {
 
     private final CustomOAuth2UserService customOAuth2UserService;
-//    private final SteamAuthenticationProvider steamAuthenticationProvider;
+    private final SteamAuthenticationProvider steamAuthenticationProvider;
     private final CustomSuccessHandler customSuccessHandler;
     private final RefreshRepository refreshRepository;
     private final JWTUtil jwtUtil;
@@ -47,11 +47,7 @@ public class SecurityConfig {
     private final CustomUserDetailsService customUserDetailsService;
 
 
-//    public SecurityConfig(AuthenticationConfiguration authenticationConfiguration, JWTUtil jwtUtil,CustomUserDetailsService customUserDetailsService) {
-//        this.authenticationConfiguration = authenticationConfiguration;
-//        this.jwtUtil = jwtUtil;
-//        this.customUserDetailsService = customUserDetailsService;
-//    }
+
     @Bean
     public BCryptPasswordEncoder bCryptPasswordEncoder() {
         return new BCryptPasswordEncoder();
@@ -101,6 +97,7 @@ public class SecurityConfig {
                         .requestMatchers("/login","/login/**", "/","/my", "/signup","/steam/failed","/api/**", "/v3/api-docs/**", "/swagger-ui/**").permitAll()
                         .requestMatchers("/admin").hasRole("ADMIN")
                         .requestMatchers("/reissue").permitAll()
+                        .requestMatchers("/**").permitAll()
                         .anyRequest().authenticated());
 
 
@@ -126,14 +123,14 @@ public class SecurityConfig {
         http
                 .sessionManagement((session) -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS));
-//        AuthenticationManagerBuilder authenticationManagerBuilder = http.getSharedObject(AuthenticationManagerBuilder.class);
-//        authenticationManagerBuilder.authenticationProvider(steamAuthenticationProvider);
+        AuthenticationManagerBuilder authenticationManagerBuilder = http.getSharedObject(AuthenticationManagerBuilder.class);
+        authenticationManagerBuilder.authenticationProvider(steamAuthenticationProvider);
 
         return http.build();
     }
-//    @Autowired
-//    public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
-//        auth.authenticationProvider(steamAuthenticationProvider);
-//    }
+    @Autowired
+    public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
+        auth.authenticationProvider(steamAuthenticationProvider);
+    }
 
 }

@@ -6,6 +6,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import mytrophy.api.member.dto.CustomOAuth2User;
 import mytrophy.api.member.security.SteamUserPrincipal;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
@@ -37,14 +38,16 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
             role = authorities.iterator().next().getAuthority();
         } else if (authentication.getPrincipal() instanceof SteamUserPrincipal) {
             SteamUserPrincipal steamUserDetails = (SteamUserPrincipal) authentication.getPrincipal();
-            username = steamUserDetails.getName();
+            username = steamUserDetails.getUsername();
             role = "ROLE_STEAM_USER";
+            System.out.println(username);
         } else {
             super.onAuthenticationSuccess(request, response, authentication);
             return;
         }
 
         String token = jwtUtil.createJwt("refresh",username, role, 60 * 60 * 60L);
+        System.out.println(token);
         response.addCookie(createCookie("refresh", token));
 
         if ("ROLE_STEAM_USER".equals(role)) {
@@ -52,21 +55,8 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         } else {
             response.sendRedirect("/my");
         }
-//        //OAuth2User
-//        CustomOAuth2User customUserDetails = (CustomOAuth2User) authentication.getPrincipal();
-//
-//        String username = customUserDetails.getName();
-//
-//        Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
-//        Iterator<? extends GrantedAuthority> iterator = authorities.iterator();
-//        GrantedAuthority auth = iterator.next();
-//        String role = auth.getAuthority();
-//
-//        String token = jwtUtil.createJwt(username, role, 60*60*60L);
-//
-//        response.addCookie(createCookie("Authorization", token));
-//        response.sendRedirect("http://localhost:8080/my"); // 로그인 성공시 다이렉트 페이지 http://localhost:3000/미정
-//        //response.addHeader("Authorization", "Bearer " + token);
+        response.setStatus(HttpStatus.OK.value());
+
     }
 
     private Cookie createCookie(String key, String value) {

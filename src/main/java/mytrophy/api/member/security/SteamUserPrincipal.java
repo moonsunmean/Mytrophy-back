@@ -41,7 +41,7 @@ public class SteamUserPrincipal implements UserDetails {
 
     @Override
     public String getUsername() {
-        return this.name;
+        return this.steamId;
     }
 
     @Override
