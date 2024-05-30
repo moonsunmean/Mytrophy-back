@@ -1,6 +1,7 @@
 package mytrophy.api.game.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import mytrophy.api.game.dto.tsetDTO;
 import mytrophy.api.game.dto.ResponseDTO.GetAllGameDTO;
 import mytrophy.api.game.dto.ResponseDTO.GetTopGameDTO;
 import mytrophy.api.game.dto.ResponseDTO.GetGameDetailDTO;
@@ -28,6 +29,12 @@ public class GameController {
         this.gameService = gameService;
         this.gameDataService = gameDataService;
         this.gameDataScheduler = gameDataScheduler;
+    }
+
+    @GetMapping("/test")
+    public ResponseEntity<String> test(@RequestBody tsetDTO test) {
+        String asd = test.getTest1() + test.getTest2();
+        return ResponseEntity.ok(asd);
     }
 
 
@@ -79,7 +86,7 @@ public class GameController {
     public ResponseEntity<Any> saveDetailSteamGameData(
             @RequestParam(name = "size", defaultValue = "10") int size,
             @RequestParam(name = "isContinue", defaultValue = "false") Boolean isContinue
-    ) throws JsonProcessingException {
+    ) throws JsonProcessingException, InterruptedException {
         gameDataScheduler.startManualDown(isContinue,size);
         return ResponseEntity.ok(null);
     }
