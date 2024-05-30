@@ -15,11 +15,14 @@ import java.util.List;
 @Builder
 public class Game {
 
-    // 게임 목록의 id를 그대로 entity 저장
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column
+    private Integer appId;
+
+    @Column(unique = true)
     private String name;
 
     @Column(length = 2000)

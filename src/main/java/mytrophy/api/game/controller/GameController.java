@@ -1,12 +1,14 @@
 package mytrophy.api.game.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import mytrophy.api.game.dto.tsetDTO;
 import mytrophy.api.game.dto.ResponseDTO.GetAllGameDTO;
 import mytrophy.api.game.dto.ResponseDTO.GetTopGameDTO;
 import mytrophy.api.game.dto.ResponseDTO.GetGameDetailDTO;
 import mytrophy.api.game.dto.ResponseDTO.GetSearchGameDTO;
 import mytrophy.api.game.service.GameDataService;
 import mytrophy.api.game.service.GameService;
+import mytrophy.global.scheduler.GameDataScheduler;
 import org.hibernate.mapping.Any;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -20,11 +22,19 @@ public class GameController {
 
     private final GameService gameService;
     private final GameDataService gameDataService;
+    private final GameDataScheduler gameDataScheduler;
 
     @Autowired
-    public GameController(GameService gameService, GameDataService gameDataService) {
+    public GameController(GameService gameService, GameDataService gameDataService, GameDataScheduler gameDataScheduler) {
         this.gameService = gameService;
         this.gameDataService = gameDataService;
+        this.gameDataScheduler = gameDataScheduler;
+    }
+
+    @GetMapping("/test")
+    public ResponseEntity<String> test(@RequestBody tsetDTO test) {
+        String asd = test.getTest1() + test.getTest2();
+        return ResponseEntity.ok(asd);
     }
 
 
@@ -37,7 +47,7 @@ public class GameController {
 
 
     @GetMapping("/{id}")
-    public ResponseEntity<GetGameDetailDTO> getGameDetail(@PathVariable(name = "id") Long id) {
+    public ResponseEntity<GetGameDetailDTO> getGameDetail(@PathVariable(name = "id") Integer id) {
 
         return ResponseEntity.status(HttpStatus.OK).body(gameService.getGameDetailDTO(id));
     }
@@ -62,17 +72,22 @@ public class GameController {
 
 
 
-    // 스팀에서 서버로 다운 /////////////////////////////////////////////////////////////////////////////////////
+    ///////                       스팀에서 서버로 다운                            ////////
 
-    // 스팀의 전체 게임목록 다운
+    // 스팀의 전체 게임목록 DB에 다운
     @PostMapping("/read/game")
-    public ResponseEntity<Any> readSteamGameData(@RequestParam(name = "size", defaultValue = "10") int size) {
+    public ResponseEntity<Any> readSteamGameData() throws JsonProcessingException {
+        gameDataService.receiveSteamGameList();
+        return ResponseEntity.ok(null);
+    }
 
-        try {
-            gameDataService.receiveSteamGameList(size);
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
+    // 스팀의 전체 상세게임정보 DB에서 다운
+    @PostMapping("/read/game/detail")
+    public ResponseEntity<Any> saveDetailSteamGameData(
+            @RequestParam(name = "size", defaultValue = "10") int size,
+            @RequestParam(name = "isContinue", defaultValue = "false") Boolean isContinue
+    ) throws JsonProcessingException, InterruptedException {
+        gameDataScheduler.startManualDown(isContinue,size);
         return ResponseEntity.ok(null);
     }
 
