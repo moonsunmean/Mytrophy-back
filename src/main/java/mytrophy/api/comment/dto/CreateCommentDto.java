@@ -8,8 +8,10 @@ import lombok.NoArgsConstructor;
 public class CreateCommentDto {
 
     private String content;
+    private Long parentCommentId;
 
-    public CreateCommentDto(String content) {
+    public CreateCommentDto(String content, Long parentCommentId) {
         this.content = content;
+        this.parentCommentId = parentCommentId;
     }
 }
