@@ -19,6 +19,22 @@ public class ArticleRequestDto {
     private String name;
     private String content;
     private String imagePath;
-    private Long memberId;
+
+    @Builder
+    public ArticleRequestDto(Header header, String name, String content, String imagePath) {
+        this.header = header;
+        this.name = name;
+        this.content = content;
+        this.imagePath = imagePath;
+    }
+
+    public Article toEntity() {
+        return Article.builder()
+                .header(header)
+                .name(name)
+                .content(content)
+                .imagePath(imagePath)
+                .build();
+    }
 
 }

@@ -33,11 +33,11 @@ public class Member {
     private String loginType; // 로그인 형태 (소셜로그인, 일반로그인)
     private String imagePath; // 프로필 이미지
 
-    @OneToMany(mappedBy = "member", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "member", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JsonIgnoreProperties("member") // 순환 참조 방지
     private List<Article> articles = new ArrayList<>();
 
-    @ManyToMany(fetch = FetchType.EAGER)
+    @ManyToMany(fetch = FetchType.LAZY)
     private List<Category> categories;
 
     @CreationTimestamp

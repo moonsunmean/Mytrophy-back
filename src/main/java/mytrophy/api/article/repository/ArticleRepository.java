@@ -16,6 +16,5 @@ public interface ArticleRepository extends JpaRepository<Article, Long> {
 
     Article findByIdAndHeader(Long id, Header header);
 
-    List<Comment> findByMemberId(Long memberId);
 
 }
