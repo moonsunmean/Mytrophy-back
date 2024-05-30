@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
+@Transactional
 public class GameService {
     private final GameRepository gameRepository;
     private final AchievementRepository achievementRepository;
@@ -67,7 +68,7 @@ public class GameService {
         return new PageImpl<>(pageList, PageRequest.of(page, size), pageList.size());
     }
 
-    @Transactional
+
     public GetGameDetailDTO getGameDetailDTO(Integer id) {
         Game game = gameRepository.findByAppId(id);
 

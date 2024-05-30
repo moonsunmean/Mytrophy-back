@@ -22,7 +22,7 @@ public class Game {
     @Column
     private Integer appId;
 
-    @Column
+    @Column(unique = true)
     private String name;
 
     @Column(length = 2000)

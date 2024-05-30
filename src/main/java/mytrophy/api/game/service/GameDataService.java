@@ -20,9 +20,9 @@ import org.springframework.web.client.RestTemplate;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
+@Transactional
 public class GameDataService {
 
     private final GameRepository gameRepository;
@@ -52,7 +52,6 @@ public class GameDataService {
     }
 
     // 스팀 게임 목록을 받아와 DB에 저장하는 메서드
-    @Transactional
     public void receiveSteamGameList() throws JsonProcessingException {
         RestTemplate restTemplate = new RestTemplate();
         String url = "http://api.steampowered.com/ISteamApps/GetAppList/v2/";
@@ -66,7 +65,7 @@ public class GameDataService {
 
         for (JsonNode appNode : appsNode){
             int id = appNode.get("appid").asInt();
-            gameDataList.add(new GameData(null,id));
+            if(!gameDataRepository.existsByAppId(id)) gameDataList.add(new GameData(null, id));
         }
 
         // 데이터를 한꺼번에 저장
@@ -76,7 +75,8 @@ public class GameDataService {
     @Transactional
     public Boolean receiveSteamGameListByDb(int size, boolean isContinue) throws JsonProcessingException {
         // 마지막에 저장한 appId 불러오기
-        GameRead gameRead = gameReadRepository.findById(1L).orElse(null);
+        List<GameRead> gameReadList = gameReadRepository.findAll();
+        GameRead gameRead = gameReadList.get(0);
 
         // 스팀에서 받아온 모든 게임목록 불러온 후 오름차순 정렬
         List<GameData> gameDataList = gameDataRepository.findAll()
@@ -148,7 +148,6 @@ public class GameDataService {
     }
 
     // 특정 게임의 상세 정보를 받아와 DB에 저장하는 메서드
-    @Transactional
     public void gameDetail(int appId) throws JsonProcessingException {
         String url = "https://store.steampowered.com/api/appdetails?appids=" + appId + "&l=korean";
         JsonNode appNode = getAppNodeFromUrl(url, String.valueOf(appId));
@@ -248,10 +247,12 @@ public class GameDataService {
         // 컴퓨터 권장 사양
         JsonNode requirementHader = appNode.hasNonNull("pc_requirements") ? appNode.get("pc_requirements") : null;
         String requirement = requirementHader.hasNonNull("minimum") ? requirementHader.get("minimum").asText() : null;
+        Long id = null;
+        Game target = gameRepository.findByAppId(appId);
 
+        if (target != null) id = target.getId();
 
-
-        return new Game(null,appId,name,description,gameDeveloper,gamePublisher,requirement,price,date,recommandation,headerImagePath,koPosible,enPosible,jpPosible,null,null,null);
+        return new Game(id,appId,name,description,gameDeveloper,gamePublisher,requirement,price,date,recommandation,headerImagePath,koPosible,enPosible,jpPosible,null,null,null);
     }
 
     // 게임 업적을 받아와서 업적 리스트를 반환하는 메서드
