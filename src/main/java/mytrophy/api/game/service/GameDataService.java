@@ -22,6 +22,7 @@ import java.io.InputStream;
 import java.util.*;
 
 @Service
+@Transactional
 public class GameDataService {
 
     private final GameRepository gameRepository;
@@ -29,6 +30,8 @@ public class GameDataService {
     private final CategoryRepository categoryRepository;
     private final ScreenshotRepository screenshotRepository;
     private final GameCategoryRepository gameCategoryRepository;
+    private final GameDataRepository gameDataRepository;
+    private final GameReadRepository gameReadRepository;
 
     // application.properties에서 설정된 값 주입
     @Value("${steam.api-key}")
@@ -37,16 +40,19 @@ public class GameDataService {
     @Autowired
     public GameDataService(GameRepository gameRepository, AchievementRepository achievementRepository,
                            CategoryRepository categoryRepository, ScreenshotRepository screenshotRepository,
-                           GameCategoryRepository gameCategoryRepository) {
+                           GameCategoryRepository gameCategoryRepository, GameDataRepository gameDataRepository,
+                           GameReadRepository gameReadRepository) {
         this.gameRepository = gameRepository;
         this.achievementRepository = achievementRepository;
         this.categoryRepository = categoryRepository;
         this.screenshotRepository = screenshotRepository;
         this.gameCategoryRepository = gameCategoryRepository;
+        this.gameDataRepository = gameDataRepository;
+        this.gameReadRepository = gameReadRepository;
     }
 
     // 스팀 게임 목록을 받아와 DB에 저장하는 메서드
-    public void receiveSteamGameList(int size) throws JsonProcessingException {
+    public void receiveSteamGameList() throws JsonProcessingException {
         RestTemplate restTemplate = new RestTemplate();
         String url = "http://api.steampowered.com/ISteamApps/GetAppList/v2/";
         ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, null, String.class);
@@ -55,15 +61,63 @@ public class GameDataService {
 
         int count = 1;
 
-        for (JsonNode appNode : appsNode) {
-            int appId = appNode.get("appid").asInt();
-            System.out.println(appId);
-            System.out.println(count);
-            gameDetail(appId);
-            if (count >= size) break;
-            count++;
+        List<GameData> gameDataList = new ArrayList<>();
+
+        for (JsonNode appNode : appsNode){
+            int id = appNode.get("appid").asInt();
+            if(!gameDataRepository.existsByAppId(id)) gameDataList.add(new GameData(null, id));
         }
+
+        // 데이터를 한꺼번에 저장
+        gameDataRepository.saveAll(gameDataList);
     }
+
+    @Transactional
+    public Boolean receiveSteamGameListByDb(int size, boolean isContinue) throws JsonProcessingException {
+        // 마지막에 저장한 appId 불러오기
+        List<GameRead> gameReadList = gameReadRepository.findAll();
+        GameRead gameRead = gameReadList.get(0);
+
+        // 스팀에서 받아온 모든 게임목록 불러온 후 오름차순 정렬
+        List<GameData> gameDataList = gameDataRepository.findAll()
+                .stream()
+                .sorted(Comparator.comparing(GameData::getId))
+                .toList();
+
+        // 마지막에 저장한 appId가 null 이거나 사용자가 직접 선택한 경우 처음부터 순회하며 다운
+        int startIndex = 0;
+        if (gameRead != null && isContinue && gameRead.getLastAppId() != 0) {
+            GameData gameData = gameDataRepository.findByAppId(gameRead.getLastAppId());
+            if (gameData != null) {
+                startIndex = gameDataList.indexOf(gameData) + 1;
+            }
+        }
+        System.out.println("마지막 다운 위치 : " + (startIndex - 1));
+
+
+        // DB에 있는 스팀게임 목록을 스팀에 요청하여 다운받기
+        int count = 1;
+        int currentCount = 0;
+        for (int i = startIndex; i < gameDataList.size(); i++) {
+            int appId = gameDataList.get(i).getAppId();
+            System.out.println("다운받는 APP-ID : " + appId);
+            System.out.println("다운받는 APP의 위치 : " + i);
+            gameDetail(appId);
+            gameReadRepository.save(new GameRead(1L,appId));
+            if(count >= size) break;
+            count++;
+            currentCount = i;
+        }
+
+        if (currentCount == gameDataList.size()) {
+            return true;
+        }
+
+        // false 로 바꾸기 테스트 하는동안 true
+        return false;
+    }
+
+
 
     // 스팀 게임 top100 목록을 저장하는 메서드
     public List<Long> receiveTopSteamGameList(int size, String type) throws JsonProcessingException {
@@ -94,10 +148,12 @@ public class GameDataService {
     }
 
     // 특정 게임의 상세 정보를 받아와 DB에 저장하는 메서드
-    @Transactional
     public void gameDetail(int appId) throws JsonProcessingException {
         String url = "https://store.steampowered.com/api/appdetails?appids=" + appId + "&l=korean";
         JsonNode appNode = getAppNodeFromUrl(url, String.valueOf(appId));
+        if (appNode == null) {
+            return;
+        }
         // 게임이 아닐경우 다음 앱 검색
         Boolean isSuccess = appNode.get("success").asBoolean();
         if(!isSuccess){
@@ -139,7 +195,6 @@ public class GameDataService {
     }
     // JSON 데이터에서 게임 정보를 추출하여 게임 엔티티를 생성
     private Game createGameFromJson(JsonNode appNode, int appId) {
-        Long id = Long.valueOf(appId);
         String name = appNode.hasNonNull("name") ? appNode.get("name").asText() : null;
         String description = appNode.hasNonNull("short_description") ? appNode.get("short_description").asText() : null;
 
@@ -162,11 +217,14 @@ public class GameDataService {
                 gamePublisher += ",";
             }
         }
+
+        // 지원하는 언어
         String languages = appNode.hasNonNull("supported_languages") ? appNode.get("supported_languages").asText() : null;
         List<Boolean> checkList = languagePosible(languages);
         Boolean enPosible = checkList.get(0);
         Boolean koPosible = checkList.get(1);
         Boolean jpPosible = checkList.get(2);
+
         // 출시 날짜
         String date = appNode.hasNonNull("release_date") ? appNode.get("release_date").get("date").asText() : null;
 
@@ -189,10 +247,12 @@ public class GameDataService {
         // 컴퓨터 권장 사양
         JsonNode requirementHader = appNode.hasNonNull("pc_requirements") ? appNode.get("pc_requirements") : null;
         String requirement = requirementHader.hasNonNull("minimum") ? requirementHader.get("minimum").asText() : null;
+        Long id = null;
+        Game target = gameRepository.findByAppId(appId);
 
+        if (target != null) id = target.getId();
 
-
-        return new Game(id,name,description,gameDeveloper,gamePublisher,requirement,price,date,recommandation,headerImagePath,koPosible,enPosible,jpPosible,null,null,null);
+        return new Game(id,appId,name,description,gameDeveloper,gamePublisher,requirement,price,date,recommandation,headerImagePath,koPosible,enPosible,jpPosible,null,null,null);
     }
 
     // 게임 업적을 받아와서 업적 리스트를 반환하는 메서드
@@ -314,5 +374,9 @@ public class GameDataService {
                 gameCategoryRepository.save(gameCategory);
             }
         }
+    }
+
+    public Integer getDownloadedDataCount() {
+        return (int) gameDataRepository.count();
     }
 }

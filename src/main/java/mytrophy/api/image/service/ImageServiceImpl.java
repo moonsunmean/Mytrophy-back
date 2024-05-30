@@ -67,7 +67,7 @@ public class ImageServiceImpl implements ImageService{
 
 
     // 파일 삭제
-    public void fileRemove(List<String> files) {
+    public void removeFile(List<String> files) {
         for (String imagePath : files) {
             imageRepository.deleteByImagePath(URLDecoder.decode(imagePath, StandardCharsets.UTF_8));
         }
