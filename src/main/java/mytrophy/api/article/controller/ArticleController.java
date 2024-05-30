@@ -142,7 +142,7 @@ public class ArticleController {
 
     // 파일만 업로드
     @PostMapping("/articles/files")
-    public ResponseEntity uploadOnlyFiles(@RequestPart (value = "file", required = false) List<MultipartFile> files) throws IOException {
+    public ResponseEntity uploadOnlyFiles(@RequestPart ("file") List<MultipartFile> files) throws IOException {
         List<String> uploadFiles = imageService.uploadFiles(files);
         return ResponseEntity.status(HttpStatus.CREATED).body(uploadFiles);
     }

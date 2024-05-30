@@ -6,6 +6,7 @@ import com.google.cloud.storage.Bucket;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import mytrophy.api.article.repository.ArticleRepository;
+import mytrophy.api.image.entity.Image;
 import mytrophy.api.image.repository.ImageRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -52,6 +53,10 @@ public class ImageServiceImpl implements ImageService{
             // 파일의 경로(urls) 추가
             String url = "https://storage.googleapis.com/" + bucket.getName() + "/" + blobPath;
             urls.add(url);
+            // Image 엔티티 생성 및 저장
+            Image image = new Image();
+            image.setImagePath(url);
+            imageRepository.save(image);
         }
         return urls;
     }
