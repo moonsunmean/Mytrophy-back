@@ -39,13 +39,13 @@ public class MemberGameController {
         return ResponseEntity.ok("게임 목록이 저장 되었습니다");
     }
 
-    // 회원 보유 게임 상세 조회
+    // 회원 보유 게임 업적 조회
     @GetMapping("/{id}/mygames/{appId}")
     public ResponseEntity<JsonNode> getMemberSteamGameAchievementFromApi(@PathVariable("id") Long id, @PathVariable("appId") Long appId) {
         try {
             JsonNode steamGameDetail = memberSteamService.findMemberSteamGameAchievement(id, appId);
             return ResponseEntity.ok(steamGameDetail);
-        } catch (JsonProcessingException e) {
+        } catch (JsonProcessingException e) { // 도전과제를 제공하지 않는 게임은 500에러가 뜸
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         } catch (IllegalArgumentException e) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
