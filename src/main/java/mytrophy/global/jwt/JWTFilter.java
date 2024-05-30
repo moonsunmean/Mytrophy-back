@@ -21,6 +21,12 @@ public class JWTFilter extends OncePerRequestFilter {
     }
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+        String requestUri = request.getRequestURI();
+        if (requestUri.matches("^\\/login(?:\\/.*)?$") || requestUri.matches("^\\/oauth2(?:\\/.*)?$")) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
         //request에서 Authorization 헤더를 찾음
         String authorization = request.getHeader("Authorization");
 
@@ -49,14 +55,14 @@ public class JWTFilter extends OncePerRequestFilter {
         //토큰에서 username과 role 획득
         String username = jwtUtil.getUsername(token);
         String role = jwtUtil.getRole(token);
-        Long steamId = Long.valueOf(jwtUtil.getSteamId(token));
+//        Long steamId = Long.valueOf(jwtUtil.getSteamId(token));
 
         // member를 생성하여 값 set
         Member member = new Member();
         member.setUsername(username);
         member.setPassword("temppassword");
         member.setRole(role);
-        member.setSteamId(steamId);
+//        member.setSteamId(steamId);
 
         // UserDetails에 회원 정보 객체 담기
         CustomUserDetails customUserDetails = new CustomUserDetails(member);
