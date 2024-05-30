@@ -6,4 +6,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface GameDataRepository extends JpaRepository<GameData,Long> {
     GameData findByAppId(Integer appId);
+
+    boolean existsByAppId(Integer appId);
 }
