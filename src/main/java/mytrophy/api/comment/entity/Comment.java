@@ -49,14 +49,13 @@ public class Comment extends BaseEntity {
 
     //setter는 불변성 보장 x -> 사용 자제해야함. 대신에 Builder 패턴 사용
     @Builder
-    public Comment(String content, Member member, Article article, int cntUp) {
+    public Comment(String content, Member member, Article article) {
         Assert.notNull(content, "내용 필수 작성");    //null 이면 IllegalArgumentException
 
         // jpa 쓰니까 id는 세팅할 필요없음
         this.content = content;
         this.member = member;
         this.article = article;
-        this.cntUp = cntUp;
     }
 
     //댓글 내용 업데이트

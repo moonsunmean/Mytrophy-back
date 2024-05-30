@@ -8,10 +8,10 @@ import java.util.List;
 public interface CommentService {
 
     CommentDto createComment(Long memberId, Long articleId, CreateCommentDto createCommentDto);
-    CommentDto updateComment(Long commentId, String content);
+    CommentDto updateComment(Long commentId, Long memberId, String content);
 
     //수정할 부분
-    void deleteComment(Long commentId);
+    void deleteComment(Long commentId, Long memberId);
 
     List<CommentDto> findByArticleId(Long articleId);
     List<CommentDto> findByMemberId(Long memberId);
