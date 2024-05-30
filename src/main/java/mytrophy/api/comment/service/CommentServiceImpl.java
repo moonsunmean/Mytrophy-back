@@ -39,7 +39,14 @@ public class CommentServiceImpl implements CommentService{
         Article article = articleRepository.findById(articleId)
                 .orElseThrow(() -> new CustomException(ErrorCodeEnum.NOT_EXISTS_ARTICLE_ID));
 
-        Comment comment = dtoToEntity(createCommentDto, member,article);
+        Comment parentComment = null;
+        //자식 댓글
+        if (createCommentDto.getParentCommentId() != null) {
+            parentComment = commentRepository.findById(createCommentDto.getParentCommentId())
+                    .orElseThrow(() -> new CustomException(ErrorCodeEnum.NOT_EXISTS_PARENT_COMMENT_ID));
+        }
+
+        Comment comment = dtoToEntity(createCommentDto, member, article);
         Comment createdComment = commentRepository.save(comment);
         return entityToDto(createdComment);
     }
@@ -118,7 +125,7 @@ public class CommentServiceImpl implements CommentService{
                 .build();
         commentLikeRepository.save(commentLike);
 
-        comment.incrementCntUp();
+        comment.incrementLikes();
         commentRepository.save(comment);
     }
 
@@ -134,7 +141,7 @@ public class CommentServiceImpl implements CommentService{
                 .orElseThrow(() -> new CustomException(ErrorCodeEnum.NOT_LIKED_COMMENT_ID));
 
         commentLikeRepository.delete(commentLike);
-        comment.decrementCntUp();
+        comment.decrementLikes();
         commentRepository.save(comment);
     }
 
@@ -153,16 +160,24 @@ public class CommentServiceImpl implements CommentService{
             comment.getContent(),
             comment.getMember().getId(),
             comment.getArticle().getId(),
-            comment.getCntUp()
+            comment.getLikes(),
+            comment.getParentComment() != null ? comment.getParentComment().getId() : null
         );
     }
 
     //dto -> entity
     private Comment dtoToEntity(CreateCommentDto createCommentDto, Member member, Article article) {
-        return Comment.builder()
+        Comment.CommentBuilder commentBuilder = Comment.builder()
                 .content(createCommentDto.getContent())
                 .member(member)
-                .article(article)
-                .build();
+                .article(article);
+
+        if (createCommentDto.getParentCommentId() != null) {
+            Comment parentComment = commentRepository.findById(createCommentDto.getParentCommentId())
+                    .orElseThrow(() -> new CustomException(ErrorCodeEnum.NOT_EXISTS_PARENT_COMMENT_ID));
+            commentBuilder.parentComment(parentComment);
+        }
+
+        return commentBuilder.build();
     }
 }
