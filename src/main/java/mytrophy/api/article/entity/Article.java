@@ -36,12 +36,12 @@ public class Article extends BaseEntity {
 
     private String imagePath; // 이미지 경로
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id")
     @JsonIgnoreProperties("articles") // 순환 참조 방지
     private Member member; // 게시글 작성자
 
-    @OneToMany(mappedBy = "article", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "article", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<Comment> comments;
 
     @Builder // 빌더 패턴 적용

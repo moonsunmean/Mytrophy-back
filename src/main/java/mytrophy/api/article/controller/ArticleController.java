@@ -3,7 +3,7 @@ package mytrophy.api.article.controller;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import mytrophy.api.article.dto.ArticleRequestDto;
-import mytrophy.api.article.entity.Article;
+import mytrophy.api.article.dto.ArticleResponseDto;
 import mytrophy.api.article.enumentity.Header;
 import mytrophy.api.article.service.ArticleService;
 import mytrophy.api.image.service.ImageService;
@@ -33,7 +33,7 @@ public class ArticleController {
 
     // 게시글 생성
     @PostMapping("/articles")
-    public ResponseEntity<Article> createArticle(@AuthenticationPrincipal CustomUserDetails userInfo,
+    public ResponseEntity<ArticleResponseDto> createArticle(@AuthenticationPrincipal CustomUserDetails userInfo,
                                                  @RequestBody ArticleRequestDto articleRequestDto,
                                                  @RequestParam(value = "imagePath", required = false) List<String> imagePath) throws IOException {
         //토큰에서 username 빼내기
@@ -47,28 +47,29 @@ public class ArticleController {
         }
 
         // Article 생성
-        Article articleRequest = articleService.createArticle(member.getId(), articleRequestDto, imagePath);
+        ArticleResponseDto articleResponseDto = articleService.createArticle(member.getId(), articleRequestDto, imagePath);
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(articleRequest);
+        return ResponseEntity.status(HttpStatus.CREATED).body(articleResponseDto);
     }
 
     // 게시글 리스트 조회
     @GetMapping("/articles")
-    public ResponseEntity<List<Article>> getAllArticles() {
-        List<Article> articles = articleService.findAll();
+    public ResponseEntity<List<ArticleResponseDto>> getAllArticles() {
+        List<ArticleResponseDto> articles = articleService.findAll();
         return ResponseEntity.ok().body(articles);
     }
 
     // 해당 게시글 조회
     @GetMapping("/articles/{id}")
-    public ResponseEntity getArticleById(@PathVariable("id") Long id) { // PathVariable:URL 경로에 있는 값을 파라미터로 받을 때 사용
-        return ResponseEntity.ok().body(articleQueryService.findArticleWithCommentsOrderedByLatest(id));
+    public ResponseEntity<List<ArticleResponseDto>> getArticleById(@PathVariable("id") Long id) {
+        List<ArticleResponseDto> articleResponseDto = articleQueryService.findArticleWithCommentsOrderedByLatest(id);
+        return ResponseEntity.ok().body(articleResponseDto);
     }
 
     // 말머리 별 게시글 리스트 조회
     @GetMapping("/articles/headers/{header}")
-    public ResponseEntity<List<Article>> getArticlesByHeader(@PathVariable Header header) {
-        List<Article> articles;
+    public ResponseEntity<List<ArticleResponseDto>> getArticlesByHeader(@PathVariable Header header) {
+        List<ArticleResponseDto> articles;
         // 헤더가 유효한지 검사
         switch (header) {
             case FREE_BOARD:
@@ -87,8 +88,8 @@ public class ArticleController {
 
     // 말머리 별 해당 게시글 조회
     @GetMapping("/articles/{id}/headers/{header}")
-    public ResponseEntity getArticleByHeaderAndId(@PathVariable("id") Long id, @PathVariable("header") Header header) {
-        Article article = articleService.findByIdAndHeader(id, header);
+    public ResponseEntity<ArticleResponseDto> getArticleByHeaderAndId(@PathVariable("id") Long id, @PathVariable("header") Header header) {
+        ArticleResponseDto article = articleService.findByIdAndHeader(id, header);
 
         if (article == null) {
             return ResponseEntity.notFound().build();
@@ -96,8 +97,6 @@ public class ArticleController {
 
         return ResponseEntity.ok().body(article);
     }
-
-    // 회원 별 게시글 리스트 조회
 
 
     // 게시글 수정
@@ -126,7 +125,7 @@ public class ArticleController {
 
         // 파일을 변경하지 않았을 경우
         if (articleRequestDto.getImagePath() == null) {
-            Article article = articleService.findById(id);
+            ArticleResponseDto article = articleService.findById(id);
             articleRequestDto.setImagePath(article.getImagePath());
         }
 
@@ -136,19 +135,8 @@ public class ArticleController {
 
     // 게시글 삭제
     @DeleteMapping("/articles/{id}")
-    public ResponseEntity deleteArticle(@AuthenticationPrincipal CustomUserDetails userInfo,
-                                        @PathVariable("id") Long id) {
-        //토큰에서 username 빼내기
-        String username = userInfo.getUsername();
-        Long memberId = memberService.findMemberByUsername(username).getId();
-
-        // 유저 권한 확인
-        if (!articleService.isAuthorized(id, memberId)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-        }
-
-        articleService.deleteArticle(memberId, id);
-        log.info("게시글 삭제 완료");
+    public ResponseEntity deleteArticle(@PathVariable("id") Long id) {
+        articleService.deleteArticle(id);
         return ResponseEntity.ok().build();
     }
 

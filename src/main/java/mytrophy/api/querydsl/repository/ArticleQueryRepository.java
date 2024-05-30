@@ -23,18 +23,17 @@ public class ArticleQueryRepository {
     public List<Article> findAll() {
         return jpaQueryFactory
             .selectFrom(qArticle)
+            .leftJoin(qArticle.member).fetchJoin()  // Member 엔티티를 Fetch Join하여 함께 로딩
             .fetch();
     }
 
-    // 해당 게시글 조회 시 댓글 작성일자를 기준으로 내림차순 정렬
     public List<Article> findArticleWithCommentsOrderedByLatest(Long articleId) {
         return jpaQueryFactory
             .selectFrom(qArticle)
-            .leftJoin(qArticle.comments, qComment)
+            .leftJoin(qArticle.comments, qComment).fetchJoin()
+            .leftJoin(qArticle.member).fetchJoin() // Member 엔티티를 Fetch Join하여 함께 로딩
             .where(qArticle.id.eq(articleId))
-            .orderBy(qComment.createdAt.desc())
+            .orderBy(qComment.createdAt.desc()) // 댓글 작성일자를 기준으로 내림차순 정렬
             .fetch();
     }
-
-
 }
