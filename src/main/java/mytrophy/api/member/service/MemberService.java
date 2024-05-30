@@ -31,7 +31,7 @@ public class MemberService {
 
     public void signupMember(MemberDto memberDto) {
 
-        Boolean isExist = memberRepository.existsByLoginId(memberDto.getLoginId());
+        Boolean isExist = memberRepository.existsByUsername(memberDto.getUsername());
 
         if (isExist) {
             return;
@@ -39,7 +39,7 @@ public class MemberService {
 
         // 만약 회원가입 정보가 없으면 (처음 회원가입하면)
         Member signupMember = new Member();
-        signupMember.setLoginId(memberDto.getLoginId());
+        signupMember.setUsername(memberDto.getUsername());
         signupMember.setPassword(bCryptPasswordEncoder.encode(memberDto.getPassword()));
         signupMember.setRole("ROLE_USER");
         signupMember.setName(memberDto.getName());

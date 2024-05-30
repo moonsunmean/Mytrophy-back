@@ -32,7 +32,7 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
 
         if (authentication.getPrincipal() instanceof CustomOAuth2User) {
             CustomOAuth2User customUserDetails = (CustomOAuth2User) authentication.getPrincipal();
-            username = customUserDetails.getName();
+            username = customUserDetails.getUsername();
             Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
             role = authorities.iterator().next().getAuthority();
         } else if (authentication.getPrincipal() instanceof SteamUserPrincipal) {
@@ -44,8 +44,8 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
             return;
         }
 
-        String token = jwtUtil.createJwt(username, role, 60 * 60 * 60L);
-        response.addCookie(createCookie("Authorization", token));
+        String token = jwtUtil.createJwt("refresh",username, role, 60 * 60 * 60L);
+        response.addCookie(createCookie("refresh", token));
 
         if ("ROLE_STEAM_USER".equals(role)) {
             response.sendRedirect("/steam/profile");

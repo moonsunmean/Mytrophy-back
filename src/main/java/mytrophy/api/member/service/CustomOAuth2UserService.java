@@ -46,13 +46,13 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         String type= oAuth2Response.getProvider();
         String snsId = oAuth2Response.getProviderId();
 
-        Member existData = memberRepository.findByLoginId(snsId);
+        Member existData = memberRepository.findByUsername(snsId);
 
         // 새로운 회원인 경우
         if(existData==null){
             Member member = new Member();
             member.setLoginType(type);
-            member.setLoginId(snsId);
+            member.setUsername(snsId);
             member.setEmail(oAuth2Response.getEmail());
             member.setName(oAuth2Response.getName());
             member.setProfileImage(oAuth2Response.getProfileImg());
@@ -60,7 +60,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
             memberRepository.save(member);
 
             MemberDto memberDto = new MemberDto();
-            memberDto.setLoginId(snsId);
+            memberDto.setUsername(snsId);
             memberDto.setLoginType(type);
             memberDto.setName(oAuth2Response.getName());
             memberDto.setRole("ROLE_USER");
@@ -75,7 +75,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
             memberRepository.save(existData);
 
             MemberDto memberDto = new MemberDto();
-            memberDto.setLoginId(existData.getLoginId());
+            memberDto.setUsername(existData.getUsername());
             memberDto.setLoginType(existData.getLoginType());
             memberDto.setName(oAuth2Response.getName());
             memberDto.setRole(existData.getRole());

@@ -20,7 +20,12 @@ public class Member {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
+    @Column(nullable = false, unique = true)
+    private String username;  //loginId
+
+    @Column(nullable = true)
+    private String password;
+    @Column(nullable = true)
     private String name;
 
     @Column(nullable = true)
@@ -39,11 +44,7 @@ public class Member {
     @Column(nullable = true)
     private String profileImage;
 
-    @Column(nullable = false, unique = true)
-    private String loginId;
 
-    @Column(nullable = true)
-    private String password;
 
     @Column(nullable = false)
     private String role;

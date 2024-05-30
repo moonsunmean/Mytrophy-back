@@ -42,9 +42,9 @@ public class CustomOAuth2User implements OAuth2User {
         return memberDto.getName();
     }
 
-    public String getLoginId() {
+    public String getUsername() {
 
-        return memberDto.getLoginId();
+        return memberDto.getUsername();
     }
     public String getLoginType() {
 

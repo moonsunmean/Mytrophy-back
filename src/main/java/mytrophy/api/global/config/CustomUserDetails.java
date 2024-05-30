@@ -33,12 +33,12 @@ public class CustomUserDetails implements UserDetails {
     }
 
 
-    public String getLoginId() {
-        return member.getLoginId();
-    }
+//    public String getLoginId() {
+//        return member.getLoginId();
+//    }
     @Override
     public String getUsername() {
-        return member.getLoginId();
+        return member.getUsername();
     }
     public String getSteamId() {
         return member.getSteamId();

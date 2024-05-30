@@ -12,10 +12,11 @@ import java.util.Date;
 @Component
 public class JWTUtil {
 
-    // 프로퍼티에서 시크릿키 가져오기
     private SecretKey secretKey;
-    public JWTUtil(@Value("${spring.jwt.secret}") String secret) {  //HS256 -> 암호화 방식
-        secretKey = new SecretKeySpec(secret.getBytes(StandardCharsets.UTF_8), Jwts.SIG.HS256.key().build().getAlgorithm());
+
+    public JWTUtil(@Value("${spring.jwt.secret}")String secret) {
+
+        this.secretKey = new SecretKeySpec(secret.getBytes(StandardCharsets.UTF_8), Jwts.SIG.HS256.key().build().getAlgorithm());
     }
 
     public String getUsername(String token) {
@@ -28,15 +29,21 @@ public class JWTUtil {
         return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload().get("role", String.class);
     }
 
+    public String getCategory(String token) {
+
+        return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload().get("category", String.class);
+    }
+
     public Boolean isExpired(String token) {
 
         return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload().getExpiration().before(new Date());
     }
 
 
-    public String createJwt(String username, String role, Long expiredMs) {
+    public String createJwt(String category, String username, String role, Long expiredMs) {
 
         return Jwts.builder()
+                .claim("category", category)
                 .claim("username", username)
                 .claim("role", role)
                 .issuedAt(new Date(System.currentTimeMillis()))

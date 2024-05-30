@@ -54,7 +54,7 @@ public class SteamAuthenticationProvider implements AuthenticationProvider {
             newMember.setName(username);
             newMember.setLoginType("steam");
             newMember.setSteamId(steamId);
-            newMember.setLoginId(steamId);
+            newMember.setUsername(steamId);
             newMember.setProfileImage(profile);
             newMember.setRole("ROLE_USER");
             return memberRepository.save(newMember);

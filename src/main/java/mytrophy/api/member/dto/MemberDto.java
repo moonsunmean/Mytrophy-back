@@ -13,7 +13,7 @@ public class MemberDto {
     private String role;
     private String name;
     private String password; // 비밀번호
-    private String loginId;
+    private String username;//loginId
     private String nickname; // 별명
     private String email; // 이메일
     private String steamId; // 스팀 ID 값
