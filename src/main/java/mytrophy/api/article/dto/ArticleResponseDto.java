@@ -16,6 +16,7 @@ public class ArticleResponseDto {
     private String name;
     private String content;
     private String imagePath;
+    private Long appId;
     private Long memberId;
     private String username;
     private List<Comment> comments;
@@ -27,6 +28,7 @@ public class ArticleResponseDto {
         this.name = article.getName();
         this.content = article.getContent();
         this.imagePath = article.getImagePath();
+        this.appId = article.getAppId();
         Member member = article.getMember();
         if (member != null) {
             this.memberId = member.getId();
@@ -42,6 +44,7 @@ public class ArticleResponseDto {
         this.name = article.getName();
         this.content = article.getContent();
         this.imagePath = article.getImagePath();
+        this.appId = article.getAppId();
         Member member = article.getMember();
         if (member != null) {
             this.memberId = member.getId();

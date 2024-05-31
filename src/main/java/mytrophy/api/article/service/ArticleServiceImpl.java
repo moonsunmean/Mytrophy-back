@@ -37,13 +37,18 @@ public class ArticleServiceImpl implements ArticleService {
 
         Article article;
 
+        if (articleRequestDto.getAppId() == null) {
+            return null;
+        }
+
         // 이미지 경로가 null이 아닌 경우
         if (imagePath != null && !imagePath.isEmpty()) {
             article = Article.builder()
                 .header(articleRequestDto.getHeader())
                 .name(articleRequestDto.getName())
                 .content(articleRequestDto.getContent())
-                .imagePath(articleRequestDto.getImagePath()) // 이미지 경로 설정
+                .imagePath(articleRequestDto.getImagePath())
+                .appId(articleRequestDto.getAppId())
                 .member(member)
                 .build();
         } else {
@@ -52,6 +57,7 @@ public class ArticleServiceImpl implements ArticleService {
                 .header(articleRequestDto.getHeader())
                 .name(articleRequestDto.getName())
                 .content(articleRequestDto.getContent())
+                .appId(articleRequestDto.getAppId())
                 .member(member)
                 .build();
         }
@@ -121,7 +127,7 @@ public class ArticleServiceImpl implements ArticleService {
             .orElseThrow(() -> new ResourceNotFoundException("해당 게시글이 존재하지 않습니다."));
 
         // 게시글 정보 업데이트
-        article.updateArticle(articleRequestDto.getHeader(), articleRequestDto.getName(), articleRequestDto.getContent(), articleRequestDto.getImagePath());
+        article.updateArticle(articleRequestDto.getHeader(), articleRequestDto.getName(), articleRequestDto.getContent(), articleRequestDto.getImagePath(), articleRequestDto.getAppId());
 
         // 엔티티를 저장하고, 저장된 엔티티를 기반으로 DTO 객체 생성하여 반환
         return ArticleResponseDto.fromEntity(articleRepository.save(article));
