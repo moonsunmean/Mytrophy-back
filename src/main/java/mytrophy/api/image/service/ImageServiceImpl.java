@@ -1,15 +1,19 @@
 package mytrophy.api.image.service;
 
 
+import com.google.auth.oauth2.GoogleCredentials;
 import com.google.cloud.storage.BlobInfo;
 import com.google.cloud.storage.Bucket;
+import com.google.cloud.storage.Storage;
+import com.google.cloud.storage.StorageOptions;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import mytrophy.api.article.repository.ArticleRepository;
+import mytrophy.api.image.entity.Image;
 import mytrophy.api.image.repository.ImageRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
@@ -24,6 +28,7 @@ public class ImageServiceImpl implements ImageService{
 
     private final ImageRepository imageRepository;
     private final Bucket bucket;
+
 
     // 파일 업로드
     public List<String> uploadFiles(List<MultipartFile> files) throws IOException{
@@ -52,9 +57,14 @@ public class ImageServiceImpl implements ImageService{
             // 파일의 경로(urls) 추가
             String url = "https://storage.googleapis.com/" + bucket.getName() + "/" + blobPath;
             urls.add(url);
+            // Image 엔티티 생성 및 저장
+            Image image = new Image();
+            image.setImagePath(url);
+            imageRepository.save(image);
         }
         return urls;
     }
+
 
     // 파일 삭제
     public void removeFile(List<String> files) {
