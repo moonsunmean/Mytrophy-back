@@ -247,6 +247,7 @@ public class GameDataService {
         // 컴퓨터 권장 사양
         JsonNode requirementHader = appNode.hasNonNull("pc_requirements") ? appNode.get("pc_requirements") : null;
         String requirement = requirementHader.hasNonNull("minimum") ? requirementHader.get("minimum").asText() : null;
+
         Long id = null;
         Game target = gameRepository.findByAppId(appId);
 
@@ -374,9 +375,5 @@ public class GameDataService {
                 gameCategoryRepository.save(gameCategory);
             }
         }
-    }
-
-    public Integer getDownloadedDataCount() {
-        return (int) gameDataRepository.count();
     }
 }

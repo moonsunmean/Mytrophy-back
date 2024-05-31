@@ -2,6 +2,7 @@ package mytrophy.api.game.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import mytrophy.api.common.base.BaseEntity;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -13,7 +14,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Game {
+public class Game extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
