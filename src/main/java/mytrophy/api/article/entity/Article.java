@@ -1,10 +1,16 @@
 package mytrophy.api.article.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.*;
-import mytrophy.api.article.dto.ArticleRequest;
+import mytrophy.api.article.dto.ArticleRequestDto;
 import mytrophy.api.article.enumentity.Header;
+import mytrophy.api.comment.entity.Comment;
 import mytrophy.api.common.base.BaseEntity;
+import mytrophy.api.member.entity.Member;
+
+import java.util.List;
 
 
 @Entity
@@ -30,31 +36,43 @@ public class Article extends BaseEntity {
 
     private String imagePath; // 이미지 경로
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "member_id")
+    @JsonIgnoreProperties("articles") // 순환 참조 방지
+    private Member member; // 게시글 작성자
+
+    @OneToMany(mappedBy = "article", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private List<Comment> comments;
 
     @Builder // 빌더 패턴 적용
-    public Article(Long id, Header header, String name, String content, int cntUp) {
+    public Article(Long id, Header header, String name, String content, int cntUp, String imagePath, Member member) {
         this.id = id;
         this.header = header;
         this.name = name;
         this.content = content;
         this.cntUp = cntUp;
+        this.imagePath = imagePath;
+        this.member = member;
     }
 
     // 게시글 생성 로직
-    public static Article createArticle(ArticleRequest articleRequest) {
+    public static Article createArticle(ArticleRequestDto articleRequestDto, Member member) {
         return Article.builder()
-            .header(articleRequest.getHeader())
-            .name(articleRequest.getName())
-            .content(articleRequest.getContent())
+            .header(articleRequestDto.getHeader())
+            .name(articleRequestDto.getName())
+            .content(articleRequestDto.getContent())
             .cntUp(0)
+            .imagePath(articleRequestDto.getImagePath())
+            .member(member)
             .build();
     }
 
     // 게시글 수정
-    public void update(Header header, String name, String content) {
+    public void updateArticle(Header header, String name, String content, String imagePath) {
         this.header = header;
         this.name = name;
         this.content = content;
+        this.imagePath = imagePath;
     }
 
     // 좋아요 증가

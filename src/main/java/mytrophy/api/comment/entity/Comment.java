@@ -1,6 +1,7 @@
 package mytrophy.api.comment.entity;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.jsonwebtoken.lang.Assert;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -27,8 +28,9 @@ public class Comment extends BaseEntity {
     @JoinColumn(name = "member_id")
     private Member member;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "article_id")
+    @JsonIgnore
     private Article article;
 
     //추천수
