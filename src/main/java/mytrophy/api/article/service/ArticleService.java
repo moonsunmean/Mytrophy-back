@@ -36,10 +36,9 @@ public interface ArticleService {
     // 유저 권한 확인
     boolean isAuthorized(Long id, Long memberId);
 
-    // 좋아요 증가
-    void upCntUp(Long id);
+    // 추천 증가
+    void likeArticle(Long articleId, Long memberId);
 
-    // 좋아요 감소
-    void CntUpDown(Long id);
-
+    // 추천 감소
+    void unlikeArticle(Long articleId, Long memberId);
 }
