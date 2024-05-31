@@ -76,12 +76,12 @@ public class Article extends BaseEntity {
     }
 
     // 좋아요 증가
-    public void upCntUp() {
+    public void likeUp() {
         this.cntUp++;
     }
 
     // 좋아요 감소
-    public void CntUpDown() {
+    public void likeDown() {
         this.cntUp--;
     }
 
