@@ -22,6 +22,8 @@ public class QGame extends EntityPathBase<Game> {
 
     public final ListPath<Achievement, QAchievement> achievementList = this.<Achievement, QAchievement>createList("achievementList", Achievement.class, QAchievement.class, PathInits.DIRECT2);
 
+    public final NumberPath<Integer> appId = createNumber("appId", Integer.class);
+
     public final StringPath description = createString("description");
 
     public final StringPath developer = createString("developer");

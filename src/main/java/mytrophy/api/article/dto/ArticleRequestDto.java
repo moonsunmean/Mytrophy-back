@@ -19,13 +19,15 @@ public class ArticleRequestDto {
     private String name;
     private String content;
     private String imagePath;
+    private Long appId;
 
     @Builder
-    public ArticleRequestDto(Header header, String name, String content, String imagePath) {
+    public ArticleRequestDto(Header header, String name, String content, String imagePath, Long appId) {
         this.header = header;
         this.name = name;
         this.content = content;
         this.imagePath = imagePath;
+        this.appId = appId;
     }
 
     public Article toEntity() {
@@ -34,6 +36,7 @@ public class ArticleRequestDto {
                 .name(name)
                 .content(content)
                 .imagePath(imagePath)
+                .appId(appId)
                 .build();
     }
 
