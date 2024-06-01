@@ -1,20 +1,23 @@
 package mytrophy.api.member.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import mytrophy.api.article.entity.Article;
+import mytrophy.api.game.entity.Category;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @Setter
 @Entity
 public class Member {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -25,12 +28,20 @@ public class Member {
     private String name; // 이름
     private String nickname; // 별명
     private String email; // 이메일
-    private Long steam_id; // 스팀 ID 값
-    private String login_type; // 로그인 형태 (소셜로그인, 일반로그인)
-    private String profile_image; // 프로필 이미지
+    private Long steamId; // 스팀 ID 값
+    private String loginType; // 로그인 형태 (소셜로그인, 일반로그인)
+    private String imagePath; // 프로필 이미지
+
+    @OneToMany(mappedBy = "member", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JsonIgnoreProperties("member") // 순환 참조 방지
+    private List<Article> articles = new ArrayList<>();
+
+    @ManyToMany(fetch = FetchType.LAZY)
+    private List<Category> categories;
 
     @CreationTimestamp
     private LocalDateTime created_at; // 생성날짜
+
     @UpdateTimestamp
-    private LocalDateTime update_at; // 생성날짜
+    private LocalDateTime update_at; // 수정날짜
 }
