@@ -1,7 +1,10 @@
 package mytrophy.api.game.service;
 
+import com.google.api.gax.rpc.NotFoundException;
+import mytrophy.api.game.dto.ResponseDTO;
 import mytrophy.api.game.dto.ResponseDTO.GetGameAchievementDTO;
 import mytrophy.api.game.dto.ResponseDTO.GetGameScreenshotDTO;
+import mytrophy.api.game.dto.ResponseDTO.GetTopGameDTO;
 import mytrophy.api.game.dto.ResponseDTO.GetAllGameDTO;
 import mytrophy.api.game.dto.ResponseDTO.GetGameCategoryDTO;
 import mytrophy.api.game.dto.ResponseDTO.GetGameDetailDTO;
@@ -12,10 +15,7 @@ import mytrophy.api.game.entity.Game;
 import mytrophy.api.game.entity.Screenshot;
 import mytrophy.api.game.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
+@Transactional
 public class GameService {
     private final GameRepository gameRepository;
     private final AchievementRepository achievementRepository;
@@ -42,13 +43,38 @@ public class GameService {
 
     public Page<GetAllGameDTO> getAllGameDTO(int page, int size) {
         return gameRepository.findAll(PageRequest.of(page, size, Sort.by("id").descending())).map(
-                game -> new GetAllGameDTO(game.getId(), game.getName(), game.getHeaderImagePath())
+                game -> new GetAllGameDTO(game.getAppId(), game.getName(), game.getHeaderImagePath())
         );
     }
 
-    @Transactional
-    public GetGameDetailDTO getGameDetailDTO(Long id) {
-        Game game = gameRepository.findById(id).orElse(null);
+    public Page<GetTopGameDTO> getTopGameDTO(int page, int size,List<Long> appList) {
+        int rank = 1;
+        List<GetTopGameDTO> topGameDTOList = new ArrayList<>();
+        for (Long appid : appList) {
+            Game game = gameRepository.findById(appid).orElse(null);
+            GetTopGameDTO dto;
+            if (game != null) {
+                dto = new GetTopGameDTO(game.getAppId(), game.getName(), game.getHeaderImagePath(), rank);
+            } else {
+                dto = new GetTopGameDTO(null, null, null, rank);
+            }
+            topGameDTOList.add(dto);
+            rank++;
+        }
+
+        int start = page * size;
+        int end = Math.min(start + size, topGameDTOList.size());
+        List<GetTopGameDTO> pageList = topGameDTOList.subList(start, end);
+
+        return new PageImpl<>(pageList, PageRequest.of(page, size), pageList.size());
+    }
+
+
+    public GetGameDetailDTO getGameDetailDTO(Integer id) {
+
+        if (!gameRepository.existsByAppId(id)) throw new NullPointerException("해당하는 게임을 찾을 수 없습니다");
+
+        Game game = gameRepository.findByAppId(id);
 
         List<Category> categoryList = new ArrayList<>();
         game.getGameCategoryList().forEach(gameCategory -> categoryList.add(gameCategory.getCategory()));
@@ -70,7 +96,7 @@ public class GameService {
                 .collect(Collectors.toList());
 
         return new GetGameDetailDTO(
-                game.getId(),
+                game.getAppId(),
                 game.getName(),
                 game.getDescription(),
                 game.getDeveloper(),
@@ -93,10 +119,10 @@ public class GameService {
         Pageable pageable = PageRequest.of(page, size, Sort.by("id").descending());
         if(categoryId == 0){
             return gameRepository.findGameByNameContaining(keyword == null ? "" : keyword, pageable).map(
-                    game -> new GetSearchGameDTO(game.getId(), game.getName(), game.getHeaderImagePath()));
+                    game -> new GetSearchGameDTO(game.getAppId(), game.getName(), game.getHeaderImagePath()));
 
         }
         return gameRepository.findGameByNameContainingByCategoryId(keyword == null ? "" : keyword , pageable,categoryId).map(
-                game -> new GetSearchGameDTO(game.getId(), game.getName(), game.getHeaderImagePath()));
+                game -> new GetSearchGameDTO(game.getAppId(), game.getName(), game.getHeaderImagePath()));
     }
 }

@@ -11,7 +11,7 @@ public class ResponseDTO {
     @Data
     @AllArgsConstructor
     public static class GetAllGameDTO{
-        private Long id;
+        private Integer id;
         private String name;
         private String headerImagePath;
     }
@@ -19,7 +19,7 @@ public class ResponseDTO {
     @Data
     @AllArgsConstructor
     public static class GetGameDetailDTO {
-        private Long id;
+        private Integer id;
         private String name;
         private String description;
         private String developer;
@@ -40,7 +40,7 @@ public class ResponseDTO {
     @Data
     @AllArgsConstructor
     public static class GetSearchGameDTO{
-        private Long id;
+        private Integer id;
         private String name;
         private String headerImagePath;
     }
@@ -67,6 +67,15 @@ public class ResponseDTO {
         private Long id;
         private String thumbnailImagePath;
         private String fullImagePath;
+    }
+
+    @Data
+    @AllArgsConstructor
+    public static class GetTopGameDTO{
+        private Integer id;
+        private String name;
+        private String headerImagePath;
+        private Integer rank;
     }
 
 }
