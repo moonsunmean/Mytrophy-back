@@ -2,6 +2,7 @@ package mytrophy.api.game.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import mytrophy.api.common.base.BaseEntity;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -13,13 +14,16 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Game {
+public class Game extends BaseEntity {
 
-    // 게임 목록의 id를 그대로 entity 저장
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column
+    private Integer appId;
+
+    @Column(unique = true)
     private String name;
 
     @Column(length = 2000)
