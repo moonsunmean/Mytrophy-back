@@ -24,6 +24,8 @@ public class QArticle extends EntityPathBase<Article> {
 
     public final mytrophy.api.common.base.QBaseEntity _super = new mytrophy.api.common.base.QBaseEntity(this);
 
+    public final NumberPath<Long> appId = createNumber("appId", Long.class);
+
     public final NumberPath<Integer> cntUp = createNumber("cntUp", Integer.class);
 
     public final ListPath<mytrophy.api.comment.entity.Comment, mytrophy.api.comment.entity.QComment> comments = this.<mytrophy.api.comment.entity.Comment, mytrophy.api.comment.entity.QComment>createList("comments", mytrophy.api.comment.entity.Comment.class, mytrophy.api.comment.entity.QComment.class, PathInits.DIRECT2);

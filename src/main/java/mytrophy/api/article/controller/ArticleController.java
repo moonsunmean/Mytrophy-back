@@ -60,9 +60,14 @@ public class ArticleController {
     }
 
     // 해당 게시글 조회
+//    @GetMapping("/articles/{id}")
+//    public ResponseEntity<List<ArticleResponseDto>> getArticleById(@PathVariable("id") Long id) {
+//        List<ArticleResponseDto> articleResponseDto = articleQueryService.findArticleWithCommentsOrderedByLatest(id);
+//        return ResponseEntity.ok().body(articleResponseDto);
+//    }
     @GetMapping("/articles/{id}")
-    public ResponseEntity<List<ArticleResponseDto>> getArticleById(@PathVariable("id") Long id) {
-        List<ArticleResponseDto> articleResponseDto = articleQueryService.findArticleWithCommentsOrderedByLatest(id);
+    public ResponseEntity<ArticleResponseDto> getArticleById(@PathVariable("id") Long id) {
+        ArticleResponseDto articleResponseDto = articleQueryService.findArticleWithCommentsOrderedByLatest(id);
         return ResponseEntity.ok().body(articleResponseDto);
     }
 
@@ -154,18 +159,34 @@ public class ArticleController {
         return ResponseEntity.ok().build();
     }
 
-    // 좋아요 증가
-    @PatchMapping("/articles/{id}/cnt-up")
-    public ResponseEntity upCntUp(@PathVariable("id") Long id) {
-        articleService.upCntUp(id);
-        return ResponseEntity.ok().build();
+    // 게시글 추천
+    @PostMapping("/articles/{id}/like")
+    public ResponseEntity<String> likeArticle(@PathVariable("id") Long articleId,
+                                                @AuthenticationPrincipal CustomUserDetails userInfo) {
+        try {
+            // 토큰에서 username 빼내기
+            String username = userInfo.getUsername();
+            Long memberId = memberService.findMemberByUsername(username).getId();
+            articleService.likeArticle(articleId, memberId);
+            return ResponseEntity.ok().body("추천 완료");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("추천 실패");
+        }
     }
 
-    // 좋아요 감소
-    @PatchMapping("/articles/{id}/cnt-down")
-    public ResponseEntity CntUpDown(@PathVariable("id") Long id) {
-        articleService.CntUpDown(id);
-        return ResponseEntity.ok().build();
+    // 게시글 추천 취소
+    @PostMapping("/articles/{id}/unlike")
+    public ResponseEntity<String> unlikeArticle(@PathVariable("id") Long articleId,
+                                                @AuthenticationPrincipal CustomUserDetails userInfo) {
+        try {
+            // 토큰에서 username 빼내기
+            String username = userInfo.getUsername();
+            Long memberId = memberService.findMemberByUsername(username).getId();
+            articleService.unlikeArticle(articleId, memberId);
+            return ResponseEntity.ok().body("추천 취소 완료");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("추천 취소 실패");
+        }
     }
 
 }
