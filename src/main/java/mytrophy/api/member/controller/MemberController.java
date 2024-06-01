@@ -24,14 +24,18 @@ public class MemberController {
         this.imageService = imageService;
     }
 
+    // 중복 회원 검증
+    @GetMapping("/checkUsername")
+    public boolean isUsernameExists(@RequestParam String username) {
+        return memberService.isUsernameExists(username);
+    }
+
     // 회원 가입
     @PostMapping("/signup")
     public ResponseEntity<String> signupMember(@RequestBody MemberDto memberDto) {
         memberService.signupMember(memberDto);
         return new ResponseEntity<>("회원 가입 성공", HttpStatus.CREATED);
     }
-
-
 
     // 회원 조회
     @GetMapping("/{id}")
