@@ -40,10 +40,15 @@ public class CommentServiceImpl implements CommentService{
                 .orElseThrow(() -> new CustomException(ErrorCodeEnum.NOT_EXISTS_ARTICLE_ID));
 
         Comment parentComment = null;
-        //자식 댓글
-        if (createCommentDto.getParentCommentId() != null) {
-            parentComment = commentRepository.findById(createCommentDto.getParentCommentId())
+        Long parentCommentId = createCommentDto.getParentCommentId();
+
+        if (parentCommentId != null) {
+            parentComment = commentRepository.findById(parentCommentId)
                     .orElseThrow(() -> new CustomException(ErrorCodeEnum.NOT_EXISTS_PARENT_COMMENT_ID));
+
+            if(parentComment.getParentComment() != null) {
+                throw new CustomException(ErrorCodeEnum.NOT_PARENT_COMMENT);
+            }
         }
 
         Comment comment = dtoToEntity(createCommentDto, member, article);
@@ -75,17 +80,11 @@ public class CommentServiceImpl implements CommentService{
             throw new CustomException(ErrorCodeEnum.UNAUTHORIZED);
         }
 
-        commentRepository.delete(comment);
-    }
+        if (!comment.getChildrenComment().isEmpty()) {
+            commentRepository.deleteAllByParentComment(comment);
+        }
 
-    //특정 게시글의 댓글 전체조회
-    @Override
-    @Transactional(readOnly = true)
-    public List<CommentDto> findByArticleId(Long articleId) {
-        List<Comment> comments = commentRepository.findByArticleId(articleId);
-        return comments.stream()
-                .map(this::entityToDto)
-                .collect(Collectors.toList());
+        commentRepository.delete(comment);
     }
 
     //특정 회원의 댓글 전체조회
@@ -96,13 +95,6 @@ public class CommentServiceImpl implements CommentService{
         return comments.stream()
                 .map(this::entityToDto)
                 .collect(Collectors.toList());
-    }
-
-    //게시글 별 댓글 수 조회
-    @Override
-    @Transactional(readOnly = true)
-    public int countByArticleId(Long articleId) {
-        return commentRepository.countByArticleId(articleId);
     }
 
     //댓글 추천
