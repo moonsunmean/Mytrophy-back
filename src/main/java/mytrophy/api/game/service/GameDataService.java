@@ -59,24 +59,25 @@ public class GameDataService {
         JsonNode rootNode = new ObjectMapper().readTree(response.getBody());
         JsonNode appsNode = rootNode.get("applist").get("apps");
 
-        int count = 1;
-
         List<GameData> gameDataList = new ArrayList<>();
+        List<Integer> gameDataListCheck = new ArrayList<>();
 
         for (JsonNode appNode : appsNode){
             int id = appNode.get("appid").asInt();
-            if(!gameDataRepository.existsByAppId(id)) gameDataList.add(new GameData(null, id));
+            if(!gameDataRepository.existsByAppId(id) && !gameDataListCheck.contains(id)){
+                gameDataList.add(new GameData(null, id));
+                gameDataListCheck.add(id);
+            }
         }
-
-        // 데이터를 한꺼번에 저장
         gameDataRepository.saveAll(gameDataList);
     }
 
-    @Transactional
     public Boolean receiveSteamGameListByDb(int size, boolean isContinue) throws JsonProcessingException {
         // 마지막에 저장한 appId 불러오기
         List<GameRead> gameReadList = gameReadRepository.findAll();
-        GameRead gameRead = gameReadList.get(0);
+
+        GameRead gameRead =
+                (!gameReadList.isEmpty())?gameReadList.get(0):new GameRead(1L,0);
 
         // 스팀에서 받아온 모든 게임목록 불러온 후 오름차순 정렬
         List<GameData> gameDataList = gameDataRepository.findAll()
@@ -116,8 +117,6 @@ public class GameDataService {
         // false 로 바꾸기 테스트 하는동안 true
         return false;
     }
-
-
 
     // 스팀 게임 top100 목록을 저장하는 메서드
     public List<Long> receiveTopSteamGameList(int size, String type) throws JsonProcessingException {
