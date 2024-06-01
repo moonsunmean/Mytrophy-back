@@ -19,11 +19,19 @@ public class QScreenshot extends EntityPathBase<Screenshot> {
 
     public static final QScreenshot screenshot = new QScreenshot("screenshot");
 
+    public final mytrophy.api.common.base.QBaseEntity _super = new mytrophy.api.common.base.QBaseEntity(this);
+
+    //inherited
+    public final DateTimePath<java.time.LocalDateTime> createdAt = _super.createdAt;
+
     public final StringPath fullImagePath = createString("fullImagePath");
 
     public final NumberPath<Long> id = createNumber("id", Long.class);
 
     public final StringPath thumbnailImagePath = createString("thumbnailImagePath");
+
+    //inherited
+    public final DateTimePath<java.time.LocalDateTime> updatedAt = _super.updatedAt;
 
     public QScreenshot(String variable) {
         super(Screenshot.class, forVariable(variable));

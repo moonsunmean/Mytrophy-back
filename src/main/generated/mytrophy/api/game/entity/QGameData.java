@@ -7,43 +7,40 @@ import com.querydsl.core.types.dsl.*;
 import com.querydsl.core.types.PathMetadata;
 import javax.annotation.processing.Generated;
 import com.querydsl.core.types.Path;
-import com.querydsl.core.types.dsl.PathInits;
 
 
 /**
- * QCategory is a Querydsl query type for Category
+ * QGameData is a Querydsl query type for GameData
  */
 @Generated("com.querydsl.codegen.DefaultEntitySerializer")
-public class QCategory extends EntityPathBase<Category> {
+public class QGameData extends EntityPathBase<GameData> {
 
-    private static final long serialVersionUID = -843948301L;
+    private static final long serialVersionUID = 1630865585L;
 
-    public static final QCategory category = new QCategory("category");
+    public static final QGameData gameData = new QGameData("gameData");
 
     public final mytrophy.api.common.base.QBaseEntity _super = new mytrophy.api.common.base.QBaseEntity(this);
+
+    public final NumberPath<Integer> appId = createNumber("appId", Integer.class);
 
     //inherited
     public final DateTimePath<java.time.LocalDateTime> createdAt = _super.createdAt;
 
-    public final ListPath<GameCategory, QGameCategory> gameCategoryList = this.<GameCategory, QGameCategory>createList("gameCategoryList", GameCategory.class, QGameCategory.class, PathInits.DIRECT2);
-
     public final NumberPath<Long> id = createNumber("id", Long.class);
-
-    public final StringPath name = createString("name");
 
     //inherited
     public final DateTimePath<java.time.LocalDateTime> updatedAt = _super.updatedAt;
 
-    public QCategory(String variable) {
-        super(Category.class, forVariable(variable));
+    public QGameData(String variable) {
+        super(GameData.class, forVariable(variable));
     }
 
-    public QCategory(Path<? extends Category> path) {
+    public QGameData(Path<? extends GameData> path) {
         super(path.getType(), path.getMetadata());
     }
 
-    public QCategory(PathMetadata metadata) {
-        super(Category.class, metadata);
+    public QGameData(PathMetadata metadata) {
+        super(GameData.class, metadata);
     }
 
 }

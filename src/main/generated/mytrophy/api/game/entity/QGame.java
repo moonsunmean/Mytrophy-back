@@ -20,7 +20,14 @@ public class QGame extends EntityPathBase<Game> {
 
     public static final QGame game = new QGame("game");
 
+    public final mytrophy.api.common.base.QBaseEntity _super = new mytrophy.api.common.base.QBaseEntity(this);
+
     public final ListPath<Achievement, QAchievement> achievementList = this.<Achievement, QAchievement>createList("achievementList", Achievement.class, QAchievement.class, PathInits.DIRECT2);
+
+    public final NumberPath<Integer> appId = createNumber("appId", Integer.class);
+
+    //inherited
+    public final DateTimePath<java.time.LocalDateTime> createdAt = _super.createdAt;
 
     public final StringPath description = createString("description");
 
@@ -51,6 +58,9 @@ public class QGame extends EntityPathBase<Game> {
     public final StringPath requirement = createString("requirement");
 
     public final ListPath<Screenshot, QScreenshot> screenshotList = this.<Screenshot, QScreenshot>createList("screenshotList", Screenshot.class, QScreenshot.class, PathInits.DIRECT2);
+
+    //inherited
+    public final DateTimePath<java.time.LocalDateTime> updatedAt = _super.updatedAt;
 
     public QGame(String variable) {
         super(Game.class, forVariable(variable));
