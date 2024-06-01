@@ -59,13 +59,6 @@ public class CommentController {
         return ResponseEntity.noContent().build();
     }
 
-    //게시글 댓글 조회
-    @GetMapping("/articles/{id}/comments")
-    public ResponseEntity<List<CommentDto>> getCommentsByArticleId(@PathVariable("id") Long articleId){
-        List<CommentDto> comments = commentService.findByArticleId(articleId);
-        return ResponseEntity.ok(comments);
-    }
-
     //회원별 댓글 조회
     @GetMapping("/members/{id}/comments")
     public ResponseEntity<List<CommentDto>> getCommentsByMemberId(@AuthenticationPrincipal CustomUserDetails userinfo) {
@@ -75,13 +68,6 @@ public class CommentController {
 
         List<CommentDto> comments = commentService.findByMemberId(memberId);
         return ResponseEntity.ok(comments);
-    }
-
-    //게시글별 댓글 수 조회
-    @GetMapping("/articles/{id}/count")
-    public ResponseEntity<Integer> countCommentsByArticleId(@PathVariable("id") Long articleId) {
-        int count = commentService.countByArticleId(articleId);
-        return ResponseEntity.ok(count);
     }
 
     //댓글 추천
