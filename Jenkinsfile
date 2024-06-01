@@ -7,11 +7,11 @@ pipeline {
     }
 
     stages {
-        stage('Clone repository') {
-            stage('Clone Repository') {
-                steps {
-                    git branch: 'master',
-                        url: 'https://kdt-gitlab.elice.io/cloud_track/class_02/web_project3/team04/team4-back.git'
+        stage('Git Clone') {
+            steps {
+                script {
+                    // Git 클론
+                    sh 'git clone -b master https://kdt-gitlab.elice.io/cloud_track/class_02/web_project3/team04/team4-back.git'
                 }
             }
         }
@@ -19,7 +19,7 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 script {
-                    // Docker 빌드
+                    // Docker 이미지 빌드
                     sh 'docker build -t $DOCKERHUB_REPO:$BUILD_NUMBER .'
                 }
             }
@@ -28,8 +28,8 @@ pipeline {
         stage('Push to Docker Hub') {
             steps {
                 script {
-                    docker.withRegistry('https://index.docker.io/v1/', 'DOCKERHUB_CREDENTIALS') {
-                        // Docker 이미지를 푸시
+                    docker.withRegistry('https://index.docker.io/v1/', DOCKERHUB_CREDENTIALS) {
+                        // Docker 이미지 푸시
                         sh 'docker push $DOCKERHUB_REPO:$BUILD_NUMBER'
                     }
                 }
