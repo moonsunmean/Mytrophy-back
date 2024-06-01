@@ -1,5 +1,6 @@
 package mytrophy.api.game.service;
 
+import com.google.api.gax.rpc.NotFoundException;
 import mytrophy.api.game.dto.ResponseDTO;
 import mytrophy.api.game.dto.ResponseDTO.GetGameAchievementDTO;
 import mytrophy.api.game.dto.ResponseDTO.GetGameScreenshotDTO;
@@ -70,6 +71,9 @@ public class GameService {
 
 
     public GetGameDetailDTO getGameDetailDTO(Integer id) {
+
+        if (!gameRepository.existsByAppId(id)) throw new NullPointerException("해당하는 게임을 찾을 수 없습니다");
+
         Game game = gameRepository.findByAppId(id);
 
         List<Category> categoryList = new ArrayList<>();
