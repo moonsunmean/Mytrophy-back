@@ -4,6 +4,7 @@ pipeline {
     environment {
         DOCKERHUB_CREDENTIALS = credentials('dockerhub-credentials-id')
         DOCKERHUB_REPO = 'qpfriday/mytrophy'
+        DOCKER_IMAGE_TAG = "${DOCKERHUB_REPO}:${BUILD_NUMBER}"
     }
 
     stages {
@@ -16,11 +17,20 @@ pipeline {
             }
         }
 
+        stage('Build') {
+            steps {
+                script {
+                    // 빌드
+                    sh './gradlew clean build'
+                }
+            }
+        }
+
         stage('Build Docker Image') {
             steps {
                 script {
                     // Docker 이미지 빌드
-                    sh 'docker build -t $DOCKERHUB_REPO:$BUILD_NUMBER .'
+                    sh "docker build -t ${DOCKER_IMAGE_TAG} ."
                 }
             }
         }
@@ -30,7 +40,7 @@ pipeline {
                 script {
                     docker.withRegistry('https://index.docker.io/v1/', DOCKERHUB_CREDENTIALS) {
                         // Docker 이미지 푸시
-                        sh 'docker push $DOCKERHUB_REPO:$BUILD_NUMBER'
+                        sh "docker push ${DOCKER_IMAGE_TAG}"
                     }
                 }
             }
@@ -39,8 +49,8 @@ pipeline {
 
     post {
         always {
-            // 작업이 완료되면 Docker 이미지 제거
-            sh 'docker rmi $DOCKERHUB_REPO:$BUILD_NUMBER'
+            // Docker 이미지 제거
+            sh "docker rmi ${DOCKER_IMAGE_TAG}"
         }
         success {
             // 성공 메시지 출력
