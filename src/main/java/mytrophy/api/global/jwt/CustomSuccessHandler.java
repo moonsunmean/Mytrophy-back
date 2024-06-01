@@ -53,7 +53,7 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         if ("ROLE_STEAM_USER".equals(role)) {
             response.sendRedirect("/steam/profile");
         } else {
-            response.sendRedirect("/my");
+            response.sendRedirect("/mt");
         }
         response.setStatus(HttpStatus.OK.value());
 

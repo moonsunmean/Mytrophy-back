@@ -104,14 +104,4 @@ public class SteamService {
         return body;
     }
 
-    public Map<String, String> getOpenIdAttributes() {
-        if (this.openIdAttributes == null) {
-            Map<String, String> openIdAttributes = new HashMap<>();
-            openIdAttributes.put("openid_realm", String.format("http://localhost:%s/", serverPort));
-            openIdAttributes.put("openid_return_to", String.format("http://localhost:%s/steam/login/redirect", serverPort));
-            this.openIdAttributes = Collections.unmodifiableMap(openIdAttributes);
-        }
-
-        return openIdAttributes;
-    }
 }

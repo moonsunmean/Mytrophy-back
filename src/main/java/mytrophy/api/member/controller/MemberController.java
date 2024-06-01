@@ -8,6 +8,7 @@ import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import mytrophy.api.global.jwt.CustomSuccessHandler;
+import mytrophy.api.global.jwt.JWTUtil;
 import mytrophy.api.member.dto.MemberDto;
 import mytrophy.api.member.dto.SteamOpenidLoginDto;
 import mytrophy.api.member.entity.Member;
@@ -17,6 +18,7 @@ import mytrophy.api.member.service.SteamService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -24,6 +26,8 @@ import org.springframework.web.bind.annotation.*;
 import mytrophy.api.member.service.MemberService;
 import org.springframework.web.servlet.ModelAndView;
 
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Map;
 
@@ -37,6 +41,7 @@ public class MemberController {
     private final SteamService steamService;
     private final MemberService memberService;
     private final CustomSuccessHandler successHandler;
+    private final JWTUtil jwtUtil;
     // 회원 가입
     @PostMapping("/signup")
     public ResponseEntity<String> signupMember(@RequestBody MemberDto memberDto) {
@@ -75,15 +80,18 @@ public class MemberController {
             return new ResponseEntity<>("회원 삭제 실패", HttpStatus.NOT_FOUND);
         }
     }
-
-
     @GetMapping("/steam/login")
-    public ModelAndView login() {
-        return new ModelAndView("steam", steamService.getOpenIdAttributes());
+    public void login(HttpServletRequest request, HttpServletResponse response, @RequestHeader("access") String token) throws IOException {
+
+            response.sendRedirect("http://localhost:8080/steam-login");
+
     }
 
+
+
     @GetMapping("/steam/login/redirect")
-    public ModelAndView loginRedirect(HttpServletRequest request, HttpServletResponse response, @RequestParam Map<String, String> allRequestParams) {
+    public ModelAndView loginRedirect(HttpServletRequest request, HttpServletResponse response,@RequestParam Map<String, String> allRequestParams) {
+        System.out.println("loginRedirect----------------------- ");
         SteamOpenidLoginDto dto = new SteamOpenidLoginDto(
                 allRequestParams.get("openid.ns"),
                 allRequestParams.get("openid.op_endpoint"),
@@ -95,22 +103,41 @@ public class MemberController {
                 allRequestParams.get("openid.signed"),
                 allRequestParams.get("openid.sig")
         );
+        String token =  allRequestParams.get("access");
+        System.out.println(token);
+        String currentUsername = jwtUtil.getUsername(token);
+        System.out.println("currentUsername : "+currentUsername);
+        String testname  =  SecurityContextHolder.getContext().getAuthentication().getName();
+        System.out.println("testname : "+testname);
+        if(currentUsername !="anonymousUser"){
+            try {
+                String steamUserId = steamService.validateLoginParameters(dto);
+                memberService.linkSteamAccount(currentUsername, steamUserId);
+                return new ModelAndView("redirect:/steam/login/profile");
 
-        try {
-            String                  steamUserId = steamService.validateLoginParameters(dto);
-            SteamAutenticationToken authReq     = new SteamAutenticationToken(steamUserId);
-            Authentication auth        = authenticationManager.authenticate(authReq);
-            SecurityContext sc          = SecurityContextHolder.getContext();
-            sc.setAuthentication(auth);
+            } catch (Exception e) {
+                e.printStackTrace();
+                return new ModelAndView("redirect:/steam/login/failed");
+            }
+        }
+        else{
+            try {
+                String                  steamUserId = steamService.validateLoginParameters(dto);
+                SteamAutenticationToken authReq     = new SteamAutenticationToken(steamUserId);
+                Authentication auth        = authenticationManager.authenticate(authReq);
+                SecurityContext sc          = SecurityContextHolder.getContext();
+                sc.setAuthentication(auth);
 //            HttpSession session = request.getSession(true);
 //            session.setAttribute(SPRING_SECURITY_CONTEXT_KEY, sc);
-            successHandler.onAuthenticationSuccess(request,response, auth);
-            return null;
+                successHandler.onAuthenticationSuccess(request,response, auth);
+                return null;
 
-        } catch (Exception e) {
-            e.printStackTrace();
-            return new ModelAndView("redirect:/steam/login/failed");
+            } catch (Exception e) {
+                e.printStackTrace();
+                return new ModelAndView("redirect:/steam/login/failed");
+            }
         }
+
 
         //return new ModelAndView("redirect:/steam/login/profile");
     }

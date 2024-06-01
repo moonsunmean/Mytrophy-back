@@ -86,7 +86,14 @@ public class MemberService {
         }
         return false;
     }
-
-
+    public void linkSteamAccount(String username, String steamId) {
+        System.out.println("linkSteam username : "+username);
+        Member member = memberRepository.findByUsername(username);
+        if (member == null) {
+            throw new IllegalArgumentException("사용자를 찾을 수 없습니다.");
+        }
+        member.setSteamId(steamId);
+        memberRepository.save(member);
+    }
 
 }

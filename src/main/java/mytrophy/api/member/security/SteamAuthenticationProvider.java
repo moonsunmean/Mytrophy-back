@@ -36,6 +36,7 @@ public class SteamAuthenticationProvider implements AuthenticationProvider {
 
     @Override
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
+        System.out.println("into authenticate");
         String steamId = ((SteamAutenticationToken) authentication).getSteamId();
 
         Map<String, Object> userAttributes;
