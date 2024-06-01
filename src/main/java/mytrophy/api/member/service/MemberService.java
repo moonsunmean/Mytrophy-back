@@ -24,9 +24,14 @@ public class MemberService {
         this.categoryRepository = categoryRepository;
     }
 
+    // 중복 아이디 검증
+    public boolean isUsernameExists(String username) {
+        return memberRepository.existsByUsername(username);
+    }
+
     // 회원 가입
     @Transactional
-    public Member signupMember(MemberDto memberDto) {
+    public void signupMember(MemberDto memberDto) {
         if (memberRepository.existsByUsername(memberDto.getUsername())) {
             throw new IllegalArgumentException("Username already exists: " + memberDto.getUsername());
         }
@@ -36,7 +41,7 @@ public class MemberService {
         signupMember.setPassword(encodePassword(memberDto.getPassword()));
         signupMember.setRole("ROLE_USER");
 
-        return memberRepository.save(signupMember);
+        memberRepository.save(signupMember);
     }
 
     // 회원 조회
