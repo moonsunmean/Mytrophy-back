@@ -94,7 +94,6 @@ public class MemberController {
 
     @GetMapping("/steam/login/redirect")
     public ModelAndView loginRedirect(HttpServletRequest request, HttpServletResponse response,@RequestParam Map<String, String> allRequestParams) {
-        System.out.println("loginRedirect----------------------- ");
         SteamOpenidLoginDto dto = new SteamOpenidLoginDto(
                 allRequestParams.get("openid.ns"),
                 allRequestParams.get("openid.op_endpoint"),
@@ -108,8 +107,7 @@ public class MemberController {
         );
 
         String token =  allRequestParams.get("access");
-        System.out.println(token);
-        log.info("토큰값: {}",token);
+
         String currentUsername = "anonymousUser";
         if(StringUtils.hasText(token) && token !=null &&token.length()>5) {
             currentUsername = jwtUtil.getUsername(token);
