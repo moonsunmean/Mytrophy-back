@@ -3,20 +3,11 @@ pipeline {
 
     environment {
         DOCKERHUB_CREDENTIALS = credentials('dockerhub-credentials-id')
-        DOCKERHUB_REPO = 'qpfriday/chandol'
+        DOCKERHUB_REPO = 'qpfriday/mytrophy'
         DOCKER_IMAGE_TAG = "${DOCKERHUB_REPO}:${BUILD_NUMBER}"
     }
 
     stages {
-        stage('Prepare Environment') {
-            steps {
-                script {
-                    // Clean up the existing directory if it exists
-                    sh 'rm -rf jenkinsTest'
-                }
-            }
-        }
-
         stage('Git Clone') {
             steps {
                 script {
@@ -29,13 +20,10 @@ pipeline {
         stage('Build') {
             steps {
                 script {
-                    // Navigate to the cloned directory
-                    dir('jenkinsTest') {
-                        // Set execute permissions for gradlew
-                        sh 'chmod +x gradlew'
-                        // Build
-                        sh './gradlew clean build'
-                    }
+                    // Set execute permissions for gradlew
+                    sh 'chmod +x gradlew'
+                    // Build
+                    sh './gradlew clean build'
                 }
             }
         }
