@@ -5,15 +5,17 @@ pipeline {
         DOCKERHUB_CREDENTIALS = credentials('dockerhub-credentials-id')
         DOCKERHUB_REPO = 'qpfriday/mytrophy'
         DOCKER_IMAGE_TAG = "${DOCKERHUB_REPO}:${BUILD_NUMBER}"
-        GIT_CREDENTIALS = credentials('GitLabUsernamePW') // Add this line
+        GIT_CREDENTIALS = credentials('GitLabUsernamePW')
     }
 
     stages {
         stage('Git Clone') {
             steps {
-                script {
-                    // Use the GitLab credentials for cloning the repository
-                    sh "git clone -b dev https://${GIT_CREDENTIALS_USR}:${GIT_CREDENTIALS_PSW}@kdt-gitlab.elice.io/cloud_track/class_02/web_project3/team04/team4-back.git"
+                withCredentials([usernamePassword(credentialsId: 'GitLabUsernamePW', usernameVariable: 'qpfriday@gmail.com', passwordVariable: 'cksgur15617!')]) {
+                    script {
+                        // Use the GitLab credentials for cloning the repository
+                        sh "git clone -b dev https://${GIT_USERNAME}:${GIT_PASSWORD}@kdt-gitlab.elice.io/cloud_track/class_02/web_project3/team04/team4-back.git"
+                    }
                 }
             }
         }
