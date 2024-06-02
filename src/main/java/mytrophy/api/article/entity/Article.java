@@ -38,6 +38,8 @@ public class Article extends BaseEntity {
 
     private Long appId; // 게임 Id
 
+    private int commentCount; // 댓글 수
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id")
     @JsonIgnoreProperties("articles") // 순환 참조 방지
