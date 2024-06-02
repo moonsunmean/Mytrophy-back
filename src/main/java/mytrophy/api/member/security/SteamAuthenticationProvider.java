@@ -36,11 +36,7 @@ public class SteamAuthenticationProvider implements AuthenticationProvider {
 
     @Override
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
-        System.out.println("into authenticate");
         String steamId = ((SteamAutenticationToken) authentication).getSteamId();
-        String steamusername = ((SteamAutenticationToken) authentication).getName();
-        System.out.println("steamId: "+ steamId);
-        System.out.println("steamusername: "+ steamusername);
         Map<String, Object> userAttributes;
         try {
             userAttributes = steamService.getUserData(steamId);
@@ -48,6 +44,7 @@ public class SteamAuthenticationProvider implements AuthenticationProvider {
             e.printStackTrace();
             return null;
         }
+        // 하나의 스팀아이디로 일반/소셜 각각 가입 가능할경우
 //        Member member = memberService.findMemberByUsername(steamId);
 //        if (member == null) {
 //            String username = (String) userAttributes.get("personaname");

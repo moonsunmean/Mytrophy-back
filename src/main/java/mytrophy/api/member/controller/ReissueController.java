@@ -11,12 +11,14 @@ import mytrophy.global.jwt.JWTUtil;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Date;
 
 @RestController
 @RequiredArgsConstructor
+@RequestMapping("/api")
 public class ReissueController {
 
     private final JWTUtil jwtUtil;
