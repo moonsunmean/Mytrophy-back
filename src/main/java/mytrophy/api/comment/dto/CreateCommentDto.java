@@ -7,13 +7,11 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class CreateCommentDto {
 
-    private Long id;
     private String content;
-    private int cntUp;
+    private Long parentCommentId;
 
-    public CreateCommentDto(Long id, String content, int cntUp) {
-        this.id = id;
+    public CreateCommentDto(String content, Long parentCommentId) {
         this.content = content;
-        this.cntUp = cntUp;
+        this.parentCommentId = parentCommentId;
     }
 }

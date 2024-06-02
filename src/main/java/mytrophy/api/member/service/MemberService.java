@@ -35,10 +35,18 @@ public class MemberService {
         this.categoryRepository = categoryRepository;
     }
 
+
     public Optional<Member> findBySteamId(String id) {
         return memberRepository.findBySteamId(id);
     }
 
+    // 중복 아이디 검증
+    @Transactional
+    public boolean isUsernameExists(String username) {
+        return memberRepository.existsByUsername(username);
+    }
+
+    // 회원 가입
     @Transactional
     public void signupMember(MemberDto memberDto) {
 

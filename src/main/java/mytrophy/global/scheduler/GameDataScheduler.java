@@ -14,7 +14,7 @@ public class GameDataScheduler {
     private boolean isContinue = false;
     private int downSize = 20;
     private boolean downType = false; // false 면 스케줄러 true 면 메뉴얼
-    private int sleepTime = 3000;
+    private int sleepTime = 1000;
     private int test = 1;
     private static boolean serverFirstStartCheck = false;
 
@@ -42,17 +42,13 @@ public class GameDataScheduler {
             this.isContinue = false;
         }
 
-        int testCount = 1;
         while (true) {
             System.out.println("~~~~~~~~~~~~~~~~~ 게임 상세정보 다운로드  ~~~~~~~~~~~~~~~~~");
             boolean downFinish = gameDataService.receiveSteamGameListByDb(downSize, isContinue);
             isContinue = true;
             if(downFinish) break;
-            testCount++;
-            if (testCount > 40) {
-                break;
-            }
-            Thread.sleep(sleepTime); // 3초 대기 ( 시간은 잘 조정 해야겠음 )
+            System.out.println("~~~~~~~~~~~~~~~~~ 쓰레드 일시 정지  ~~~~~~~~~~~~~~~~~");
+            Thread.sleep(sleepTime); // 1초 대기 ( 시간은 잘 조정 해야겠음 )
         }
     }
 

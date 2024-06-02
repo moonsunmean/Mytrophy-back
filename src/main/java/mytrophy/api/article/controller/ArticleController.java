@@ -60,9 +60,14 @@ public class ArticleController {
     }
 
     // 해당 게시글 조회
+//    @GetMapping("/articles/{id}")
+//    public ResponseEntity<List<ArticleResponseDto>> getArticleById(@PathVariable("id") Long id) {
+//        List<ArticleResponseDto> articleResponseDto = articleQueryService.findArticleWithCommentsOrderedByLatest(id);
+//        return ResponseEntity.ok().body(articleResponseDto);
+//    }
     @GetMapping("/articles/{id}")
-    public ResponseEntity<List<ArticleResponseDto>> getArticleById(@PathVariable("id") Long id) {
-        List<ArticleResponseDto> articleResponseDto = articleQueryService.findArticleWithCommentsOrderedByLatest(id);
+    public ResponseEntity<ArticleResponseDto> getArticleById(@PathVariable("id") Long id) {
+        ArticleResponseDto articleResponseDto = articleQueryService.findArticleWithCommentsOrderedByLatest(id);
         return ResponseEntity.ok().body(articleResponseDto);
     }
 

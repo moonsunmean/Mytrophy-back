@@ -44,6 +44,12 @@ public class MemberController {
 
 
 
+    // 중복 회원 검증
+    @GetMapping("/checkUsername")
+    public boolean isUsernameExists(@RequestParam String username) {
+        return memberService.isUsernameExists(username);
+    }
+
     // 회원 가입
     @PostMapping("/signup")
     public ResponseEntity<String> signupMember(@RequestBody MemberDto memberDto) {
