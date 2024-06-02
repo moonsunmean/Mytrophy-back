@@ -3,15 +3,24 @@ pipeline {
 
     environment {
         DOCKERHUB_CREDENTIALS = credentials('dockerhub-credentials-id')
-        DOCKERHUB_REPO = 'qpfriday/mytrophy'
+        DOCKERHUB_REPO = 'qpfriday/chandol'
         DOCKER_IMAGE_TAG = "${DOCKERHUB_REPO}:${BUILD_NUMBER}"
     }
 
     stages {
+        stage('Prepare Environment') {
+            steps {
+                script {
+                    // Clean up the existing directory if it exists
+                    sh 'rm -rf jenkinsTest'
+                }
+            }
+        }
+
         stage('Git Clone') {
             steps {
                 script {
-                    // Git 클론
+                    // Git clone
                     sh 'git clone -b master https://kdt-gitlab.elice.io/cloud_track/class_02/web_project3/team04/team4-back.git'
                 }
             }
@@ -20,8 +29,22 @@ pipeline {
         stage('Build') {
             steps {
                 script {
-                    // 빌드
-                    sh './gradlew clean build'
+                    // Navigate to the cloned directory
+                    dir('jenkinsTest') {
+                        // Set execute permissions for gradlew
+                        sh 'chmod +x gradlew'
+                        // Build
+                        sh './gradlew clean build'
+                    }
+                }
+            }
+        }
+
+        stage('Verify Docker Installation') {
+            steps {
+                script {
+                    // Ensure Docker is installed and accessible
+                    sh 'docker --version'
                 }
             }
         }
@@ -29,7 +52,7 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 script {
-                    // Docker 이미지 빌드
+                    // Docker image build
                     sh "docker build -t ${DOCKER_IMAGE_TAG} ."
                 }
             }
@@ -38,27 +61,12 @@ pipeline {
         stage('Push to Docker Hub') {
             steps {
                 script {
-                    docker.withRegistry('https://index.docker.io/v1/', DOCKERHUB_CREDENTIALS) {
-                        // Docker 이미지 푸시
+                    docker.withRegistry('https://index.docker.io/v1/') {
+                        // Docker image push
                         sh "docker push ${DOCKER_IMAGE_TAG}"
                     }
                 }
             }
-        }
-    }
-
-    post {
-        always {
-            // Docker 이미지 제거
-            sh "docker rmi ${DOCKER_IMAGE_TAG}"
-        }
-        success {
-            // 성공 메시지 출력
-            echo 'Docker image pushed to Docker Hub successfully!'
-        }
-        failure {
-            // 실패 메시지 출력
-            echo 'Build or push failed.'
         }
     }
 }
