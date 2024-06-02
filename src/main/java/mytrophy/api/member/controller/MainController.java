@@ -11,11 +11,13 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import java.util.Collection;
 import java.util.Iterator;
 
+
+//test 컨트롤러
 @Controller
 @ResponseBody
 public class MainController {
 
-    @GetMapping("/")
+    @GetMapping("/test")
     public String mainAPI() {
 
         String username = SecurityContextHolder.getContext().getAuthentication().getName();

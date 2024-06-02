@@ -29,7 +29,7 @@ public class SteamUserPrincipal implements UserDetails {
         List<GrantedAuthority> authorities = Collections.
                 singletonList(new SimpleGrantedAuthority("ROLE_USER"));
 
-        return new SteamUserPrincipal(member.getId(), member.getSteamId(), member.getName(), member.getProfileImage(), Collections.unmodifiableMap(attributes), authorities);
+        return new SteamUserPrincipal(member.getId(), member.getSteamId(), member.getName(), member.getImagePath(), Collections.unmodifiableMap(attributes), authorities);
     }
 
 

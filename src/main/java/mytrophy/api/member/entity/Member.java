@@ -1,19 +1,26 @@
 package mytrophy.api.member.entity;
 
-import lombok.*;
+
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
+import mytrophy.api.article.entity.Article;
+import mytrophy.api.game.entity.Category;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
-import lombok.Getter;
-import lombok.Setter;
-import org.hibernate.annotations.CreationTimestamp;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.time.LocalDate;
-
-@Entity
 @Getter
 @Setter
+@Entity
 public class Member {
 
     @Id
@@ -21,7 +28,7 @@ public class Member {
     private Long id;
 
     @Column(nullable = false, unique = true)
-    private String username;  //loginId
+    private String username;  //여기서 username 이 로그인할 때 입력하는 로그인 아이디
 
     @Column(nullable = true)
     private String password;
@@ -35,23 +42,36 @@ public class Member {
     private String email;
 
     @Column(nullable = true, unique = true)
-    private String steamId;
+    private String steamId; // 스팀 ID 값
 
     @Column(nullable = true)
-    private String loginType;
+    private String loginType;// 로그인 형태 (소셜로그인, 일반로그인)
 
 
     @Column(nullable = true)
-    private String profileImage;
+    private String imagePath;;// 프로필 이미지
 
 
 
     @Column(nullable = false)
-    private String role;
+    private String role;// 권한 (ROLE_USER, ROLE_ADMIN)
 
     @CreationTimestamp
     @Column(nullable = false)
     private LocalDate createdAt;
 
 
+
+    @OneToMany(mappedBy = "member", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JsonIgnoreProperties("member") // 순환 참조 방지
+    private List<Article> articles = new ArrayList<>();
+
+    @ManyToMany(fetch = FetchType.LAZY)
+    private List<Category> categories;
+
+    @CreationTimestamp
+    private LocalDateTime created_at; // 생성날짜
+
+    @UpdateTimestamp
+    private LocalDateTime update_at; // 수정날짜
 }

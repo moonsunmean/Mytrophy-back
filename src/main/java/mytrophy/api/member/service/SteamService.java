@@ -23,8 +23,8 @@ public class SteamService {
     @Value("${softawii.steam.token}")
     private      String              steamApiToken;
     private      String              steamApiUrl = "https://api.steampowered.com";
-    @Value("${server.port}")
-    private      String              serverPort;
+//    @Value("${server.port}")
+//    private      String              serverPort;
 
     public Map<String, Object> getUserData(String steamUserId) throws Exception {
         RestTemplate           restTemplate = new RestTemplate();
