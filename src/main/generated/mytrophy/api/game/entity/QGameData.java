@@ -19,6 +19,18 @@ public class QGameData extends EntityPathBase<GameData> {
 
     public static final QGameData gameData = new QGameData("gameData");
 
+    public final mytrophy.api.common.base.QBaseEntity _super = new mytrophy.api.common.base.QBaseEntity(this);
+
+    public final NumberPath<Integer> appId = createNumber("appId", Integer.class);
+
+    //inherited
+    public final DateTimePath<java.time.LocalDateTime> createdAt = _super.createdAt;
+
+    public final NumberPath<Long> id = createNumber("id", Long.class);
+
+    //inherited
+    public final DateTimePath<java.time.LocalDateTime> updatedAt = _super.updatedAt;
+
     public final NumberPath<Integer> appId = createNumber("appId", Integer.class);
 
     public final NumberPath<Long> id = createNumber("id", Long.class);

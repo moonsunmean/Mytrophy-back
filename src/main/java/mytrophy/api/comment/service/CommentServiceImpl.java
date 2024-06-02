@@ -12,6 +12,8 @@ import mytrophy.api.comment.repository.CommentLikeRepository;
 import mytrophy.api.comment.repository.CommentRepository;
 import mytrophy.api.member.entity.Member;
 import mytrophy.api.member.repository.MemberRepository;
+import mytrophy.global.handler.CustomException;
+import mytrophy.global.handler.ErrorCodeEnum;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,24 +31,40 @@ public class CommentServiceImpl implements CommentService{
     private final ArticleRepository articleRepository;
     private final CommentLikeRepository commentLikeRepository;
 
-    //댓글 작성
+    //댓글 등록
     @Override
     public CommentDto createComment(Long memberId, Long articleId, CreateCommentDto createCommentDto) {
         Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new RuntimeException("회원 정보를 찾을 수 없습니다."));
+                .orElseThrow(() -> new CustomException(ErrorCodeEnum.NOT_EXISTS_MEMBER_ID));
         Article article = articleRepository.findById(articleId)
-                .orElseThrow(() -> new RuntimeException("게시글을 찾을 수 없습니다."));
+                .orElseThrow(() -> new CustomException(ErrorCodeEnum.NOT_EXISTS_ARTICLE_ID));
 
-        Comment comment = dtoToEntity(createCommentDto, member,article);
+        Comment parentComment = null;
+        Long parentCommentId = createCommentDto.getParentCommentId();
+
+        if (parentCommentId != null) {
+            parentComment = commentRepository.findById(parentCommentId)
+                    .orElseThrow(() -> new CustomException(ErrorCodeEnum.NOT_EXISTS_PARENT_COMMENT_ID));
+
+            if(parentComment.getParentComment() != null) {
+                throw new CustomException(ErrorCodeEnum.NOT_PARENT_COMMENT);
+            }
+        }
+
+        Comment comment = dtoToEntity(createCommentDto, member, article);
         Comment createdComment = commentRepository.save(comment);
         return entityToDto(createdComment);
     }
 
     //댓글 수정
     @Override
-    public CommentDto updateComment(Long commentId, String content) {
+    public CommentDto updateComment(Long commentId, Long memberId, String content) {
         Comment comment = commentRepository.findById(commentId)
-                .orElseThrow(() -> new RuntimeException("댓글을 찾을 수 없습니다."));
+                .orElseThrow(() -> new CustomException(ErrorCodeEnum.NOT_EXISTS_COMMENT_ID));
+
+        if (!isAuthorized(commentId, memberId)) {
+            throw new CustomException(ErrorCodeEnum.UNAUTHORIZED);
+        }
 
         comment.updateContent(content);
         return entityToDto(commentRepository.save(comment));
@@ -54,18 +72,19 @@ public class CommentServiceImpl implements CommentService{
 
     //댓글 삭제
     @Override
-    public void deleteComment(Long commentId) {
-        commentRepository.deleteById(commentId);
-    }
+    public void deleteComment(Long commentId, Long memberId) {
+        Comment comment = commentRepository.findById(commentId)
+                .orElseThrow(() -> new CustomException(ErrorCodeEnum.NOT_EXISTS_COMMENT_ID));
 
-    //특정 게시글의 댓글 전체조회
-    @Override
-    @Transactional(readOnly = true)
-    public List<CommentDto> findByArticleId(Long articleId) {
-        List<Comment> comments = commentRepository.findByArticleId(articleId);
-        return comments.stream()
-                .map(this::entityToDto)
-                .collect(Collectors.toList());
+        if (!isAuthorized(commentId, memberId)) {
+            throw new CustomException(ErrorCodeEnum.UNAUTHORIZED);
+        }
+
+        if (!comment.getChildrenComment().isEmpty()) {
+            commentRepository.deleteAllByParentComment(comment);
+        }
+
+        commentRepository.delete(comment);
     }
 
     //특정 회원의 댓글 전체조회
@@ -78,25 +97,18 @@ public class CommentServiceImpl implements CommentService{
                 .collect(Collectors.toList());
     }
 
-    //게시글 별 댓글 수 조회
-    @Override
-    @Transactional(readOnly = true)
-    public int countByArticleId(Long articleId) {
-        return commentRepository.countByArticleId(articleId);
-    }
-
     //댓글 추천
     @Override
     public void likeComment(Long commentId, Long memberId) {
         Comment comment = commentRepository.findById(commentId)
-                .orElseThrow(() -> new RuntimeException("댓글을 찾을 수 없습니다."));
+                .orElseThrow(() -> new CustomException(ErrorCodeEnum.NOT_EXISTS_COMMENT_ID));
 
         Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new RuntimeException("회원을 찾을 수 없습니다."));
+                .orElseThrow(() -> new CustomException(ErrorCodeEnum.NOT_EXISTS_MEMBER_ID));
 
         Optional<CommentLike> existingLike = commentLikeRepository.findByCommentAndMember(comment, member);
         if(existingLike.isPresent()) {
-            throw new RuntimeException("이미 추천한 댓글입니다.");
+            throw new CustomException(ErrorCodeEnum.ALREADY_LIKED_COMMENT_ID);
         }
 
         CommentLike commentLike = CommentLike.builder()
@@ -105,7 +117,7 @@ public class CommentServiceImpl implements CommentService{
                 .build();
         commentLikeRepository.save(commentLike);
 
-        comment.incrementCntUp();
+        comment.incrementLikes();
         commentRepository.save(comment);
     }
 
@@ -113,15 +125,15 @@ public class CommentServiceImpl implements CommentService{
     @Override
     public void unlikeComment(Long commentId, Long memberId) {
         Comment comment = commentRepository.findById(commentId)
-                .orElseThrow(() -> new RuntimeException("댓글을 찾을 수 없습니다."));
+                .orElseThrow(() -> new CustomException(ErrorCodeEnum.NOT_EXISTS_COMMENT_ID));
         Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new RuntimeException("회원을 찾을 수 없습니다."));
+                .orElseThrow(() -> new CustomException(ErrorCodeEnum.NOT_EXISTS_MEMBER_ID));
 
         CommentLike commentLike = commentLikeRepository.findByCommentAndMember(comment, member)
-                .orElseThrow(() -> new RuntimeException("해당 댓글을 추천하지 않았습니다."));
+                .orElseThrow(() -> new CustomException(ErrorCodeEnum.NOT_LIKED_COMMENT_ID));
 
         commentLikeRepository.delete(commentLike);
-        comment.decrementCntUp();
+        comment.decrementLikes();
         commentRepository.save(comment);
     }
 
@@ -129,7 +141,7 @@ public class CommentServiceImpl implements CommentService{
     @Override
     public boolean isAuthorized(Long commentId, Long memberId) {
         Comment comment = commentRepository.findById(commentId)
-                .orElseThrow(() -> new RuntimeException("댓글을 찾을 수 없습니다."));
+                .orElseThrow(() -> new CustomException(ErrorCodeEnum.NOT_EXISTS_COMMENT_ID));
         return comment.getMember().getId().equals(memberId);
     }
 
@@ -140,17 +152,24 @@ public class CommentServiceImpl implements CommentService{
             comment.getContent(),
             comment.getMember().getId(),
             comment.getArticle().getId(),
-            comment.getCntUp()
+            comment.getLikes(),
+            comment.getParentComment() != null ? comment.getParentComment().getId() : null
         );
     }
 
     //dto -> entity
     private Comment dtoToEntity(CreateCommentDto createCommentDto, Member member, Article article) {
-        return Comment.builder()
+        Comment.CommentBuilder commentBuilder = Comment.builder()
                 .content(createCommentDto.getContent())
                 .member(member)
-                .article(article)
-                .cntUp(createCommentDto.getCntUp())
-                .build();
+                .article(article);
+
+        if (createCommentDto.getParentCommentId() != null) {
+            Comment parentComment = commentRepository.findById(createCommentDto.getParentCommentId())
+                    .orElseThrow(() -> new CustomException(ErrorCodeEnum.NOT_EXISTS_PARENT_COMMENT_ID));
+            commentBuilder.parentComment(parentComment);
+        }
+
+        return commentBuilder.build();
     }
 }

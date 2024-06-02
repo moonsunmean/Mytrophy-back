@@ -1,0 +1,16 @@
+version: "3.9"
+
+services:
+  spring-prometheus:
+    image: "prom/prometheus:latest"
+    ports:
+      - 9292:9090
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+  spring-grafana:
+    image: "grafana/grafana"
+    user: "$UID:$GID"
+    ports:
+      - 3202:3000
+    env_file:
+      - ./monitoring/grafana.env
