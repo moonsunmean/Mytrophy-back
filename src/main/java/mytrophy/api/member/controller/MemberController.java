@@ -1,47 +1,49 @@
 package mytrophy.api.member.controller;
 
-
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
 import lombok.AllArgsConstructor;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import mytrophy.api.global.jwt.CustomSuccessHandler;
-import mytrophy.api.global.jwt.JWTUtil;
+import mytrophy.global.jwt.CustomSuccessHandler;
 import mytrophy.api.member.dto.MemberDto;
 import mytrophy.api.member.dto.SteamOpenidLoginDto;
 import mytrophy.api.member.entity.Member;
 import mytrophy.api.member.security.SteamAutenticationToken;
 import mytrophy.api.member.security.SteamUserPrincipal;
 import mytrophy.api.member.service.SteamService;
+import mytrophy.global.jwt.JWTUtil;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import mytrophy.api.member.service.MemberService;
 import org.springframework.web.servlet.ModelAndView;
-
+import org.springframework.util.StringUtils;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Map;
 
-import static org.springframework.security.web.context.HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY;
+import mytrophy.api.image.service.ImageService;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
 
 @Slf4j
 @AllArgsConstructor
 @RestController
+@RequestMapping("/api/members")
 public class MemberController {
     private final AuthenticationManager authenticationManager;
     private final SteamService steamService;
     private final MemberService memberService;
     private final CustomSuccessHandler successHandler;
     private final JWTUtil jwtUtil;
+    private final ImageService imageService;
+
+
+
     // 회원 가입
     @PostMapping("/signup")
     public ResponseEntity<String> signupMember(@RequestBody MemberDto memberDto) {
@@ -57,6 +59,7 @@ public class MemberController {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
         return ResponseEntity.ok(member);
+
     }
 
     // 회원 수정
@@ -68,6 +71,7 @@ public class MemberController {
         } else {
             return new ResponseEntity<>("회원 수정 실패", HttpStatus.NOT_FOUND);
         }
+
     }
 
     // 회원 삭제
@@ -84,7 +88,6 @@ public class MemberController {
     public void login(HttpServletRequest request, HttpServletResponse response, @RequestHeader("access") String token) throws IOException {
 
             response.sendRedirect("http://localhost:8080/steam-login");
-
     }
 
 
@@ -103,12 +106,15 @@ public class MemberController {
                 allRequestParams.get("openid.signed"),
                 allRequestParams.get("openid.sig")
         );
+
         String token =  allRequestParams.get("access");
         System.out.println(token);
-        String currentUsername = jwtUtil.getUsername(token);
+        log.info("토큰값: {}",token);
+        String currentUsername = "anonymousUser";
+        if(StringUtils.hasText(token) && token !=null &&token.length()>5) {
+            currentUsername = jwtUtil.getUsername(token);
+        }
         System.out.println("currentUsername : "+currentUsername);
-        String testname  =  SecurityContextHolder.getContext().getAuthentication().getName();
-        System.out.println("testname : "+testname);
         if(currentUsername !="anonymousUser"){
             try {
                 String steamUserId = steamService.validateLoginParameters(dto);
@@ -127,8 +133,6 @@ public class MemberController {
                 Authentication auth        = authenticationManager.authenticate(authReq);
                 SecurityContext sc          = SecurityContextHolder.getContext();
                 sc.setAuthentication(auth);
-//            HttpSession session = request.getSession(true);
-//            session.setAttribute(SPRING_SECURITY_CONTEXT_KEY, sc);
                 successHandler.onAuthenticationSuccess(request,response, auth);
                 return null;
 
@@ -163,4 +167,18 @@ public class MemberController {
     }
 
 
+
+    // 회원 사진 추가
+    @PostMapping("/files")
+    public ResponseEntity<String> uploadOnlyFiles(@RequestPart(value = "file", required = false) List<MultipartFile> files) throws IOException {
+        imageService.uploadFiles(files);
+        return ResponseEntity.ok("파일 업로드 성공");
+    }
+
+    // 회원 사진 삭제
+    @DeleteMapping("/files")
+    public ResponseEntity<String> removeOnlyFiles(List<String> files) {
+        imageService.removeFile(files);
+        return ResponseEntity.ok("파일 삭제 성공");
+    }
 }

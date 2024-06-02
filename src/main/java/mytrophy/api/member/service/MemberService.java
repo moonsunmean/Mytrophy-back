@@ -2,6 +2,8 @@ package mytrophy.api.member.service;
 
 
 import lombok.RequiredArgsConstructor;
+import mytrophy.api.game.entity.Category;
+import mytrophy.api.game.repository.CategoryRepository;
 import mytrophy.api.member.dto.MemberDto;
 import mytrophy.api.member.entity.Member;
 import mytrophy.api.member.repository.MemberRepository;
@@ -14,27 +16,34 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.Collections;
 import java.util.Optional;
+import java.util.List;
+import java.util.stream.Collectors;
+
+
+import org.springframework.transaction.annotation.Transactional;
+
 
 @Service
 public class MemberService {
 
     private final MemberRepository memberRepository;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
-    public MemberService(MemberRepository memberRepository, BCryptPasswordEncoder bCryptPasswordEncoder) {
+    private final CategoryRepository categoryRepository;
+    public MemberService(MemberRepository memberRepository, BCryptPasswordEncoder bCryptPasswordEncoder, CategoryRepository categoryRepository) {
         this.memberRepository = memberRepository;
         this.bCryptPasswordEncoder = bCryptPasswordEncoder;
+        this.categoryRepository = categoryRepository;
     }
 
     public Optional<Member> findBySteamId(String id) {
         return memberRepository.findBySteamId(id);
     }
 
+    @Transactional
     public void signupMember(MemberDto memberDto) {
 
-        Boolean isExist = memberRepository.existsByUsername(memberDto.getUsername());
-
-        if (isExist) {
-            return;
+        if (memberRepository.existsByUsername(memberDto.getUsername())) {
+            throw new IllegalArgumentException("Username already exists: " + memberDto.getUsername());
         }
 
         // 만약 회원가입 정보가 없으면 (처음 회원가입하면)
@@ -47,10 +56,15 @@ public class MemberService {
         signupMember.setEmail(memberDto.getEmail());
         signupMember.setSteamId(memberDto.getSteamId());
         signupMember.setLoginType("mytrophy");
-        signupMember.setProfileImage(memberDto.getProfileImage());
+        signupMember.setImagePath(memberDto.getImagePath());
 
         memberRepository.save(signupMember);
     }
+
+
+
+
+
 
     // 회원 조회
     public Member findMemberById(Long id) {
@@ -60,8 +74,10 @@ public class MemberService {
 
     // 회원 수정
     public boolean updateMemberById(Long id, MemberDto memberDto) {
-        if (memberRepository.existsById(id)) {
-            Member member = memberRepository.findById(id).get();
+        Member member = memberRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("다음 ID에 해당하는 회원을 찾을 수 없습니다: " + id));
+
+
             member.setName(memberDto.getName());
             member.setEmail(memberDto.getEmail());
             member.setPassword(bCryptPasswordEncoder.encode(memberDto.getPassword()));
@@ -71,20 +87,20 @@ public class MemberService {
             member.setEmail(memberDto.getEmail());
             member.setSteamId(memberDto.getSteamId());
             member.setLoginType(memberDto.getLoginType());
-            member.setProfileImage(memberDto.getProfileImage());
+            member.setImagePath(memberDto.getImagePath());
             memberRepository.save(member);
             return true;
-        }
-        return false;
     }
 
-    // 회원 삭제
+
+
+    @Transactional
     public boolean deleteMemberById(Long id) {
-        if (memberRepository.existsById(id)) {
-            memberRepository.deleteById(id);
-            return true;
+        if (!memberRepository.existsById(id)) {
+            throw new IllegalArgumentException("다음 ID에 해당하는 회원을 찾을 수 없습니다: " + id);
         }
-        return false;
+        memberRepository.deleteById(id);
+        return true;
     }
     public void linkSteamAccount(String username, String steamId) {
         System.out.println("linkSteam username : "+username);
@@ -95,5 +111,35 @@ public class MemberService {
         member.setSteamId(steamId);
         memberRepository.save(member);
     }
+
+
+
+
+    private void mapDtoToMember(MemberDto memberDto, Member member) {
+        member.setUsername(memberDto.getUsername());
+        member.setName(memberDto.getName());
+        member.setNickname(memberDto.getNickname());
+        member.setEmail(memberDto.getEmail());
+        member.setSteamId(memberDto.getSteamId());
+        member.setLoginType(memberDto.getLoginType());
+        member.setImagePath(memberDto.getImagePath());
+        if (memberDto.getCategoryIds() != null) {
+            List<Category> categories = memberDto.getCategoryIds().stream()
+                .map(categoryId -> categoryRepository.findById(categoryId)
+                    .orElseThrow(() -> new IllegalArgumentException("Invalid category ID: " + categoryId)))
+                .collect(Collectors.toList());
+            member.setCategories(categories);
+        }
+    }
+
+    private String encodePassword(String password) {
+        return bCryptPasswordEncoder.encode(password);
+    }
+
+    // 회원 username으로 조회
+    public Member findMemberByUsername(String username) {
+        return memberRepository.findByUsername(username);
+    }
+
 
 }

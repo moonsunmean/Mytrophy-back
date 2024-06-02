@@ -38,7 +38,9 @@ public class SteamAuthenticationProvider implements AuthenticationProvider {
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
         System.out.println("into authenticate");
         String steamId = ((SteamAutenticationToken) authentication).getSteamId();
-
+        String steamusername = ((SteamAutenticationToken) authentication).getName();
+        System.out.println("steamId: "+ steamId);
+        System.out.println("steamusername: "+ steamusername);
         Map<String, Object> userAttributes;
         try {
             userAttributes = steamService.getUserData(steamId);
@@ -46,6 +48,19 @@ public class SteamAuthenticationProvider implements AuthenticationProvider {
             e.printStackTrace();
             return null;
         }
+//        Member member = memberService.findMemberByUsername(steamId);
+//        if (member == null) {
+//            String username = (String) userAttributes.get("personaname");
+//            String profile = (String) userAttributes.get("avatar");
+//            member = new Member();
+//            member.setName(username);
+//            member.setLoginType("steam");
+//            member.setSteamId(steamId);
+//            member.setUsername(steamId);
+//            member.setImagePath(profile);
+//            member.setRole("ROLE_USER");
+//            member = memberRepository.save(member);
+//        }
         Optional<Member> userOptional = memberService.findBySteamId(steamId);
         Member member = userOptional.orElseGet(() -> {
             String username = (String) userAttributes.get("personaname");
@@ -55,7 +70,7 @@ public class SteamAuthenticationProvider implements AuthenticationProvider {
             newMember.setLoginType("steam");
             newMember.setSteamId(steamId);
             newMember.setUsername(steamId);
-            newMember.setProfileImage(profile);
+            newMember.setImagePath(profile);
             newMember.setRole("ROLE_USER");
             return memberRepository.save(newMember);
         });
