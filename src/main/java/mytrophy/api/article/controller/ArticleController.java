@@ -14,6 +14,7 @@ import mytrophy.global.jwt.CustomUserDetails;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.parameters.P;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -65,6 +66,7 @@ public class ArticleController {
 //        List<ArticleResponseDto> articleResponseDto = articleQueryService.findArticleWithCommentsOrderedByLatest(id);
 //        return ResponseEntity.ok().body(articleResponseDto);
 //    }
+
     @GetMapping("/articles/{id}")
     public ResponseEntity<ArticleResponseDto> getArticleById(@PathVariable("id") Long id) {
         ArticleResponseDto articleResponseDto = articleQueryService.findArticleWithCommentsOrderedByLatest(id);
@@ -167,25 +169,20 @@ public class ArticleController {
             // 토큰에서 username 빼내기
             String username = userInfo.getUsername();
             Long memberId = memberService.findMemberByUsername(username).getId();
-            articleService.likeArticle(articleId, memberId);
-            return ResponseEntity.ok().body("추천 완료");
+
+            // 이미 해당 게시글에 좋아요를 눌렀는지 확인
+            boolean isLiked = articleService.checkLikeArticle(articleId, memberId);
+            if (isLiked) {
+                // 이미 좋아요를 눌렀다면 좋아요 취소
+                articleService.articleLikeDown(articleId, memberId);
+                return ResponseEntity.ok().body("게시글 추천을 취소하였습니다.");
+            } else {
+                // 좋아요를 누르지 않았다면 좋아요
+                articleService.articleLikeUp(articleId, memberId);
+                return ResponseEntity.ok().body("게시글을 추천하였습니다.");
+            }
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("추천 실패");
-        }
-    }
-
-    // 게시글 추천 취소
-    @PostMapping("/articles/{id}/unlike")
-    public ResponseEntity<String> unlikeArticle(@PathVariable("id") Long articleId,
-                                                @AuthenticationPrincipal CustomUserDetails userInfo) {
-        try {
-            // 토큰에서 username 빼내기
-            String username = userInfo.getUsername();
-            Long memberId = memberService.findMemberByUsername(username).getId();
-            articleService.unlikeArticle(articleId, memberId);
-            return ResponseEntity.ok().body("추천 취소 완료");
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body("추천 취소 실패");
         }
     }
 
