@@ -21,7 +21,7 @@ pipeline {
             steps {
                 script {
                     // Git clone
-                    sh 'git clone -b master https://kdt-gitlab.elice.io/cloud_track/class_02/web_project3/team04/team4-back.git'
+                    sh 'git clone -b dev https://kdt-gitlab.elice.io/cloud_track/class_02/web_project3/team04/team4-back.git'
                 }
             }
         }
