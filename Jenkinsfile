@@ -8,12 +8,12 @@ pipeline {
     }
 
     stages {
-        stage('Git Clone') {
+
+        stage('git clone') {
             steps {
-                script {
                     // git 클론
-                    sh 'git clone -b dev https://kdt-gitlab.elice.io/cloud_track/class_02/web_project3/team04/team4-back.git'
-                }
+                    git branch: 'dev', credentialsId: 'GitLabUsernamePW', url: 'https://kdt-gitlab.elice.io/cloud_track/class_02/web_project3/team04/team4-back.git'
+
             }
         }
 
