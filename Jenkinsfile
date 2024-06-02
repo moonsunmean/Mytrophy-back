@@ -5,14 +5,15 @@ pipeline {
         DOCKERHUB_CREDENTIALS = credentials('dockerhub-credentials-id')
         DOCKERHUB_REPO = 'qpfriday/mytrophy'
         DOCKER_IMAGE_TAG = "${DOCKERHUB_REPO}:${BUILD_NUMBER}"
+        GIT_CREDENTIALS = credentials('GitLabUsernamePW') // Add this line
     }
 
     stages {
         stage('Git Clone') {
             steps {
                 script {
-                    // Git clone
-                    sh 'git clone -b dev https://kdt-gitlab.elice.io/cloud_track/class_02/web_project3/team04/team4-back.git'
+                    // Use the GitLab credentials for cloning the repository
+                    sh "git clone -b dev https://${GIT_CREDENTIALS_USR}:${GIT_CREDENTIALS_PSW}@kdt-gitlab.elice.io/cloud_track/class_02/web_project3/team04/team4-back.git"
                 }
             }
         }
@@ -20,9 +21,9 @@ pipeline {
         stage('Build') {
             steps {
                 script {
-                    // Set execute permissions for gradlew
+                    // gradlew 권한 설정
                     sh 'chmod +x gradlew'
-                    // Build
+                    // 빌드
                     sh './gradlew clean build'
                 }
             }
@@ -31,7 +32,7 @@ pipeline {
         stage('Verify Docker Installation') {
             steps {
                 script {
-                    // Ensure Docker is installed and accessible
+                    // docker 설치 확인
                     sh 'docker --version'
                 }
             }
@@ -40,7 +41,7 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 script {
-                    // Docker image build
+                    // docker 이미지 빌드
                     sh "docker build -t ${DOCKER_IMAGE_TAG} ."
                 }
             }
@@ -49,8 +50,8 @@ pipeline {
         stage('Push to Docker Hub') {
             steps {
                 script {
-                    docker.withRegistry('https://index.docker.io/v1/') {
-                        // Docker image push
+                    docker.withRegistry('https://index.docker.io/v1/', DOCKERHUB_CREDENTIALS) {
+                        // docker 이미지 푸시
                         sh "docker push ${DOCKER_IMAGE_TAG}"
                     }
                 }
