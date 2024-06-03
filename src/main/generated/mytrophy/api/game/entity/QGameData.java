@@ -31,10 +31,6 @@ public class QGameData extends EntityPathBase<GameData> {
     //inherited
     public final DateTimePath<java.time.LocalDateTime> updatedAt = _super.updatedAt;
 
-    public final NumberPath<Integer> appId = createNumber("appId", Integer.class);
-
-    public final NumberPath<Long> id = createNumber("id", Long.class);
-
     public QGameData(String variable) {
         super(GameData.class, forVariable(variable));
     }
