@@ -14,6 +14,8 @@ import mytrophy.api.game.entity.Category;
 import mytrophy.api.game.entity.Game;
 import mytrophy.api.game.entity.Screenshot;
 import mytrophy.api.game.repository.*;
+import mytrophy.global.handler.CustomException;
+import mytrophy.global.handler.ErrorCodeEnum;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
@@ -47,11 +49,11 @@ public class GameService {
         );
     }
 
-    public Page<GetTopGameDTO> getTopGameDTO(int page, int size,List<Long> appList) {
+    public Page<GetTopGameDTO> getTopGameDTO(int page, int size,List<Integer> appList) {
         int rank = 1;
         List<GetTopGameDTO> topGameDTOList = new ArrayList<>();
-        for (Long appid : appList) {
-            Game game = gameRepository.findById(appid).orElse(null);
+        for (int appid : appList) {
+            Game game = gameRepository.findByAppId(appid);
             GetTopGameDTO dto;
             if (game != null) {
                 dto = new GetTopGameDTO(game.getAppId(), game.getName(), game.getHeaderImagePath(), rank);
@@ -72,7 +74,7 @@ public class GameService {
 
     public GetGameDetailDTO getGameDetailDTO(Integer id) {
 
-        if (!gameRepository.existsByAppId(id)) throw new NullPointerException("해당하는 게임을 찾을 수 없습니다");
+        if (!gameRepository.existsByAppId(id)) throw new CustomException(ErrorCodeEnum.NOT_EXISTS_GAME_ID);
 
         Game game = gameRepository.findByAppId(id);
 
