@@ -18,10 +18,10 @@ public class Achievement extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column
+    @Column(length = 2000)
     private String name;
 
-    @Column
+    @Column(length = 2000)
     private String imagePath;
 
 }

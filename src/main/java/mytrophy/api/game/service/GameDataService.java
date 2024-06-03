@@ -19,6 +19,9 @@ import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.*;
 
 @Service
@@ -165,8 +168,8 @@ public class GameDataService {
 
         // JSON 데이터를 가지고 게임 엔티티를 생성하고 저장
         Game game = createGameFromJson(appNode.get("data"), appId);
-        // 게임 가격이 null 이면 출시 예정 게임이므로 건너뛰기
-        if (game.getPrice() == null) {
+        // 출시 예정 게임이므로 건너뛰기
+        if (game.getPrice() == null || game.getReleaseDate() == null) {
             return;
         }
         game.setAchievementList(achievementRepository.saveAll(saveGameAchievement(appId)));
@@ -229,7 +232,8 @@ public class GameDataService {
         Boolean jpPosible = checkList.get(2);
 
         // 출시 날짜
-        String date = appNode.hasNonNull("release_date") ? appNode.get("release_date").get("date").asText() : null;
+        String dateString = appNode.hasNonNull("release_date") ? appNode.get("release_date").get("date").asText() : null;
+        LocalDate date = convertToDate(dateString);
 
         // 추천수
         Integer recommandation = appNode.hasNonNull("recommendations") ? appNode.get("recommendations").get("total").asInt() : null;
@@ -377,6 +381,18 @@ public class GameDataService {
                 gameCategory.setCategory(existingCategory);
                 gameCategoryRepository.save(gameCategory);
             }
+        }
+    }
+
+    public static LocalDate convertToDate(String dateString) {
+        try {
+            // 날짜 형식 지정
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy년 M월 d일");
+            // 문자열을 LocalDate로 변환하여 반환
+            return LocalDate.parse(dateString, formatter);
+        } catch (DateTimeParseException e) {
+            // 예외 발생 시 기본값으로 null 반환
+            return null;
         }
     }
 }

@@ -3,6 +3,7 @@ package mytrophy.api.game.dto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Data
@@ -26,7 +27,7 @@ public class ResponseDTO {
         private String publisher;
         private String requirement;
         private Integer price;
-        private String releaseDate;
+        private LocalDate releaseDate;
         private Integer recommendation;
         private String headerImagePath;
         private Boolean koIsPosible;
