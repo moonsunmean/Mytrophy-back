@@ -49,7 +49,7 @@ pipeline {
         stage('Push to Docker Hub') {
             steps {
                 script {
-                    docker.withRegistry('https://index.docker.io/v1/', DOCKERHUB_CREDENTIALS) {
+                    docker.withRegistry('https://index.docker.io/v1/') {
                         // docker 이미지 푸시
                         sh "docker push ${DOCKER_IMAGE_TAG}"
                     }
