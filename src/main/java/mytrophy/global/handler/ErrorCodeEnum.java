@@ -14,7 +14,8 @@ public enum ErrorCodeEnum {
     UNAUTHORIZED(HttpStatus.FORBIDDEN, "C-006", "권한이 없습니다."),
     NOT_EXISTS_PARENT_COMMENT_ID(HttpStatus.NOT_FOUND, "C-007", "존재하지 않는 부모 댓글입니다."),
     NOT_PARENT_COMMENT(HttpStatus.BAD_REQUEST, "C-008", "답글에는 추가 답글을 달 수 없습니다."),
-    NOT_EXISTS_GAME_ID(HttpStatus.NOT_FOUND, "C-009", "해당하는 게임을 찾을 수 없습니다."),;
+    NOT_EXISTS_GAME_ID(HttpStatus.NOT_FOUND, "C-009", "해당하는 게임을 찾을 수 없습니다."),
+    NOT_FOUND_GAME(HttpStatus.NOT_FOUND,"C-010","조회된 게임이 없습니다." );
 
 
     private final HttpStatus httpStatus;

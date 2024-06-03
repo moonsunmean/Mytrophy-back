@@ -2,6 +2,7 @@ package mytrophy.api.game.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import mytrophy.api.game.dto.tsetDTO;
+import mytrophy.api.game.dto.RequestDTO.SearchGameRequestDTO;
 import mytrophy.api.game.dto.ResponseDTO.GetAllGameDTO;
 import mytrophy.api.game.dto.ResponseDTO.GetTopGameDTO;
 import mytrophy.api.game.dto.ResponseDTO.GetGameDetailDTO;
@@ -12,6 +13,8 @@ import mytrophy.global.scheduler.GameDataScheduler;
 import org.hibernate.mapping.Any;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -53,13 +56,9 @@ public class GameController {
     }
 
     @GetMapping("/search")
-    public ResponseEntity<Page<GetSearchGameDTO>> getSearchGame(@RequestParam(value = "keyword", defaultValue = "") String keyword,
-                                                                @RequestParam(value = "categoryId", defaultValue = "0") Long categoryId,
-                                                                @RequestParam(name = "page", defaultValue = "1") int page,
-                                                                @RequestParam(name = "size", defaultValue = "10") int size
-    ) {
+    public ResponseEntity<Page<GetSearchGameDTO>> getSearchGame(@RequestBody SearchGameRequestDTO searchGameRequestDTO) {
 
-        return ResponseEntity.status(HttpStatus.OK).body(gameService.getSearchGameDTO(keyword, page - 1, size, categoryId));
+        return ResponseEntity.status(HttpStatus.OK).body(gameService.getSearchGameDTO(searchGameRequestDTO));
     }
 
     @GetMapping("/top100")
@@ -69,8 +68,6 @@ public class GameController {
 
         return ResponseEntity.status(HttpStatus.OK).body(gameService.getTopGameDTO(page-1,size,gameDataService.receiveTopSteamGameList(100,"request")));
     }
-
-
 
     ///////                       스팀에서 서버로 다운                            ////////
 

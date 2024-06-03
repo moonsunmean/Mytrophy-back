@@ -180,6 +180,7 @@ public class GameDataService {
         saveGameCategory(appNode.get("data").get("genres"),game);
     }
 
+
     // 주어진 URL로부터 JSON 데이터를 받아와서 해당 앱의 노드를 반환
     private JsonNode getAppNodeFromUrl(String url, String strId) {
         try {
@@ -362,10 +363,14 @@ public class GameDataService {
         }
     }
 
-    public Category saveCategoryToDb(int receiveId,String name) {
-        Long id = Long.valueOf(receiveId);
-        return new Category(id, name,null);
+    public Category saveCategoryToDb(int receiveId, String name) {
+        Long id = (long) receiveId;
+        Category category = new Category();
+        category.setId(id);
+        category.setName(name);
+        return category;
     }
+
 
     private void saveGameCategory(JsonNode appsNode, Game game) {
         // null 값이면 바로 종료
@@ -374,8 +379,14 @@ public class GameDataService {
         // 게임과 카테고리 연결
         for (JsonNode appNode : appsNode) {
             Long categoryId = appNode.get("id").asLong();
+            String categoryName = appNode.get("description").asText();
+
             if(!gameCategoryRepository.existsByGameIdAndCategoryId(game.getId(), categoryId)){
                 Category existingCategory = categoryRepository.findById(categoryId).orElse(null);
+                if (existingCategory == null) {
+                    existingCategory = new Category(categoryId, categoryName, null);
+                    existingCategory = categoryRepository.save(existingCategory);
+                }
                 GameCategory gameCategory = new GameCategory();
                 gameCategory.setGame(game);
                 gameCategory.setCategory(existingCategory);

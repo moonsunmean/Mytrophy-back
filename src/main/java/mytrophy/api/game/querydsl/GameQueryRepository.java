@@ -5,6 +5,7 @@ import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
+import mytrophy.api.game.dto.ResponseDTO.GetSearchGameDTO;
 import mytrophy.api.game.entity.Game;
 import mytrophy.api.game.entity.QGame;
 import org.springframework.data.domain.Page;
@@ -14,7 +15,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @Repository
@@ -31,41 +31,31 @@ public class GameQueryRepository {
      * @param categoryId                    카테고리 ID
      * @param minPrice                      최소 가격
      * @param maxPrice                      최대 가격
-     * @param recommendation                추천 수
      * @param isFree                        무료 여부
      * @param startDate                     시작 날짜
      * @param endDate                       종료 날짜
      * @param pageable                      페이지 정보
-     * @param nameSortDirection             이름 정렬 방향
-     * @param priceSortDirection            가격 정렬 방향
-     * @param recommendationSortDirection  추천 수 정렬 방향
      * @return 검색된 게임 페이지
      */
     public Page<Game> searchGame(
-            String keyword, Long categoryId, Integer minPrice, Integer maxPrice,
-            Integer recommendation, boolean isFree, String startDate, String endDate,
-            Pageable pageable, Sort.Direction nameSortDirection, Sort.Direction priceSortDirection,
-            Sort.Direction recommendationSortDirection) {
+            String keyword, Long categoryId,
+            Integer minPrice, Integer maxPrice,
+            boolean isFree, LocalDate startDate,
+            LocalDate endDate, Pageable pageable) {
 
         // 검색 조건 생성
-        BooleanExpression predicate = buildSearchPredicate(keyword, categoryId, minPrice, maxPrice, recommendation, isFree, startDate, endDate);
+        BooleanExpression predicate = buildSearchPredicate(keyword, categoryId, minPrice, maxPrice, isFree, startDate, endDate);
 
-        // 페이징된 검색 결과 반환
+        // 쿼리 실행 및 페이징하여 결과 반환
         QueryResults<Game> results = jpaQueryFactory
                 .selectFrom(qGame)
                 .leftJoin(qGame.gameCategoryList).fetchJoin()
                 .where(predicate)
-                .orderBy(getSortExpression(nameSortDirection), getSortExpression(priceSortDirection),
-                        getSortExpression(recommendationSortDirection))
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .fetchResults();
 
-        List<Game> resultList = results.getResults();
-
-        long total = results.getTotal();
-
-        return new PageImpl<>(resultList, pageable, total);
+        return new PageImpl<>(results.getResults(), pageable, results.getTotal());
     }
 
     /**
@@ -75,7 +65,6 @@ public class GameQueryRepository {
      * @param categoryId                    카테고리 ID
      * @param minPrice                      최소 가격
      * @param maxPrice                      최대 가격
-     * @param recommendation                추천 수
      * @param isFree                        무료 여부
      * @param startDate                     시작 날짜
      * @param endDate                       종료 날짜
@@ -83,8 +72,8 @@ public class GameQueryRepository {
      */
     private BooleanExpression buildSearchPredicate(
             String keyword, Long categoryId, Integer minPrice, Integer maxPrice,
-            Integer recommendation, boolean isFree, String startDate, String endDate) {
-        BooleanExpression predicate = qGame.name.contains(keyword);
+            boolean isFree, LocalDate startDate, LocalDate endDate) {
+        BooleanExpression predicate = qGame.name.contains(keyword != null ? keyword : "");
 
         if (categoryId != null) {
             predicate = predicate.and(qGame.gameCategoryList.any().category.id.eq(categoryId));
@@ -98,51 +87,66 @@ public class GameQueryRepository {
             predicate = predicate.and(qGame.price.loe(maxPrice));
         }
 
-        if (recommendation != null) {
-            predicate = predicate.and(qGame.recommendation.eq(recommendation));
-        }
-
         if (isFree) {
             predicate = predicate.and(qGame.price.eq(0));
         }
 
         if (startDate != null && endDate != null) {
-            LocalDate parsedStartDate = parseDate(startDate);
-            LocalDate parsedEndDate = parseDate(endDate).plusDays(1);
-            predicate = predicate.and(qGame.releaseDate.between(parsedStartDate, parsedEndDate));
+            predicate = predicate.and(qGame.releaseDate.between(startDate, endDate.plusDays(1)));
         }
 
         return predicate;
     }
 
     /**
-     * 정렬 방향에 따른 정렬 표현식을 반환하는 메서드입니다.
+     * 이름 정렬 표현식을 반환하는 메서드입니다.
      *
-     * @param direction 정렬 방향
-     * @return 정렬 표현식
+     * @param direction 이름 정렬 방향
+     * @return 이름 정렬 표현식
      */
-    private OrderSpecifier<?> getSortExpression(Sort.Direction direction) {
+    private OrderSpecifier<String> getNameSortExpression(Sort.Direction direction) {
         if (direction == null) {
             return null;
         }
-        switch (direction) {
-            case ASC:
-                return qGame.name.asc();
-            case DESC:
-                return qGame.name.desc();
-            default:
-                return null;
-        }
+        return direction.isAscending() ? qGame.name.asc() : qGame.name.desc();
     }
 
     /**
-     * 문자열 형식의 날짜를 LocalDate로 변환하는 메서드입니다.
+     * 가격 정렬 표현식을 반환하는 메서드입니다.
      *
-     * @param dateString 날짜 문자열
-     * @return LocalDate 객체
+     * @param direction 가격 정렬 방향
+     * @return 가격 정렬 표현식
      */
-    private LocalDate parseDate(String dateString) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy년 M월 d일");
-        return LocalDate.parse(dateString, formatter);
+    private OrderSpecifier<Integer> getPriceSortExpression(Sort.Direction direction) {
+        if (direction == null) {
+            return null;
+        }
+        return direction.isAscending() ? qGame.price.asc() : qGame.price.desc();
+    }
+
+    /**
+     * 추천 수 정렬 표현식을 반환하는 메서드입니다.
+     *
+     * @param direction 추천 수 정렬 방향
+     * @return 추천 수 정렬 표현식
+     */
+    private OrderSpecifier<Integer> getRecommendationSortExpression(Sort.Direction direction) {
+        if (direction == null) {
+            return null;
+        }
+        return direction.isAscending() ? qGame.recommendation.asc() : qGame.recommendation.desc();
+    }
+
+    /**
+     * 날짜 정렬 표현식을 반환하는 메서드입니다.
+     *
+     * @param direction 날짜 정렬 방향
+     * @return 날짜 정렬 표현식
+     */
+    private OrderSpecifier<LocalDate> getDateSortExpression(Sort.Direction direction) {
+        if (direction == null) {
+            return null;
+        }
+        return direction.isAscending() ? qGame.releaseDate.asc() : qGame.releaseDate.desc();
     }
 }
