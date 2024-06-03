@@ -46,7 +46,7 @@ public class ArticleResponseDto {
                 ))
                 .collect(Collectors.toList());
 
-        this.commentCount = commentCount;
+        this.commentCount = article.getCommentCount();
     }
 
     public ArticleResponseDto(Article article) {
@@ -74,7 +74,7 @@ public class ArticleResponseDto {
                 .collect(Collectors.toList());
 
         // 댓글 수 초기화
-        this.commentCount = commentCount;
+        this.commentCount = article.getCommentCount();
     }
 
     public static ArticleResponseDto fromEntity(Article article) {
