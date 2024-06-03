@@ -2,17 +2,16 @@ package mytrophy.api.game.service;
 
 import com.google.api.gax.rpc.NotFoundException;
 import mytrophy.api.game.dto.ResponseDTO;
+import mytrophy.api.game.dto.RequestDTO.SearchGameRequestDTO;
 import mytrophy.api.game.dto.ResponseDTO.GetGameAchievementDTO;
 import mytrophy.api.game.dto.ResponseDTO.GetGameScreenshotDTO;
+import mytrophy.api.game.dto.ResponseDTO.GetGameCategoryDTO;
 import mytrophy.api.game.dto.ResponseDTO.GetTopGameDTO;
 import mytrophy.api.game.dto.ResponseDTO.GetAllGameDTO;
-import mytrophy.api.game.dto.ResponseDTO.GetGameCategoryDTO;
 import mytrophy.api.game.dto.ResponseDTO.GetGameDetailDTO;
 import mytrophy.api.game.dto.ResponseDTO.GetSearchGameDTO;
-import mytrophy.api.game.entity.Achievement;
-import mytrophy.api.game.entity.Category;
-import mytrophy.api.game.entity.Game;
-import mytrophy.api.game.entity.Screenshot;
+import mytrophy.api.game.entity.*;
+import mytrophy.api.game.querydsl.GameQueryRepository;
 import mytrophy.api.game.repository.*;
 import mytrophy.global.handler.CustomException;
 import mytrophy.global.handler.ErrorCodeEnum;
@@ -21,6 +20,7 @@ import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -29,24 +29,32 @@ import java.util.stream.Collectors;
 @Transactional
 public class GameService {
     private final GameRepository gameRepository;
-    private final AchievementRepository achievementRepository;
-    private final CategoryRepository categoryRepository;
-    private final ScreenshotRepository screenshotRepository;
-    private final GameCategoryRepository gameCategoryRepository;
+    private final GameQueryRepository gameQueryRepository;
+
 
     @Autowired
-    public GameService(GameRepository gameRepository, AchievementRepository achievementRepository, CategoryRepository categoryRepository, ScreenshotRepository screenshotRepository, GameCategoryRepository gameCategoryRepository) {
+    public GameService(GameRepository gameRepository, GameQueryRepository gameQueryRepository) {
         this.gameRepository = gameRepository;
-        this.achievementRepository = achievementRepository;
-        this.categoryRepository = categoryRepository;
-        this.screenshotRepository = screenshotRepository;
-        this.gameCategoryRepository = gameCategoryRepository;
+        this.gameQueryRepository = gameQueryRepository;
     }
 
     public Page<GetAllGameDTO> getAllGameDTO(int page, int size) {
-        return gameRepository.findAll(PageRequest.of(page, size, Sort.by("id").descending())).map(
-                game -> new GetAllGameDTO(game.getAppId(), game.getName(), game.getHeaderImagePath())
-        );
+        Page<Game> gamePage = gameRepository.findAll(PageRequest.of(page, size, Sort.by("id").descending()));
+        return gamePage.map(game -> {
+            List<Category> categoryList = game.getGameCategoryList().stream()
+                    .map(GameCategory::getCategory)
+                    .toList();
+
+
+            List<GetGameCategoryDTO> getGameCategoryDTOList = categoryList.stream()
+                    .map(category -> new GetGameCategoryDTO(category.getId(), category.getName()))
+                    .collect(Collectors.toList());
+
+            return new GetAllGameDTO(
+                    game.getAppId(), game.getName(), game.getHeaderImagePath(), game.getPrice(),
+                    game.getKoIsPosible(), game.getEnIsPosible(), game.getJpIsPosible(), getGameCategoryDTOList
+            );
+        });
     }
 
     public Page<GetTopGameDTO> getTopGameDTO(int page, int size,List<Integer> appList) {
@@ -56,9 +64,17 @@ public class GameService {
             Game game = gameRepository.findByAppId(appid);
             GetTopGameDTO dto;
             if (game != null) {
-                dto = new GetTopGameDTO(game.getAppId(), game.getName(), game.getHeaderImagePath(), rank);
+                List<Category> categoryList = new ArrayList<>();
+                game.getGameCategoryList().forEach(gameCategory -> categoryList.add(gameCategory.getCategory()));
+
+                List<GetGameCategoryDTO> getGameCategoryDTOList = categoryList.stream()
+                        .map(category -> new GetGameCategoryDTO(category.getId(), category.getName()))
+                        .collect(Collectors.toList());
+
+                dto = new GetTopGameDTO(game.getAppId(), game.getName(), game.getHeaderImagePath(), game.getPrice(),game.getKoIsPosible(),game.getEnIsPosible(),game.getJpIsPosible(),getGameCategoryDTOList,rank);
             } else {
-                dto = new GetTopGameDTO(null, null, null, rank);
+                dto = new GetTopGameDTO();
+                dto.setRank(rank);
             }
             topGameDTOList.add(dto);
             rank++;
@@ -117,14 +133,57 @@ public class GameService {
         );
     }
 
-    public Page<GetSearchGameDTO> getSearchGameDTO(String keyword, int page, int size , Long categoryId) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by("id").descending());
-        if(categoryId == 0){
-            return gameRepository.findGameByNameContaining(keyword == null ? "" : keyword, pageable).map(
-                    game -> new GetSearchGameDTO(game.getAppId(), game.getName(), game.getHeaderImagePath()));
+    public Page<GetSearchGameDTO> getSearchGameDTO(SearchGameRequestDTO dto) {
+        int size = dto.getSize();
+        int page = dto.getPage()-1;
+        String keyword = dto.getKeyword();
+        Long categoryId = dto.getCategoryId();
+        Integer minPrice = dto.getMinPrice();
+        Integer maxPrice = dto.getMaxPrice();
+        boolean isFree = dto.getIsFree();
+        LocalDate startDate = dto.getStartDate();
+        LocalDate endDate = dto.getEndDate();
+        Sort.Direction nameSortDirection = dto.getNameSortDirection();
+        Sort.Direction priceSortDirection = dto.getPriceSortDirection();
+        Sort.Direction recommendationSortDirection = dto.getRecommendationSortDirection();
+        Sort.Direction dateSortDirection = dto.getDateSortDirection();
 
+        Sort sort = Sort.by(nameSortDirection, "name")
+                .and(Sort.by(priceSortDirection, "price"))
+                .and(Sort.by(recommendationSortDirection, "recommendation"))
+                .and(Sort.by(dateSortDirection, "releaseDate"));
+
+        Pageable pageable = PageRequest.of(page, size, sort);
+
+        Page<Game> gameList = gameQueryRepository.searchGame(
+                keyword, categoryId, minPrice, maxPrice, isFree, startDate, endDate, pageable
+        );
+
+        List<GetSearchGameDTO> getSearchGameDTOList = new ArrayList<>();
+
+            for (Game game : gameList) {
+            GetSearchGameDTO searchGameDTO;
+            List<Category> categoryList = new ArrayList<>();
+            game.getGameCategoryList().forEach(gameCategory -> categoryList.add(gameCategory.getCategory()));
+
+            List<GetGameCategoryDTO> getGameCategoryDTOList = categoryList.stream()
+                    .map(category -> new GetGameCategoryDTO(category.getId(), category.getName()))
+                    .collect(Collectors.toList());
+
+            searchGameDTO = new GetSearchGameDTO(game.getAppId(), game.getName(), game.getHeaderImagePath(), game.getPrice(),game.getKoIsPosible(),game.getEnIsPosible(),game.getJpIsPosible(),getGameCategoryDTOList);
+
+            getSearchGameDTOList.add(searchGameDTO);
         }
-        return gameRepository.findGameByNameContainingByCategoryId(keyword == null ? "" : keyword , pageable,categoryId).map(
-                game -> new GetSearchGameDTO(game.getAppId(), game.getName(), game.getHeaderImagePath()));
+
+        int start = page * size;
+        int end = Math.min(start + size, getSearchGameDTOList.size());
+        List<GetSearchGameDTO> pageList = getSearchGameDTOList.subList(start, end);
+        if (pageList.size() == 0) {
+            throw new CustomException(ErrorCodeEnum.NOT_FOUND_GAME);
+        }
+
+        return new PageImpl<>(pageList, PageRequest.of(page, size), pageList.size());
+
     }
+
 }
