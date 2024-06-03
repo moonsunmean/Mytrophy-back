@@ -119,7 +119,7 @@ public class GameDataService {
     }
 
     // 스팀 게임 top100 목록을 저장하는 메서드
-    public List<Long> receiveTopSteamGameList(int size, String type) throws JsonProcessingException {
+    public List<Integer> receiveTopSteamGameList(int size, String type) throws JsonProcessingException {
 
         RestTemplate restTemplate = new RestTemplate();
         String url = "https://steamspy.com/api.php?request=top100in2weeks";
@@ -127,7 +127,7 @@ public class GameDataService {
         JsonNode rootNode = new ObjectMapper().readTree(response.getBody());
 
         int count = 1;
-        List<Long> appList = new ArrayList<>();
+        List<Integer> appList = new ArrayList<>();
 
         for (JsonNode appNode : rootNode) {
             int appId = appNode.get("appid").asInt();
@@ -137,7 +137,7 @@ public class GameDataService {
                 gameDetail(appId);
             }
             else {
-                appList.add(Long.valueOf(appId));
+                appList.add(appId);
             }
 
             if (count >= size) break;
@@ -165,6 +165,10 @@ public class GameDataService {
 
         // JSON 데이터를 가지고 게임 엔티티를 생성하고 저장
         Game game = createGameFromJson(appNode.get("data"), appId);
+        // 게임 가격이 null 이면 출시 예정 게임이므로 건너뛰기
+        if (game.getPrice() == null) {
+            return;
+        }
         game.setAchievementList(achievementRepository.saveAll(saveGameAchievement(appId)));
         game.setScreenshotList(screenshotRepository.saveAll(saveGameScreenshot(appNode.get("data").get("screenshots"))));
         game = gameRepository.save(game);

@@ -75,14 +75,14 @@ public class GameController {
     ///////                       스팀에서 서버로 다운                            ////////
 
     // 스팀의 전체 게임목록 DB에 다운
-    @PostMapping("/request/game/list")
+    @GetMapping("/request/game/list")
     public ResponseEntity<Any> readSteamGameData() throws JsonProcessingException {
         gameDataService.receiveSteamGameList();
         return ResponseEntity.ok(null);
     }
 
     // 스팀의 전체 상세게임정보 DB에서 다운
-    @PostMapping("/request/game/detail")
+    @GetMapping("/request/game/detail")
     public ResponseEntity<Any> saveDetailSteamGameData(
             @RequestParam(name = "size", defaultValue = "10") int size,
             @RequestParam(name = "isContinue", defaultValue = "false") Boolean isContinue
@@ -92,7 +92,7 @@ public class GameController {
     }
 
     // 스팀의 게임 하나 다운
-    @PostMapping("/request/game/{id}")
+    @GetMapping("/request/game/{id}")
     public ResponseEntity<Any> readSteamGameDataOne(@PathVariable(name = "id") int id) {
         try {
             gameDataService.gameDetail(id);
@@ -103,7 +103,7 @@ public class GameController {
     }
 
     // 스팀의 TOP100 목록 다운
-    @PostMapping("/request/game/top")
+    @GetMapping("/request/game/top")
     public ResponseEntity<Any> readTopSteamGameData() {
         try {
             gameDataService.receiveTopSteamGameList(100,"read");
@@ -113,7 +113,8 @@ public class GameController {
         return ResponseEntity.ok(null);
     }
 
-    @PostMapping("/request/category")
+    // json 파일의 카테고리 리스트를 db에 저장
+    @GetMapping("/request/category")
     public ResponseEntity<Any> readSteamCategoryData() {
         gameDataService.readCategoryList();
         return ResponseEntity.ok(null);
