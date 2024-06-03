@@ -25,29 +25,30 @@ public class GameQueryRepository {
     private final QGame qGame = QGame.game;
 
     /**
-     * 검색 조건에 따라 게임을 검색하는 메서드입니다.
+     * 게임을 검색하는 메서드입니다.
      *
      * @param keyword                       검색 키워드
      * @param categoryId                    카테고리 ID
      * @param minPrice                      최소 가격
      * @param maxPrice                      최대 가격
      * @param recommendation                추천 수
+     * @param isFree                        무료 여부
      * @param startDate                     시작 날짜
      * @param endDate                       종료 날짜
      * @param pageable                      페이지 정보
      * @param nameSortDirection             이름 정렬 방향
      * @param priceSortDirection            가격 정렬 방향
      * @param recommendationSortDirection  추천 수 정렬 방향
-     * @return 검색된 게임 목록
+     * @return 검색된 게임 페이지
      */
     public Page<Game> searchGame(
             String keyword, Long categoryId, Integer minPrice, Integer maxPrice,
-            Integer recommendation, String startDate, String endDate,
+            Integer recommendation, boolean isFree, String startDate, String endDate,
             Pageable pageable, Sort.Direction nameSortDirection, Sort.Direction priceSortDirection,
             Sort.Direction recommendationSortDirection) {
 
         // 검색 조건 생성
-        BooleanExpression predicate = buildSearchPredicate(keyword, categoryId, minPrice, maxPrice, recommendation, startDate, endDate);
+        BooleanExpression predicate = buildSearchPredicate(keyword, categoryId, minPrice, maxPrice, recommendation, isFree, startDate, endDate);
 
         // 페이징된 검색 결과 반환
         QueryResults<Game> results = jpaQueryFactory
@@ -67,7 +68,6 @@ public class GameQueryRepository {
         return new PageImpl<>(resultList, pageable, total);
     }
 
-
     /**
      * 검색 조건을 생성하는 메서드입니다.
      *
@@ -76,23 +76,20 @@ public class GameQueryRepository {
      * @param minPrice                      최소 가격
      * @param maxPrice                      최대 가격
      * @param recommendation                추천 수
+     * @param isFree                        무료 여부
      * @param startDate                     시작 날짜
      * @param endDate                       종료 날짜
      * @return 생성된 검색 조건
      */
     private BooleanExpression buildSearchPredicate(
             String keyword, Long categoryId, Integer minPrice, Integer maxPrice,
-            Integer recommendation, String startDate, String endDate) {
-
-        // 기본 검색 조건: 이름 포함
+            Integer recommendation, boolean isFree, String startDate, String endDate) {
         BooleanExpression predicate = qGame.name.contains(keyword);
 
-        // 카테고리 검색 조건 추가
         if (categoryId != null) {
             predicate = predicate.and(qGame.gameCategoryList.any().category.id.eq(categoryId));
         }
 
-        // 가격 검색 조건 추가
         if (minPrice != null && maxPrice != null) {
             predicate = predicate.and(qGame.price.between(minPrice, maxPrice));
         } else if (minPrice != null) {
@@ -101,15 +98,17 @@ public class GameQueryRepository {
             predicate = predicate.and(qGame.price.loe(maxPrice));
         }
 
-        // 추천 수 검색 조건 추가
         if (recommendation != null) {
             predicate = predicate.and(qGame.recommendation.eq(recommendation));
         }
 
-        // 날짜 범위 검색 조건 추가
+        if (isFree) {
+            predicate = predicate.and(qGame.price.eq(0));
+        }
+
         if (startDate != null && endDate != null) {
             LocalDate parsedStartDate = parseDate(startDate);
-            LocalDate parsedEndDate = parseDate(endDate).plusDays(1); // End date should be exclusive, so add one day
+            LocalDate parsedEndDate = parseDate(endDate).plusDays(1);
             predicate = predicate.and(qGame.releaseDate.between(parsedStartDate, parsedEndDate));
         }
 
