@@ -18,10 +18,10 @@ public class Screenshot extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column
+    @Column(length = 2000)
     private String thumbnailImagePath;
 
-    @Column
+    @Column(length = 2000)
     private String fullImagePath;
 
 
