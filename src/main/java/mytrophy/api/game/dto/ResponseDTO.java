@@ -2,7 +2,13 @@ package mytrophy.api.game.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+import mytrophy.api.game.entity.Category;
+import mytrophy.api.game.entity.Game;
+import mytrophy.api.game.entity.GameCategory;
 
+import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 @Data
@@ -14,6 +20,11 @@ public class ResponseDTO {
         private Integer id;
         private String name;
         private String headerImagePath;
+        private Integer price;
+        private Boolean koPossible;
+        private Boolean enPossible;
+        private Boolean jpPossible;
+        private List<GetGameCategoryDTO> categoryList;
     }
 
     @Data
@@ -26,7 +37,7 @@ public class ResponseDTO {
         private String publisher;
         private String requirement;
         private Integer price;
-        private String releaseDate;
+        private LocalDate releaseDate;
         private Integer recommendation;
         private String headerImagePath;
         private Boolean koIsPosible;
@@ -43,6 +54,11 @@ public class ResponseDTO {
         private Integer id;
         private String name;
         private String headerImagePath;
+        private Integer price;
+        private Boolean koPossible;
+        private Boolean enPossible;
+        private Boolean jpPossible;
+        private List<GetGameCategoryDTO> getGameCategoryDTOList;
     }
 
 
@@ -71,10 +87,16 @@ public class ResponseDTO {
 
     @Data
     @AllArgsConstructor
+    @NoArgsConstructor
     public static class GetTopGameDTO{
         private Integer id;
         private String name;
         private String headerImagePath;
+        private Integer price;
+        private Boolean koPossible;
+        private Boolean enPossible;
+        private Boolean jpPossible;
+        private List<GetGameCategoryDTO> categoryList;
         private Integer rank;
     }
 
