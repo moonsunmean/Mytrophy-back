@@ -26,6 +26,8 @@ public class QMember extends EntityPathBase<Member> {
 
     public final DateTimePath<java.time.LocalDateTime> created_at = createDateTime("created_at", java.time.LocalDateTime.class);
 
+    public final DatePath<java.time.LocalDate> createdAt = createDate("createdAt", java.time.LocalDate.class);
+
     public final StringPath email = createString("email");
 
     public final NumberPath<Long> id = createNumber("id", Long.class);
@@ -42,7 +44,7 @@ public class QMember extends EntityPathBase<Member> {
 
     public final StringPath role = createString("role");
 
-    public final NumberPath<Long> steamId = createNumber("steamId", Long.class);
+    public final StringPath steamId = createString("steamId");
 
     public final DateTimePath<java.time.LocalDateTime> update_at = createDateTime("update_at", java.time.LocalDateTime.class);
 

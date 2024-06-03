@@ -5,15 +5,42 @@ spring:
     username: root
     password: 1234
 
+#    url: jdbc:mysql://34.64.52.132:3306/mytrophy_db
+#    username: mytrophy
+#    password: mytrophy
+
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: create
       naming:
         physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
     show-sql: true
     defer-datasource-initialization: true
     open-in-view: false
-
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-name: google
+            client-id: 1076652919726-clghs8nj9nc6oq0461i9ii4iv90op41h.apps.googleusercontent.com
+            client-secret: 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
+            redirect-uri: http://localhost:8080/login/oauth2/code/google
+            authorization-grant-type: authorization_code
+            scope: profile,email
+          naver:
+            client-name: naver
+            client-id: M__lwomWP26ogS9cROiz
+            client-secret: KeeYEbPqoz
+            redirect-uri: http://localhost:8080/login/oauth2/code/naver
+            authorization-grant-type: authorization_code
+            scope: name,email
+        provider:
+          naver:
+            authorization-uri: https://nid.naver.com/oauth2.0/authorize
+            token-uri: https://nid.naver.com/oauth2.0/token
+            user-info-uri: https://openapi.naver.com/v1/nid/me
+            user-name-attribute: response
     servlet:
       multipart:
         enabled: true           # 멀티파트 요청 활성화
@@ -21,9 +48,14 @@ spring:
         max-request-size: 10MB  # 전체 요청의 최대 크기
 
   jwt:
-    secret: vmfhaltmsasdvdfhaertgaerfgsdfasdklfvhnsdjikonkl
+    secret: vmfhaltmskdlstkfkdgodyroqkfwkdbalroqkfwkdbalaaaaaaaaaaaaaaaabbbbb
 steam:
   api-key: E747BF736400A81DFDF11557E236014E
+
+
+softawii:
+  steam:
+    token: F927DD1980502AE9F832129551700D42
 
 management:
   endpoints:
