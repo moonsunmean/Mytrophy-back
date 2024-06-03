@@ -12,7 +12,7 @@ pipeline {
         stage('git clone') {
             steps {
                     // git 클론
-                    git branch: 'dev', credentialsId: 'GitLabUsernamePW', url: 'https://kdt-gitlab.elice.io/cloud_track/class_02/web_project3/team04/team4-back.git'
+                    git branch: 'dev', credentialsId: 'gitlab-credentials-id', url: 'https://kdt-gitlab.elice.io/cloud_track/class_02/web_project3/team04/team4-back.git'
 
             }
         }
