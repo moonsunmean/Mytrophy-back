@@ -26,12 +26,9 @@ public class QGame extends EntityPathBase<Game> {
 
     public final NumberPath<Integer> appId = createNumber("appId", Integer.class);
 
-<<<<<<< HEAD
     //inherited
     public final DateTimePath<java.time.LocalDateTime> createdAt = _super.createdAt;
 
-=======
->>>>>>> cf4026e880bd58e569949d77a0e2c22366fb8c1b
     public final StringPath description = createString("description");
 
     public final StringPath developer = createString("developer");
