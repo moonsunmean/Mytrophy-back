@@ -22,7 +22,7 @@ import java.io.IOException;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/articles")
 @RequiredArgsConstructor // final 필드를 파라미터로 받는 생성자를 생성
 @Slf4j
 public class ArticleController {
@@ -33,7 +33,7 @@ public class ArticleController {
     private final MemberService memberService;
 
     // 게시글 생성
-    @PostMapping("/articles")
+    @PostMapping
     public ResponseEntity<ArticleResponseDto> createArticle(@AuthenticationPrincipal CustomUserDetails userInfo,
                                                  @RequestBody ArticleRequestDto articleRequestDto,
                                                  @RequestParam(value = "imagePath", required = false) List<String> imagePath) throws IOException {
@@ -54,7 +54,7 @@ public class ArticleController {
     }
 
     // 게시글 리스트 조회
-    @GetMapping("/articles")
+    @GetMapping
     public ResponseEntity<List<ArticleResponseDto>> getAllArticles() {
         List<ArticleResponseDto> articles = articleService.findAll();
         return ResponseEntity.ok().body(articles);
@@ -67,14 +67,14 @@ public class ArticleController {
 //        return ResponseEntity.ok().body(articleResponseDto);
 //    }
 
-    @GetMapping("/articles/{id}")
+    @GetMapping("/{id}")
     public ResponseEntity<ArticleResponseDto> getArticleById(@PathVariable("id") Long id) {
         ArticleResponseDto articleResponseDto = articleQueryService.findArticleWithCommentsOrderedByLatest(id);
         return ResponseEntity.ok().body(articleResponseDto);
     }
 
     // 말머리 별 게시글 리스트 조회
-    @GetMapping("/articles/headers/{header}")
+    @GetMapping("/headers/{header}")
     public ResponseEntity<List<ArticleResponseDto>> getArticlesByHeader(@PathVariable Header header) {
         List<ArticleResponseDto> articles;
         // 헤더가 유효한지 검사
@@ -94,7 +94,7 @@ public class ArticleController {
     }
 
     // 말머리 별 해당 게시글 조회
-    @GetMapping("/articles/{id}/headers/{header}")
+    @GetMapping("/{id}/headers/{header}")
     public ResponseEntity<ArticleResponseDto> getArticleByHeaderAndId(@PathVariable("id") Long id, @PathVariable("header") Header header) {
         ArticleResponseDto article = articleService.findByIdAndHeader(id, header);
 
@@ -107,7 +107,7 @@ public class ArticleController {
 
 
     // 게시글 수정
-    @PatchMapping("/articles/{id}")
+    @PatchMapping("/{id}")
     public ResponseEntity updateArticle(@AuthenticationPrincipal CustomUserDetails userInfo,
                                         @PathVariable("id") Long id,
                                         @RequestBody ArticleRequestDto articleRequestDto,
@@ -141,28 +141,28 @@ public class ArticleController {
     }
 
     // 게시글 삭제
-    @DeleteMapping("/articles/{id}")
+    @DeleteMapping("/{id}")
     public ResponseEntity deleteArticle(@PathVariable("id") Long id) {
         articleService.deleteArticle(id);
         return ResponseEntity.ok().build();
     }
 
     // 파일만 업로드
-    @PostMapping("/articles/files")
+    @PostMapping("/files")
     public ResponseEntity uploadOnlyFiles(@RequestPart ("file") List<MultipartFile> files) throws IOException {
         List<String> uploadFiles = imageService.uploadFiles(files);
         return ResponseEntity.status(HttpStatus.CREATED).body(uploadFiles);
     }
 
     // 파일만 삭제
-    @DeleteMapping("/articles/files")
+    @DeleteMapping("/files")
     public ResponseEntity removeOnlyFiles(List<String> files) {
         imageService.removeFile(files);
         return ResponseEntity.ok().build();
     }
 
     // 게시글 추천
-    @PostMapping("/articles/{id}/like")
+    @PostMapping("/{id}/like")
     public ResponseEntity<String> likeArticle(@PathVariable("id") Long articleId,
                                                 @AuthenticationPrincipal CustomUserDetails userInfo) {
         try {
