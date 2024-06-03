@@ -237,9 +237,9 @@ public class GameDataService {
         LocalDate date = convertToDate(dateString);
 
         // 추천수
-        Integer recommandation = appNode.hasNonNull("recommendations") ? appNode.get("recommendations").get("total").asInt() : null;
+        Integer recommandation = appNode.hasNonNull("recommendations") ? appNode.get("recommendations").get("total").asInt() : 0;
 
-        // 헤어 이미지
+        // 헤어 이미지x
         String headerImagePath = appNode.hasNonNull("header_image") ? appNode.get("header_image").asText() : null;
 
         // 게임 가격

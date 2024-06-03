@@ -137,27 +137,33 @@ public class GameService {
         int size = dto.getSize();
         int page = dto.getPage()-1;
         String keyword = dto.getKeyword();
-        Long categoryId = dto.getCategoryId();
+        List<Long> categoryIds  = dto.getCategoryIds();
         Integer minPrice = dto.getMinPrice();
         Integer maxPrice = dto.getMaxPrice();
         boolean isFree = dto.getIsFree();
         LocalDate startDate = dto.getStartDate();
         LocalDate endDate = dto.getEndDate();
-        Sort.Direction nameSortDirection = dto.getNameSortDirection();
-        Sort.Direction priceSortDirection = dto.getPriceSortDirection();
-        Sort.Direction recommendationSortDirection = dto.getRecommendationSortDirection();
-        Sort.Direction dateSortDirection = dto.getDateSortDirection();
 
-        Sort sort = Sort.by(nameSortDirection, "name")
-                .and(Sort.by(priceSortDirection, "price"))
-                .and(Sort.by(recommendationSortDirection, "recommendation"))
-                .and(Sort.by(dateSortDirection, "releaseDate"));
+        Sort sort = Sort.unsorted();
+
+        if (dto.getNameSortDirection() != null) {
+            sort = sort.and(Sort.by(Sort.Direction.valueOf(dto.getNameSortDirection()), "name"));
+        }
+        if (dto.getPriceSortDirection() != null) {
+            sort = sort.and(Sort.by(Sort.Direction.valueOf(dto.getPriceSortDirection()), "price"));
+        }
+        if (dto.getRecommendationSortDirection() != null) {
+            sort = sort.and(Sort.by(Sort.Direction.valueOf(dto.getRecommendationSortDirection()), "recommendation"));
+        }
+        if (dto.getDateSortDirection() != null) {
+            sort = sort.and(Sort.by(Sort.Direction.valueOf(dto.getDateSortDirection()), "releaseDate"));
+        }
+
+
 
         Pageable pageable = PageRequest.of(page, size, sort);
 
-        Page<Game> gameList = gameQueryRepository.searchGame(
-                keyword, categoryId, minPrice, maxPrice, isFree, startDate, endDate, pageable
-        );
+        Page<Game> gameList = gameQueryRepository.searchGame(keyword, categoryIds, minPrice, maxPrice, isFree, startDate, endDate, pageable);
 
         List<GetSearchGameDTO> getSearchGameDTOList = new ArrayList<>();
 
@@ -175,14 +181,13 @@ public class GameService {
             getSearchGameDTOList.add(searchGameDTO);
         }
 
-        int start = page * size;
-        int end = Math.min(start + size, getSearchGameDTOList.size());
-        List<GetSearchGameDTO> pageList = getSearchGameDTOList.subList(start, end);
-        if (pageList.size() == 0) {
+
+
+        if (getSearchGameDTOList.isEmpty()) {
             throw new CustomException(ErrorCodeEnum.NOT_FOUND_GAME);
         }
 
-        return new PageImpl<>(pageList, PageRequest.of(page, size), pageList.size());
+        return new PageImpl<>(getSearchGameDTOList, PageRequest.of(page, size), getSearchGameDTOList.size());
 
     }
 
