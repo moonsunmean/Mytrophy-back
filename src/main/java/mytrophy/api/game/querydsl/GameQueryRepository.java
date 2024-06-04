@@ -5,7 +5,6 @@ import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
-import mytrophy.api.game.dto.ResponseDTO.GetSearchGameDTO;
 import mytrophy.api.game.entity.Game;
 import mytrophy.api.game.entity.QGame;
 import org.springframework.data.domain.Page;
@@ -49,6 +48,22 @@ public class GameQueryRepository {
                 .selectFrom(qGame)
                 .leftJoin(qGame.gameCategoryList).fetchJoin()
                 .where(predicate)
+                .orderBy(getOrderSpecifier(sort))
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize())
+                .fetchResults();
+
+        return new PageImpl<>(results.getResults(), pageable, results.getTotal());
+    }
+
+    public Page<Game> gameList(Pageable pageable) {
+
+        // 정렬 방향 설정
+        Sort sort = pageable.getSort();
+
+        // 쿼리 실행 및 페이징하여 결과 반환
+        QueryResults<Game> results = jpaQueryFactory
+                .selectFrom(qGame)
                 .orderBy(getOrderSpecifier(sort))
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())

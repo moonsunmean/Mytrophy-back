@@ -1,7 +1,7 @@
 package mytrophy.api.game.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import mytrophy.api.game.dto.tsetDTO;
+import mytrophy.api.game.dto.ResponseDTO.GetGameListDTO;
 import mytrophy.api.game.dto.RequestDTO.SearchGameRequestDTO;
 import mytrophy.api.game.dto.ResponseDTO.GetAllGameDTO;
 import mytrophy.api.game.dto.ResponseDTO.GetTopGameDTO;
@@ -32,13 +32,6 @@ public class GameController {
         this.gameDataScheduler = gameDataScheduler;
     }
 
-    @GetMapping("/test")
-    public ResponseEntity<String> test(@RequestBody tsetDTO test) {
-        String asd = test.getTest1() + test.getTest2();
-        return ResponseEntity.ok(asd);
-    }
-
-
     @GetMapping
     public ResponseEntity<Page<GetAllGameDTO>> getAllGame(@RequestParam(name = "page", defaultValue = "1") int page,
                                                           @RequestParam(name = "size", defaultValue = "10") int size) {
@@ -65,6 +58,22 @@ public class GameController {
             @RequestParam(name = "size", defaultValue = "10") int size) throws JsonProcessingException {
 
         return ResponseEntity.status(HttpStatus.OK).body(gameService.getTopGameDTO(page-1,size,gameDataService.receiveTopSteamGameList(100,"request")));
+    }
+
+    @GetMapping("/release")
+    public ResponseEntity<Page<GetGameListDTO>> getReleaseSortGame(
+            @RequestParam(name = "page", defaultValue = "1") int page,
+            @RequestParam(name = "size", defaultValue = "10") int size) {
+
+        return ResponseEntity.status(HttpStatus.OK).body(gameService.getReleaseGameDTO(page-1,size));
+    }
+
+    @GetMapping("/recommend")
+    public ResponseEntity<Page<GetGameListDTO>> getRecommendSortGame(
+            @RequestParam(name = "page", defaultValue = "1") int page,
+            @RequestParam(name = "size", defaultValue = "10") int size) {
+
+        return ResponseEntity.status(HttpStatus.OK).body(gameService.getRecomandGameDTO(page-1,size));
     }
 
     ///////                       스팀에서 서버로 다운                            ////////
