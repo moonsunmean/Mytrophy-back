@@ -110,7 +110,7 @@ public class GameService {
                 .collect(Collectors.toList());
 
         List<GetGameAchievementDTO> getGameAchievementDTOList = achievementList.stream()
-                .map(achievement -> new GetGameAchievementDTO(achievement.getId(), achievement.getName(), achievement.getImagePath()))
+                .map(achievement -> new GetGameAchievementDTO(achievement.getId(), achievement.getName(), achievement.getImagePath(),achievement.getHidden(),achievement.getDescription()))
                 .collect(Collectors.toList());
 
         return new GetGameDetailDTO(
