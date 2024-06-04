@@ -75,6 +75,8 @@ public class ResponseDTO {
         private Long id;
         private String name;
         private String imagePath;
+        private Boolean hidden;
+        private String description;
     }
 
     @Data

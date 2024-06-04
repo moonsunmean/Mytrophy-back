@@ -24,4 +24,10 @@ public class Achievement extends BaseEntity {
     @Column(length = 2000)
     private String imagePath;
 
+    @Column
+    private Boolean hidden;
+
+    @Column(length = 2000)
+    private String description;
+
 }
