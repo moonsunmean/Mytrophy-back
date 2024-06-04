@@ -65,7 +65,7 @@ pipeline {
                 script {
                     sshagent(['server-ssh-credentials-id']) {
                         // SSH를 통해 서버에 접속
-                        sh "ssh -o StrictHostKeyChecking=no ${SERVER_CREDENTIALS_USR}@${SERVER_IP} 'echo Connected to server'"
+                        sh "ssh ${SERVER_CREDENTIALS_USR}@${SERVER_IP}"
                     }
                 }
             }
