@@ -6,7 +6,7 @@ pipeline {
         DOCKERHUB_REPO = 'qpfriday/mytrophy'
         DOCKER_IMAGE_TAG = "${DOCKERHUB_REPO}:${BUILD_NUMBER}"
         SERVER_CREDENTIALS = credentials('server-ssh-credentials-id')
-        SERVER_IP = 34.64.52.132 // 서버 IP 주소
+        SERVER_IP = '34.64.52.132' // 서버 IP 주소
     }
 
     stages {
