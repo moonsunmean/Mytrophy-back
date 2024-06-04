@@ -3,12 +3,8 @@ package mytrophy.api.game.dto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import mytrophy.api.game.entity.Category;
-import mytrophy.api.game.entity.Game;
-import mytrophy.api.game.entity.GameCategory;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 
 @Data
@@ -75,6 +71,8 @@ public class ResponseDTO {
         private Long id;
         private String name;
         private String imagePath;
+        private Boolean hidden;
+        private String description;
     }
 
     @Data
@@ -91,13 +89,42 @@ public class ResponseDTO {
     public static class GetTopGameDTO{
         private Integer id;
         private String name;
-        private String headerImagePath;
+        private String description;
+        private String developer;
+        private String publisher;
+        private String requirement;
         private Integer price;
-        private Boolean koPossible;
-        private Boolean enPossible;
-        private Boolean jpPossible;
-        private List<GetGameCategoryDTO> categoryList;
+        private LocalDate releaseDate;
+        private Integer recommendation;
+        private String headerImagePath;
+        private Boolean koIsPosible;
+        private Boolean enIsPosible;
+        private Boolean jpIsPosible;
+        private List<GetGameCategoryDTO> getGameCategoryDTOList;
+        private List<GetGameScreenshotDTO> getGameScreenshotDTOList;
+        private List<GetGameAchievementDTO> getGameAchievementDTOList;
         private Integer rank;
+    }
+
+    @Data
+    @AllArgsConstructor
+    public static class GetGameListDTO {
+        private Integer id;
+        private String name;
+        private String description;
+        private String developer;
+        private String publisher;
+        private String requirement;
+        private Integer price;
+        private LocalDate releaseDate;
+        private Integer recommendation;
+        private String headerImagePath;
+        private Boolean koIsPosible;
+        private Boolean enIsPosible;
+        private Boolean jpIsPosible;
+        private List<GetGameCategoryDTO> getGameCategoryDTOList;
+        private List<GetGameScreenshotDTO> getGameScreenshotDTOList;
+        private List<GetGameAchievementDTO> getGameAchievementDTOList;
     }
 
 }
