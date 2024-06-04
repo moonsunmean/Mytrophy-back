@@ -53,7 +53,7 @@ public class QGame extends EntityPathBase<Game> {
 
     public final NumberPath<Integer> recommendation = createNumber("recommendation", Integer.class);
 
-    public final StringPath releaseDate = createString("releaseDate");
+    public final DatePath<java.time.LocalDate> releaseDate = createDate("releaseDate", java.time.LocalDate.class);
 
     public final StringPath requirement = createString("requirement");
 
