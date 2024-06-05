@@ -221,7 +221,7 @@ public class GameDataService {
         if (publishersNode != null && publishersNode.isArray() && publishersNode.size() > 0) {
             for (JsonNode publisherNode : publishersNode) {
                 gamePublisher += publisherNode.asText();
-                gamePublisher += ",";
+                gamePublisher += "&";
             }
         }
 
@@ -287,8 +287,15 @@ public class GameDataService {
         for (JsonNode achievementNode : achievementsNode) {
             String name = achievementNode.get("displayName").asText();
             String imagePath = achievementNode.get("icon").asText();
+            JsonNode hiddenNode = achievementNode.get("hidden");
+            Boolean hidden = hiddenNode != null && hiddenNode.asBoolean();
+            JsonNode descriptionNode = achievementNode.get("description");
+            String description = descriptionNode != null ? descriptionNode.asText() : null;
+            if (hidden && description == null) {
+                description = "숨겨진 업적 입니다.";
+            }
             isExist = achievementRepository.existsByName(name);
-            if(!isExist)achievementList.add(new Achievement(null, name, imagePath));
+            if(!isExist)achievementList.add(new Achievement(null, name, imagePath,hidden,description));
         }
         return achievementList;
     }
