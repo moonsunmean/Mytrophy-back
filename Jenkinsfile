@@ -8,7 +8,6 @@ pipeline {
         SERVER_USERNAME = 'elice' // 사용자 이름
         SERVER_PASSWORD = 'e0w5y63uw7hzte6mwy94ore7ppdis6on' // 비밀번호
         SERVER_IP = '34.64.52.132' // 서버 IP 주소
-        DOCKER_CONFIG = '~/.docker/config.json' // Docker Hub 인증 토큰을 저장할 경로
     }
 
     stages {
@@ -52,8 +51,6 @@ pipeline {
                 script {
                     // docker 로그인
                     sh 'echo $DOCKERHUB_CREDENTIALS_PSW | docker login -u $DOCKERHUB_CREDENTIALS_USR --password-stdin'
-                    // Docker Hub 인증 토큰 저장
-                    sh "mkdir -p ~/.docker && echo '{\"auths\":{\"https://index.docker.io/v1/\":{\"auth\":\"$DOCKERHUB_CREDENTIALS_B64\"}}}' > $DOCKER_CONFIG"
                 }
             }
         }
