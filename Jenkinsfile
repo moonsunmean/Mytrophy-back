@@ -72,7 +72,7 @@ pipeline {
                         // Check if SSH keys are loaded correctly
                         sh 'ssh-add -l'
                         // SSH를 통해 서버에 접속
-                        sh "ssh -o StrictHostKeyChecking=no ${SERVER_CREDENTIALS_USR}@${SERVER_IP} echo 'SSH connection established'"
+                        sh """ssh -o StrictHostKeyChecking=no ${SERVER_CREDENTIALS_USR}@${SERVER_IP} 'pwd' """
                     }
                 }
             }
