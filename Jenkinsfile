@@ -67,7 +67,7 @@ pipeline {
 
         stage('SSH to Server'){
             steps {
-                sshagent([usernamePassword(credentialsId: 'server-ssh-credentials-id', passwordVariable: 'SSH_PASSWORD', usernameVariable: 'SSH_USERNAME')]) {
+                sshagent(credentials: ['server-ssh-credentials-id']) {
                     sh "ssh -o StrictHostKeyChecking=no ${SERVER_CREDENTIALS_USR}@${SERVER_IP} 'whoami'"
                 }
             }
@@ -75,7 +75,7 @@ pipeline {
 
         stage('Docker Pull and Run'){
             steps {
-                sshagent([usernamePassword(credentialsId: 'server-ssh-credentials-id', passwordVariable: 'SSH_PASSWORD', usernameVariable: 'SSH_USERNAME')]) {
+                sshagent(credentials: ['server-ssh-credentials-id']) {
                     sh "ssh -o StrictHostKeyChecking=no ${SERVER_CREDENTIALS_USR}@${SERVER_IP} 'docker pull ${DOCKER_IMAGE_TAG}'"
                     sh "ssh -o StrictHostKeyChecking=no ${SERVER_CREDENTIALS_USR}@${SERVER_IP} 'docker run -d --name mytrophy-service -p 8080:8080 ${DOCKER_IMAGE_TAG}'"
                 }
