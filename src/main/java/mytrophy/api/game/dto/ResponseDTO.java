@@ -3,6 +3,7 @@ package mytrophy.api.game.dto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import mytrophy.api.game.enumentity.Positive;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -17,6 +18,7 @@ public class ResponseDTO {
         private String name;
         private String headerImagePath;
         private Integer price;
+        private Positive positive;
         private Boolean koPossible;
         private Boolean enPossible;
         private Boolean jpPossible;
@@ -35,6 +37,7 @@ public class ResponseDTO {
         private Integer price;
         private LocalDate releaseDate;
         private Integer recommendation;
+        private Positive positive;
         private String headerImagePath;
         private Boolean koIsPosible;
         private Boolean enIsPosible;
@@ -51,6 +54,7 @@ public class ResponseDTO {
         private String name;
         private String headerImagePath;
         private Integer price;
+        private Positive positive;
         private Boolean koPossible;
         private Boolean enPossible;
         private Boolean jpPossible;
@@ -96,6 +100,7 @@ public class ResponseDTO {
         private Integer price;
         private LocalDate releaseDate;
         private Integer recommendation;
+        private Positive positive;
         private String headerImagePath;
         private Boolean koIsPosible;
         private Boolean enIsPosible;
@@ -118,6 +123,7 @@ public class ResponseDTO {
         private Integer price;
         private LocalDate releaseDate;
         private Integer recommendation;
+        private Positive positive;
         private String headerImagePath;
         private Boolean koIsPosible;
         private Boolean enIsPosible;
@@ -125,6 +131,12 @@ public class ResponseDTO {
         private List<GetGameCategoryDTO> getGameCategoryDTOList;
         private List<GetGameScreenshotDTO> getGameScreenshotDTOList;
         private List<GetGameAchievementDTO> getGameAchievementDTOList;
+    }
+
+    @Data
+    @AllArgsConstructor
+    public static class GetGamePlayerNumberDTO {
+        private String playerNumber;
     }
 
 }

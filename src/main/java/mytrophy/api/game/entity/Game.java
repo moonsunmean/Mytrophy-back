@@ -3,6 +3,7 @@ package mytrophy.api.game.entity;
 import jakarta.persistence.*;
 import lombok.*;
 import mytrophy.api.common.base.BaseEntity;
+import mytrophy.api.game.enumentity.Positive;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -48,6 +49,10 @@ public class Game extends BaseEntity {
     @Column
     private Integer recommendation;
 
+    @Column
+    @Enumerated(EnumType.STRING)
+    private Positive positive;
+
     @Column(length = 2000)
     private String headerImagePath;
 
@@ -69,4 +74,6 @@ public class Game extends BaseEntity {
 
     @OneToMany(fetch = FetchType.LAZY)
     private List<Screenshot> screenshotList;
+
+
 }

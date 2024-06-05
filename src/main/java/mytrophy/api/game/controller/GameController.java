@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import mytrophy.api.game.dto.ResponseDTO.GetGameListDTO;
 import mytrophy.api.game.dto.RequestDTO.SearchGameRequestDTO;
 import mytrophy.api.game.dto.ResponseDTO.GetAllGameDTO;
+import mytrophy.api.game.dto.ResponseDTO.GetGamePlayerNumberDTO;
 import mytrophy.api.game.dto.ResponseDTO.GetTopGameDTO;
 import mytrophy.api.game.dto.ResponseDTO.GetGameDetailDTO;
 import mytrophy.api.game.dto.ResponseDTO.GetSearchGameDTO;
@@ -76,6 +77,14 @@ public class GameController {
         return ResponseEntity.status(HttpStatus.OK).body(gameService.getRecomandGameDTO(page-1,size));
     }
 
+    @GetMapping("/positive")
+    public ResponseEntity<Page<GetGameListDTO>> getPositiveGame(
+            @RequestParam(name = "page", defaultValue = "1") int page,
+            @RequestParam(name = "size", defaultValue = "10") int size) {
+
+        return ResponseEntity.status(HttpStatus.OK).body(gameService.getPositiveGameDTO(page-1,size));
+    }
+
     ///////                       스팀에서 서버로 다운                            ////////
 
     // 스팀의 전체 게임목록 DB에 다운
@@ -115,6 +124,13 @@ public class GameController {
             throw new RuntimeException(e);
         }
         return ResponseEntity.ok(null);
+    }
+
+    // 상세게임 페이지 로딩시 현재 플레이어 수
+    @GetMapping("/request/players/{id}")
+    public ResponseEntity<GetGamePlayerNumberDTO> readSteamCategoryData(@PathVariable(name = "id") String id) throws JsonProcessingException {
+
+        return ResponseEntity.ok(gameDataService.getGamePlayerNumber(id));
     }
 
     // json 파일의 카테고리 리스트를 db에 저장
