@@ -70,6 +70,8 @@ public class GameService {
     }
 
 
+
+
     public GetGameDetailDTO getGameDetailDTO(Integer id) {
 
         if (!gameRepository.existsByAppId(id)) throw new NullPointerException("해당하는 게임을 찾을 수 없습니다");
@@ -114,7 +116,6 @@ public class GameService {
                 getGameAchievementDTOList
         );
     }
-
     public Page<GetSearchGameDTO> getSearchGameDTO(String keyword, int page, int size , Long categoryId) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("id").descending());
         if(categoryId == 0){

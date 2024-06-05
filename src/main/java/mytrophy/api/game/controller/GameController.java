@@ -37,14 +37,12 @@ public class GameController {
         return ResponseEntity.ok(asd);
     }
 
-
     @GetMapping
-    public ResponseEntity<Page<GetAllGameDTO>> getAllGame(@RequestParam(name = "page", defaultValue = "1") int page,
+    public ResponseEntity<Page<GetAllGameDTO>> getAllGameDetails(@RequestParam(name = "page", defaultValue = "1") int page,
                                                           @RequestParam(name = "size", defaultValue = "10") int size) {
 
         return ResponseEntity.status(HttpStatus.OK).body(gameService.getAllGameDTO(page - 1, size));
     }
-
 
     @GetMapping("/{id}")
     public ResponseEntity<GetGameDetailDTO> getGameDetail(@PathVariable(name = "id") Integer id) {
