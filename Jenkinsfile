@@ -69,8 +69,10 @@ pipeline {
             steps {
                 script {
                     sshagent(['server-ssh-credentials-id']) {
+                        // Check if SSH keys are loaded correctly
+                        sh 'ssh-add -l'
                         // SSH를 통해 서버에 접속
-                        sh "ssh ${SERVER_CREDENTIALS_USR}@${SERVER_IP}"
+                        sh "ssh -o StrictHostKeyChecking=no ${SERVER_CREDENTIALS_USR}@${SERVER_IP} echo 'SSH connection established'"
                     }
                 }
             }
@@ -81,7 +83,7 @@ pipeline {
                 script {
                     sshagent(['server-ssh-credentials-id']) {
                         // 서버에서 도커 이미지 풀링
-                        sh "ssh ${SERVER_CREDENTIALS_USR}@${SERVER_IP} 'docker pull ${DOCKER_IMAGE_TAG}'"
+                        sh "ssh -o StrictHostKeyChecking=no ${SERVER_CREDENTIALS_USR}@${SERVER_IP} 'docker pull ${DOCKER_IMAGE_TAG}'"
                     }
                 }
             }
@@ -93,7 +95,7 @@ pipeline {
                     sshagent(['server-ssh-credentials-id']) {
                         // 서버에서 기존 서비스 종료 및 새 컨테이너 실행
                         sh """
-                        ssh ${SERVER_CREDENTIALS_USR}@${SERVER_IP} '
+                        ssh -o StrictHostKeyChecking=no ${SERVER_CREDENTIALS_USR}@${SERVER_IP} '
                         if [ \$(docker ps -q -f name=mytrophy-service) ]; then
                             docker stop mytrophy-service
                             docker rm mytrophy-service
