@@ -51,6 +51,8 @@ pipeline {
                 script {
                     // docker 로그인
                     sh 'echo $DOCKERHUB_CREDENTIALS_PSW | docker login -u $DOCKERHUB_CREDENTIALS_USR --password-stdin'
+                    // Docker Hub 인증 토큰 저장
+                    sh "mkdir -p ~/.docker && echo '{\"auths\":{\"https://index.docker.io/v1/\":{\"auth\":\"$DOCKERHUB_CREDENTIALS_B64\"}}}' > $DOCKER_CONFIG"
                 }
             }
         }
