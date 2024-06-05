@@ -7,8 +7,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import java.util.Optional;
-
 public interface GameRepository extends JpaRepository<Game, Long> {
     Page<Game> findGameByNameContaining(String keyword, Pageable pageable);
 
@@ -17,4 +15,8 @@ public interface GameRepository extends JpaRepository<Game, Long> {
     Page<Game> findGameByNameContainingByCategoryId(@Param("keyword") String keyword, Pageable pageable, @Param("categoryId") Long categoryId);
 
     Game findByAppId(Integer appId);
+
+    boolean existsByAppId(Integer id);
 }
+
+

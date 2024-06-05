@@ -2,7 +2,9 @@ package mytrophy.api.game.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import mytrophy.api.common.base.BaseEntity;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -13,16 +15,16 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Game {
+public class Game extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column
+    @Column(unique = true)
     private Integer appId;
 
-    @Column(unique = true)
+    @Column(length = 2000)
     private String name;
 
     @Column(length = 2000)
@@ -41,12 +43,12 @@ public class Game {
     private Integer price;
 
     @Column
-    private String releaseDate;
+    private LocalDate releaseDate;
 
     @Column
     private Integer recommendation;
 
-    @Column
+    @Column(length = 2000)
     private String headerImagePath;
 
     @Column

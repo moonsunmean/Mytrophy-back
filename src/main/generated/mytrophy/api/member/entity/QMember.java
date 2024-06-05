@@ -20,11 +20,14 @@ public class QMember extends EntityPathBase<Member> {
 
     public static final QMember member = new QMember("member1");
 
+    public final mytrophy.api.common.base.QBaseEntity _super = new mytrophy.api.common.base.QBaseEntity(this);
+
     public final ListPath<mytrophy.api.article.entity.Article, mytrophy.api.article.entity.QArticle> articles = this.<mytrophy.api.article.entity.Article, mytrophy.api.article.entity.QArticle>createList("articles", mytrophy.api.article.entity.Article.class, mytrophy.api.article.entity.QArticle.class, PathInits.DIRECT2);
 
     public final ListPath<mytrophy.api.game.entity.Category, mytrophy.api.game.entity.QCategory> categories = this.<mytrophy.api.game.entity.Category, mytrophy.api.game.entity.QCategory>createList("categories", mytrophy.api.game.entity.Category.class, mytrophy.api.game.entity.QCategory.class, PathInits.DIRECT2);
 
-    public final DateTimePath<java.time.LocalDateTime> created_at = createDateTime("created_at", java.time.LocalDateTime.class);
+    //inherited
+    public final DateTimePath<java.time.LocalDateTime> createdAt = _super.createdAt;
 
     public final StringPath email = createString("email");
 
@@ -42,9 +45,10 @@ public class QMember extends EntityPathBase<Member> {
 
     public final StringPath role = createString("role");
 
-    public final NumberPath<Long> steamId = createNumber("steamId", Long.class);
+    public final StringPath steamId = createString("steamId");
 
-    public final DateTimePath<java.time.LocalDateTime> update_at = createDateTime("update_at", java.time.LocalDateTime.class);
+    //inherited
+    public final DateTimePath<java.time.LocalDateTime> updatedAt = _super.updatedAt;
 
     public final StringPath username = createString("username");
 

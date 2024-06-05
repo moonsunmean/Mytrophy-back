@@ -19,6 +19,9 @@ import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.*;
 
 @Service
@@ -59,24 +62,25 @@ public class GameDataService {
         JsonNode rootNode = new ObjectMapper().readTree(response.getBody());
         JsonNode appsNode = rootNode.get("applist").get("apps");
 
-        int count = 1;
-
         List<GameData> gameDataList = new ArrayList<>();
+        List<Integer> gameDataListCheck = new ArrayList<>();
 
         for (JsonNode appNode : appsNode){
             int id = appNode.get("appid").asInt();
-            if(!gameDataRepository.existsByAppId(id)) gameDataList.add(new GameData(null, id));
+            if(!gameDataRepository.existsByAppId(id) && !gameDataListCheck.contains(id)){
+                gameDataList.add(new GameData(null, id));
+                gameDataListCheck.add(id);
+            }
         }
-
-        // 데이터를 한꺼번에 저장
         gameDataRepository.saveAll(gameDataList);
     }
 
-    @Transactional
     public Boolean receiveSteamGameListByDb(int size, boolean isContinue) throws JsonProcessingException {
         // 마지막에 저장한 appId 불러오기
         List<GameRead> gameReadList = gameReadRepository.findAll();
-        GameRead gameRead = gameReadList.get(0);
+
+        GameRead gameRead =
+                (!gameReadList.isEmpty())?gameReadList.get(0):new GameRead(1L,0);
 
         // 스팀에서 받아온 모든 게임목록 불러온 후 오름차순 정렬
         List<GameData> gameDataList = gameDataRepository.findAll()
@@ -117,10 +121,8 @@ public class GameDataService {
         return false;
     }
 
-
-
     // 스팀 게임 top100 목록을 저장하는 메서드
-    public List<Long> receiveTopSteamGameList(int size, String type) throws JsonProcessingException {
+    public List<Integer> receiveTopSteamGameList(int size, String type) throws JsonProcessingException {
 
         RestTemplate restTemplate = new RestTemplate();
         String url = "https://steamspy.com/api.php?request=top100in2weeks";
@@ -128,7 +130,7 @@ public class GameDataService {
         JsonNode rootNode = new ObjectMapper().readTree(response.getBody());
 
         int count = 1;
-        List<Long> appList = new ArrayList<>();
+        List<Integer> appList = new ArrayList<>();
 
         for (JsonNode appNode : rootNode) {
             int appId = appNode.get("appid").asInt();
@@ -138,7 +140,7 @@ public class GameDataService {
                 gameDetail(appId);
             }
             else {
-                appList.add(Long.valueOf(appId));
+                appList.add(appId);
             }
 
             if (count >= size) break;
@@ -166,6 +168,10 @@ public class GameDataService {
 
         // JSON 데이터를 가지고 게임 엔티티를 생성하고 저장
         Game game = createGameFromJson(appNode.get("data"), appId);
+        // 출시 예정 게임이므로 건너뛰기
+        if (game.getPrice() == null || game.getReleaseDate() == null) {
+            return;
+        }
         game.setAchievementList(achievementRepository.saveAll(saveGameAchievement(appId)));
         game.setScreenshotList(screenshotRepository.saveAll(saveGameScreenshot(appNode.get("data").get("screenshots"))));
         game = gameRepository.save(game);
@@ -173,6 +179,7 @@ public class GameDataService {
         // 받아온 게임의 카테고리 연결하여 DB에 저장
         saveGameCategory(appNode.get("data").get("genres"),game);
     }
+
 
     // 주어진 URL로부터 JSON 데이터를 받아와서 해당 앱의 노드를 반환
     private JsonNode getAppNodeFromUrl(String url, String strId) {
@@ -214,7 +221,7 @@ public class GameDataService {
         if (publishersNode != null && publishersNode.isArray() && publishersNode.size() > 0) {
             for (JsonNode publisherNode : publishersNode) {
                 gamePublisher += publisherNode.asText();
-                gamePublisher += ",";
+                gamePublisher += "&";
             }
         }
 
@@ -226,12 +233,13 @@ public class GameDataService {
         Boolean jpPosible = checkList.get(2);
 
         // 출시 날짜
-        String date = appNode.hasNonNull("release_date") ? appNode.get("release_date").get("date").asText() : null;
+        String dateString = appNode.hasNonNull("release_date") ? appNode.get("release_date").get("date").asText() : null;
+        LocalDate date = convertToDate(dateString);
 
         // 추천수
-        Integer recommandation = appNode.hasNonNull("recommendations") ? appNode.get("recommendations").get("total").asInt() : null;
+        Integer recommandation = appNode.hasNonNull("recommendations") ? appNode.get("recommendations").get("total").asInt() : 0;
 
-        // 헤어 이미지
+        // 헤어 이미지x
         String headerImagePath = appNode.hasNonNull("header_image") ? appNode.get("header_image").asText() : null;
 
         // 게임 가격
@@ -247,6 +255,7 @@ public class GameDataService {
         // 컴퓨터 권장 사양
         JsonNode requirementHader = appNode.hasNonNull("pc_requirements") ? appNode.get("pc_requirements") : null;
         String requirement = requirementHader.hasNonNull("minimum") ? requirementHader.get("minimum").asText() : null;
+
         Long id = null;
         Game target = gameRepository.findByAppId(appId);
 
@@ -278,8 +287,15 @@ public class GameDataService {
         for (JsonNode achievementNode : achievementsNode) {
             String name = achievementNode.get("displayName").asText();
             String imagePath = achievementNode.get("icon").asText();
+            JsonNode hiddenNode = achievementNode.get("hidden");
+            Boolean hidden = hiddenNode != null && hiddenNode.asBoolean();
+            JsonNode descriptionNode = achievementNode.get("description");
+            String description = descriptionNode != null ? descriptionNode.asText() : null;
+            if (hidden && description == null) {
+                description = "숨겨진 업적 입니다.";
+            }
             isExist = achievementRepository.existsByName(name);
-            if(!isExist)achievementList.add(new Achievement(null, name, imagePath));
+            if(!isExist)achievementList.add(new Achievement(null, name, imagePath,hidden,description));
         }
         return achievementList;
     }
@@ -354,10 +370,14 @@ public class GameDataService {
         }
     }
 
-    public Category saveCategoryToDb(int receiveId,String name) {
-        Long id = Long.valueOf(receiveId);
-        return new Category(id, name,null);
+    public Category saveCategoryToDb(int receiveId, String name) {
+        Long id = (long) receiveId;
+        Category category = new Category();
+        category.setId(id);
+        category.setName(name);
+        return category;
     }
+
 
     private void saveGameCategory(JsonNode appsNode, Game game) {
         // null 값이면 바로 종료
@@ -366,8 +386,14 @@ public class GameDataService {
         // 게임과 카테고리 연결
         for (JsonNode appNode : appsNode) {
             Long categoryId = appNode.get("id").asLong();
+            String categoryName = appNode.get("description").asText();
+
             if(!gameCategoryRepository.existsByGameIdAndCategoryId(game.getId(), categoryId)){
                 Category existingCategory = categoryRepository.findById(categoryId).orElse(null);
+                if (existingCategory == null) {
+                    existingCategory = new Category(categoryId, categoryName, null);
+                    existingCategory = categoryRepository.save(existingCategory);
+                }
                 GameCategory gameCategory = new GameCategory();
                 gameCategory.setGame(game);
                 gameCategory.setCategory(existingCategory);
@@ -376,7 +402,15 @@ public class GameDataService {
         }
     }
 
-    public Integer getDownloadedDataCount() {
-        return (int) gameDataRepository.count();
+    public static LocalDate convertToDate(String dateString) {
+        try {
+            // 날짜 형식 지정
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy년 M월 d일");
+            // 문자열을 LocalDate로 변환하여 반환
+            return LocalDate.parse(dateString, formatter);
+        } catch (DateTimeParseException e) {
+            // 예외 발생 시 기본값으로 null 반환
+            return null;
+        }
     }
 }

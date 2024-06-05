@@ -1,5 +1,6 @@
 package mytrophy.api.member.controller;
 
+
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -27,3 +28,4 @@ public class MyController {
         return "Main Controller" + username + role;
     }
 }
+

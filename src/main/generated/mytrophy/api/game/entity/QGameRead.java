@@ -19,9 +19,17 @@ public class QGameRead extends EntityPathBase<GameRead> {
 
     public static final QGameRead gameRead = new QGameRead("gameRead");
 
+    public final mytrophy.api.common.base.QBaseEntity _super = new mytrophy.api.common.base.QBaseEntity(this);
+
+    //inherited
+    public final DateTimePath<java.time.LocalDateTime> createdAt = _super.createdAt;
+
     public final NumberPath<Long> id = createNumber("id", Long.class);
 
     public final NumberPath<Integer> lastAppId = createNumber("lastAppId", Integer.class);
+
+    //inherited
+    public final DateTimePath<java.time.LocalDateTime> updatedAt = _super.updatedAt;
 
     public QGameRead(String variable) {
         super(GameRead.class, forVariable(variable));

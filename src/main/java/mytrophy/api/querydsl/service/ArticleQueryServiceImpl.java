@@ -24,10 +24,15 @@ public class ArticleQueryServiceImpl implements ArticleQueryService{
     }
 
     // 해당 게시글 조회 시 댓글 작성일자를 기준으로 내림차순 정렬
-    public List<ArticleResponseDto> findArticleWithCommentsOrderedByLatest(Long articleId) {
-        List<Article> articles = articleQueryRepository.findArticleWithCommentsOrderedByLatest(articleId);
-        return articles.stream()
-            .map(ArticleResponseDto::fromEntity)
-            .collect(Collectors.toList());
+//    public List<ArticleResponseDto> findArticleWithCommentsOrderedByLatest(Long articleId) {
+//        List<Article> articles = articleQueryRepository.findArticleWithCommentsOrderedByLatest(articleId);
+//        return articles.stream()
+//                .map(ArticleResponseDto::fromEntity)
+//                .collect(Collectors.toList());
+//    }
+
+    public ArticleResponseDto findArticleWithCommentsOrderedByLatest(Long articleId){
+        Article article = articleQueryRepository.findArticleWithCommentsOrderedByLatest(articleId);
+        return ArticleResponseDto.fromEntity(article);
     }
 }
