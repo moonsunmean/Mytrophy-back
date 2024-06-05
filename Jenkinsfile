@@ -70,7 +70,7 @@ pipeline {
             steps {
                 script {
                     // SSH로 서버에 연결하여 명령 실행
-                    sh "ssh -p ${SERVER_PASSWORD} ssh -o StrictHostKeyChecking=no ${SERVER_USERNAME}@${SERVER_IP} 'whoami'"
+                    sh "sshpass -p ${SERVER_PASSWORD} ssh -o StrictHostKeyChecking=no ${SERVER_USERNAME}@${SERVER_IP} 'whoami'"
                 }
             }
         }
@@ -79,8 +79,8 @@ pipeline {
             steps {
                 script {
                     // 서버에서 Docker 이미지를 풀고 실행
-                    sh "ssh -p ${SERVER_PASSWORD} ssh -o StrictHostKeyChecking=no ${SERVER_USERNAME}@${SERVER_IP} 'docker pull ${DOCKER_IMAGE_TAG}'"
-                    sh "ssh -p ${SERVER_PASSWORD} ssh -o StrictHostKeyChecking=no ${SERVER_USERNAME}@${SERVER_IP} 'docker run -d --name mytrophy-service -p 8080:8080 ${DOCKER_IMAGE_TAG}'"
+                    sh "sshpass -p ${SERVER_PASSWORD} ssh -o StrictHostKeyChecking=no ${SERVER_USERNAME}@${SERVER_IP} 'docker pull ${DOCKER_IMAGE_TAG}'"
+                    sh "sshpass -p ${SERVER_PASSWORD} ssh -o StrictHostKeyChecking=no ${SERVER_USERNAME}@${SERVER_IP} 'docker run -d --name mytrophy-service -p 8080:8080 ${DOCKER_IMAGE_TAG}'"
                 }
             }
         }
