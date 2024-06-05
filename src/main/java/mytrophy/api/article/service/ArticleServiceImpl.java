@@ -1,6 +1,8 @@
 package mytrophy.api.article.service;
 
 import mytrophy.api.article.dto.ArticleResponseDto;
+import mytrophy.api.article.entity.ArticleLike;
+import mytrophy.api.article.repository.ArticleLikeRepository;
 import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import mytrophy.api.article.dto.ArticleRequestDto;
@@ -14,43 +16,38 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Transactional // 트랜잭션 전역 처리
 public class ArticleServiceImpl implements ArticleService {
 
     private final ArticleRepository articleRepository;
     private final MemberRepository memberRepository;
+    private final ArticleLikeRepository articleLikeRepository;
 
     // 게시글 생성
     @Override
-    @Transactional // 트랜잭션 처리
     public ArticleResponseDto createArticle(Long memberId, ArticleRequestDto articleRequestDto, List<String> imagePath) throws IOException {
         // 회원 정보 가져오기
         Member member = memberRepository.findById(memberId)
             .orElseThrow(() -> new RuntimeException("회원 정보를 찾을 수 없습니다."));
 
-        Article article;
+        if (articleRequestDto.getAppId() == null) {
+            return null;
+        }
 
         // 이미지 경로가 null이 아닌 경우
-        if (imagePath != null && !imagePath.isEmpty()) {
-            article = Article.builder()
-                .header(articleRequestDto.getHeader())
-                .name(articleRequestDto.getName())
-                .content(articleRequestDto.getContent())
-                .imagePath(articleRequestDto.getImagePath()) // 이미지 경로 설정
-                .member(member)
-                .build();
-        } else {
-            // 이미지 경로가 null이거나 비어있는 경우
-            article = Article.builder()
-                .header(articleRequestDto.getHeader())
-                .name(articleRequestDto.getName())
-                .content(articleRequestDto.getContent())
-                .member(member)
-                .build();
-        }
+        Article article = Article.builder()
+            .header(articleRequestDto.getHeader())
+            .name(articleRequestDto.getName())
+            .content(articleRequestDto.getContent())
+            .imagePath(imagePath != null && !imagePath.isEmpty() ? String.join(",", imagePath) : null)
+            .appId(articleRequestDto.getAppId())
+            .member(member)
+            .build();
 
         Article savedArticle = articleRepository.save(article);
 
@@ -60,7 +57,6 @@ public class ArticleServiceImpl implements ArticleService {
 
     // 게시글 리스트 조회
     @Override
-    @Transactional
     public List<ArticleResponseDto> findAll() {
         List<Article> articles = articleRepository.findAll();
         return articles.stream()
@@ -73,7 +69,6 @@ public class ArticleServiceImpl implements ArticleService {
 
     // 해당 게시글 조회
     @Override
-    @Transactional
     public ArticleResponseDto findById(Long id) {
         Article article = articleRepository.findById(id)
             .orElseThrow(() -> new IllegalArgumentException("해당 게시글이 존재하지 않습니다."));
@@ -82,7 +77,6 @@ public class ArticleServiceImpl implements ArticleService {
 
     // 말머리 별 게시글 리스트 조회
     @Override
-    @Transactional
     public List<ArticleResponseDto> findAllByHeader(Header header) {
         List<Article> articles = articleRepository.findByHeader(header);
         return articles.stream()
@@ -95,7 +89,6 @@ public class ArticleServiceImpl implements ArticleService {
 
     // 말머리 별 해당 게시글 조회
     @Override
-    @Transactional
     public ArticleResponseDto findByIdAndHeader(Long id, Header header) {
         Article article = articleRepository.findByIdAndHeader(id, header);
         if (article == null) {
@@ -106,7 +99,6 @@ public class ArticleServiceImpl implements ArticleService {
 
     // 게시글 수정
     @Override
-    @Transactional
     public ArticleResponseDto updateArticle(Long memberId, Long id, ArticleRequestDto articleRequestDto) {
         // 회원 정보 가져오기
         Member member = memberRepository.findById(memberId)
@@ -117,7 +109,7 @@ public class ArticleServiceImpl implements ArticleService {
             .orElseThrow(() -> new ResourceNotFoundException("해당 게시글이 존재하지 않습니다."));
 
         // 게시글 정보 업데이트
-        article.updateArticle(articleRequestDto.getHeader(), articleRequestDto.getName(), articleRequestDto.getContent(), articleRequestDto.getImagePath());
+        article.updateArticle(articleRequestDto.getHeader(), articleRequestDto.getName(), articleRequestDto.getContent(), articleRequestDto.getImagePath(), articleRequestDto.getAppId());
 
         // 엔티티를 저장하고, 저장된 엔티티를 기반으로 DTO 객체 생성하여 반환
         return ArticleResponseDto.fromEntity(articleRepository.save(article));
@@ -126,7 +118,6 @@ public class ArticleServiceImpl implements ArticleService {
 
     // 게시글 삭제
     @Override
-    @Transactional
     public void deleteArticle(Long id) {
         // 게시글 정보 가져오기
         Article article = articleRepository.findById(id)
@@ -143,24 +134,49 @@ public class ArticleServiceImpl implements ArticleService {
         return article.getMember().getId().equals(memberId);
     }
 
-    // 좋아요 증가
+    // 게시글 추천 여부 확인
     @Override
-    @Transactional
-    public void upCntUp(Long id) {
-        // 게시글 정보 가져오기
-        Article article = articleRepository.findById(id)
-            .orElseThrow(() -> new ResourceNotFoundException("해당 게시글이 존재하지 않습니다."));
-        article.upCntUp();
+    public boolean checkLikeArticle(Long articleId, Long memberId) {
+        Article article = articleRepository.findById(articleId)
+            .orElseThrow(() -> new RuntimeException("게시글을 찾을 수 없습니다."));
+
+        Member member = memberRepository.findById(memberId)
+            .orElseThrow(() -> new RuntimeException("회원을 찾을 수 없습니다."));
+
+        return articleLikeRepository.findByArticleAndMember(article, member).isPresent();
     }
 
-    // 좋아요 감소
+    // 게시글 추천 증가
     @Override
-    @Transactional
-    public void CntUpDown(Long id) {
-        // 게시글 정보 가져오기
-        Article article = articleRepository.findById(id)
-            .orElseThrow(() -> new ResourceNotFoundException("해당 게시글이 존재하지 않습니다."));
-        article.CntUpDown();
+    public void articleLikeUp(Long articleId, Long memberId) {
+        Article article = articleRepository.findById(articleId)
+            .orElseThrow(() -> new RuntimeException("게시글을 찾을 수 없습니다."));
+
+        Member member = memberRepository.findById(memberId)
+            .orElseThrow(() -> new RuntimeException("회원을 찾을 수 없습니다."));
+
+        ArticleLike articleLike = ArticleLike.builder()
+            .article(article)
+            .member(member)
+            .build();
+
+        articleLikeRepository.save(articleLike);
+        article.likeUp();
     }
 
+    // 게시글 추천 감소
+    @Override
+    public void articleLikeDown(Long articleId, Long memberId) {
+        Article article = articleRepository.findById(articleId)
+            .orElseThrow(() -> new RuntimeException("게시글을 찾을 수 없습니다."));
+
+        Member member = memberRepository.findById(memberId)
+            .orElseThrow(() -> new RuntimeException("회원을 찾을 수 없습니다."));
+
+        ArticleLike articleLike = articleLikeRepository.findByArticleAndMember(article, member)
+            .orElseThrow(() -> new RuntimeException("게시글 추천 정보를 찾을 수 없습니다."));
+
+        articleLikeRepository.delete(articleLike);
+        article.likeDown();
+    }
 }

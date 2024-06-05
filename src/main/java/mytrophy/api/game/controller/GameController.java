@@ -1,7 +1,8 @@
 package mytrophy.api.game.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import mytrophy.api.game.dto.tsetDTO;
+import mytrophy.api.game.dto.ResponseDTO.GetGameListDTO;
+import mytrophy.api.game.dto.RequestDTO.SearchGameRequestDTO;
 import mytrophy.api.game.dto.ResponseDTO.GetAllGameDTO;
 import mytrophy.api.game.dto.ResponseDTO.GetTopGameDTO;
 import mytrophy.api.game.dto.ResponseDTO.GetGameDetailDTO;
@@ -31,13 +32,6 @@ public class GameController {
         this.gameDataScheduler = gameDataScheduler;
     }
 
-    @GetMapping("/test")
-    public ResponseEntity<String> test(@RequestBody tsetDTO test) {
-        String asd = test.getTest1() + test.getTest2();
-        return ResponseEntity.ok(asd);
-    }
-
-
     @GetMapping
     public ResponseEntity<Page<GetAllGameDTO>> getAllGame(@RequestParam(name = "page", defaultValue = "1") int page,
                                                           @RequestParam(name = "size", defaultValue = "10") int size) {
@@ -53,13 +47,9 @@ public class GameController {
     }
 
     @GetMapping("/search")
-    public ResponseEntity<Page<GetSearchGameDTO>> getSearchGame(@RequestParam(value = "keyword", defaultValue = "") String keyword,
-                                                                @RequestParam(value = "categoryId", defaultValue = "0") Long categoryId,
-                                                                @RequestParam(name = "page", defaultValue = "1") int page,
-                                                                @RequestParam(name = "size", defaultValue = "10") int size
-    ) {
+    public ResponseEntity<Page<GetSearchGameDTO>> getSearchGame(@RequestBody SearchGameRequestDTO searchGameRequestDTO) {
 
-        return ResponseEntity.status(HttpStatus.OK).body(gameService.getSearchGameDTO(keyword, page - 1, size, categoryId));
+        return ResponseEntity.status(HttpStatus.OK).body(gameService.getSearchGameDTO(searchGameRequestDTO));
     }
 
     @GetMapping("/top100")
@@ -70,19 +60,33 @@ public class GameController {
         return ResponseEntity.status(HttpStatus.OK).body(gameService.getTopGameDTO(page-1,size,gameDataService.receiveTopSteamGameList(100,"request")));
     }
 
+    @GetMapping("/release")
+    public ResponseEntity<Page<GetGameListDTO>> getReleaseSortGame(
+            @RequestParam(name = "page", defaultValue = "1") int page,
+            @RequestParam(name = "size", defaultValue = "10") int size) {
 
+        return ResponseEntity.status(HttpStatus.OK).body(gameService.getReleaseGameDTO(page-1,size));
+    }
+
+    @GetMapping("/recommend")
+    public ResponseEntity<Page<GetGameListDTO>> getRecommendSortGame(
+            @RequestParam(name = "page", defaultValue = "1") int page,
+            @RequestParam(name = "size", defaultValue = "10") int size) {
+
+        return ResponseEntity.status(HttpStatus.OK).body(gameService.getRecomandGameDTO(page-1,size));
+    }
 
     ///////                       스팀에서 서버로 다운                            ////////
 
     // 스팀의 전체 게임목록 DB에 다운
-    @PostMapping("/read/game")
+    @GetMapping("/request/game/list")
     public ResponseEntity<Any> readSteamGameData() throws JsonProcessingException {
         gameDataService.receiveSteamGameList();
         return ResponseEntity.ok(null);
     }
 
     // 스팀의 전체 상세게임정보 DB에서 다운
-    @PostMapping("/read/game/detail")
+    @GetMapping("/request/game/detail")
     public ResponseEntity<Any> saveDetailSteamGameData(
             @RequestParam(name = "size", defaultValue = "10") int size,
             @RequestParam(name = "isContinue", defaultValue = "false") Boolean isContinue
@@ -92,7 +96,7 @@ public class GameController {
     }
 
     // 스팀의 게임 하나 다운
-    @PostMapping("/read/game/{id}")
+    @GetMapping("/request/game/{id}")
     public ResponseEntity<Any> readSteamGameDataOne(@PathVariable(name = "id") int id) {
         try {
             gameDataService.gameDetail(id);
@@ -103,7 +107,7 @@ public class GameController {
     }
 
     // 스팀의 TOP100 목록 다운
-    @PostMapping("/read/game/top")
+    @GetMapping("/request/game/top")
     public ResponseEntity<Any> readTopSteamGameData() {
         try {
             gameDataService.receiveTopSteamGameList(100,"read");
@@ -113,7 +117,8 @@ public class GameController {
         return ResponseEntity.ok(null);
     }
 
-    @PostMapping("/read/category")
+    // json 파일의 카테고리 리스트를 db에 저장
+    @GetMapping("/request/category")
     public ResponseEntity<Any> readSteamCategoryData() {
         gameDataService.readCategoryList();
         return ResponseEntity.ok(null);

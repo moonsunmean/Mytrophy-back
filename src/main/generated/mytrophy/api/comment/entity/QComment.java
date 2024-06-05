@@ -26,7 +26,7 @@ public class QComment extends EntityPathBase<Comment> {
 
     public final mytrophy.api.article.entity.QArticle article;
 
-    public final NumberPath<Integer> cntUp = createNumber("cntUp", Integer.class);
+    public final ListPath<Comment, QComment> childrenComment = this.<Comment, QComment>createList("childrenComment", Comment.class, QComment.class, PathInits.DIRECT2);
 
     public final StringPath content = createString("content");
 
@@ -35,7 +35,11 @@ public class QComment extends EntityPathBase<Comment> {
 
     public final NumberPath<Long> id = createNumber("id", Long.class);
 
+    public final NumberPath<Integer> likes = createNumber("likes", Integer.class);
+
     public final mytrophy.api.member.entity.QMember member;
+
+    public final QComment parentComment;
 
     //inherited
     public final DateTimePath<java.time.LocalDateTime> updatedAt = _super.updatedAt;
@@ -60,6 +64,7 @@ public class QComment extends EntityPathBase<Comment> {
         super(type, metadata, inits);
         this.article = inits.isInitialized("article") ? new mytrophy.api.article.entity.QArticle(forProperty("article"), inits.get("article")) : null;
         this.member = inits.isInitialized("member") ? new mytrophy.api.member.entity.QMember(forProperty("member")) : null;
+        this.parentComment = inits.isInitialized("parentComment") ? new QComment(forProperty("parentComment"), inits.get("parentComment")) : null;
     }
 
 }
