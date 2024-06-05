@@ -65,46 +65,22 @@ pipeline {
             }
         }
 
-        stage('SSH to Server') {
+        stage('SSH to Server'){
             steps {
-                script {
-                    sshagent(['server-ssh-credentials-id']) {
-                        // Check if SSH keys are loaded correctly
-                        sh 'ssh-add -l'
-                        // SSH를 통해 서버에 접속
-                        sh """ssh -o StrictHostKeyChecking=no ${SERVER_CREDENTIALS_USR}@${SERVER_IP} 'pwd' """
-                    }
+                sshagent(credentials: ['server-ssh-credentials-id']) {
+                    sh "ssh -o StrictHostKeyChecking=no ${SERVER_CREDENTIALS_USR}@${SERVER_IP} 'whoami'"
                 }
             }
         }
 
-        stage('Pull Docker Image on Server') {
+        stage('Docker Pull and Run'){
             steps {
-                script {
-                    sshagent(['server-ssh-credentials-id']) {
-                        // 서버에서 도커 이미지 풀링
-                        sh "ssh -o StrictHostKeyChecking=no ${SERVER_CREDENTIALS_USR}@${SERVER_IP} 'docker pull ${DOCKER_IMAGE_TAG}'"
-                    }
+                sshagent(credentials: ['server-ssh-credentials-id']) {
+                    sh "ssh -o StrictHostKeyChecking=no ${SERVER_CREDENTIALS_USR}@${SERVER_IP} 'docker pull ${DOCKER_IMAGE_TAG}'"
+                    sh "ssh -o StrictHostKeyChecking=no ${SERVER_CREDENTIALS_USR}@${SERVER_IP} 'docker run -d --name mytrophy-service -p 8080:8080 ${DOCKER_IMAGE_TAG}'"
                 }
             }
         }
 
-        stage('Run Docker Container on Server') {
-            steps {
-                script {
-                    sshagent(['server-ssh-credentials-id']) {
-                        // 서버에서 기존 서비스 종료 및 새 컨테이너 실행
-                        sh """
-                        ssh -o StrictHostKeyChecking=no ${SERVER_CREDENTIALS_USR}@${SERVER_IP} '
-                        if [ \$(docker ps -q -f name=mytrophy-service) ]; then
-                            docker stop mytrophy-service
-                            docker rm mytrophy-service
-                        fi
-                        docker run -d --name mytrophy-service -p 8080:8080 ${DOCKER_IMAGE_TAG}'
-                        """
-                    }
-                }
-            }
-        }
     }
 }
