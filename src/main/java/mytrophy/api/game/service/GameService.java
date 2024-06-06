@@ -3,13 +3,10 @@ package mytrophy.api.game.service;
 
 import mytrophy.api.game.dto.RequestDTO.SearchGameRequestDTO;
 import mytrophy.api.game.dto.ResponseDTO.GetGameAchievementDTO;
-import mytrophy.api.game.dto.ResponseDTO.GetGameListDTO;
 import mytrophy.api.game.dto.ResponseDTO.GetGameScreenshotDTO;
 import mytrophy.api.game.dto.ResponseDTO.GetGameCategoryDTO;
 import mytrophy.api.game.dto.ResponseDTO.GetTopGameDTO;
-import mytrophy.api.game.dto.ResponseDTO.GetAllGameDTO;
 import mytrophy.api.game.dto.ResponseDTO.GetGameDetailDTO;
-import mytrophy.api.game.dto.ResponseDTO.GetSearchGameDTO;
 import mytrophy.api.game.entity.*;
 import mytrophy.api.game.querydsl.GameQueryRepository;
 import mytrophy.api.game.repository.*;
@@ -31,30 +28,15 @@ public class GameService {
     private final GameRepository gameRepository;
     private final GameQueryRepository gameQueryRepository;
 
-
     @Autowired
     public GameService(GameRepository gameRepository, GameQueryRepository gameQueryRepository) {
         this.gameRepository = gameRepository;
         this.gameQueryRepository = gameQueryRepository;
     }
 
-    public Page<GetAllGameDTO> getAllGameDTO(int page, int size) {
+    public Page<GetGameDetailDTO> getAllGameDTO(int page, int size) {
         Page<Game> gamePage = gameRepository.findAll(PageRequest.of(page, size, Sort.by("id").descending()));
-        return gamePage.map(game -> {
-            List<Category> categoryList = game.getGameCategoryList().stream()
-                    .map(GameCategory::getCategory)
-                    .toList();
-
-
-            List<GetGameCategoryDTO> getGameCategoryDTOList = categoryList.stream()
-                    .map(category -> new GetGameCategoryDTO(category.getId(), category.getName()))
-                    .collect(Collectors.toList());
-
-            return new GetAllGameDTO(
-                    game.getAppId(), game.getName(), game.getHeaderImagePath(), game.getPrice(),game.getPositive(),
-                    game.getKoIsPosible(), game.getEnIsPosible(), game.getJpIsPosible(), getGameCategoryDTOList
-            );
-        });
+        return gamePage.map(this::mapGameToDTO);
     }
 
     public Page<GetTopGameDTO> getTopGameDTO(int page, int size,List<Integer> appList) {
@@ -104,47 +86,10 @@ public class GameService {
 
         Game game = gameRepository.findByAppId(id);
 
-        List<Category> categoryList = new ArrayList<>();
-        game.getGameCategoryList().forEach(gameCategory -> categoryList.add(gameCategory.getCategory()));
-
-        List<Screenshot> screenshotList = game.getScreenshotList();
-
-        List<Achievement> achievementList = game.getAchievementList();
-
-        List<GetGameCategoryDTO> getGameCategoryDTOList = categoryList.stream()
-                .map(category -> new GetGameCategoryDTO(category.getId(), category.getName()))
-                .collect(Collectors.toList());
-
-        List<GetGameScreenshotDTO> getGameScreenshotDTOList = screenshotList.stream()
-                .map(screenshot -> new GetGameScreenshotDTO(screenshot.getId(),screenshot.getThumbnailImagePath(),screenshot.getFullImagePath()))
-                .collect(Collectors.toList());
-
-        List<GetGameAchievementDTO> getGameAchievementDTOList = achievementList.stream()
-                .map(achievement -> new GetGameAchievementDTO(achievement.getId(), achievement.getName(), achievement.getImagePath(),achievement.getHidden(),achievement.getDescription()))
-                .collect(Collectors.toList());
-
-        return new GetGameDetailDTO(
-                game.getAppId(),
-                game.getName(),
-                game.getDescription(),
-                game.getDeveloper(),
-                game.getPublisher(),
-                game.getRequirement(),
-                game.getPrice(),
-                game.getReleaseDate(),
-                game.getRecommendation(),
-                game.getPositive(),
-                game.getHeaderImagePath(),
-                game.getKoIsPosible(),
-                game.getEnIsPosible(),
-                game.getJpIsPosible(),
-                getGameCategoryDTOList,
-                getGameScreenshotDTOList,
-                getGameAchievementDTOList
-        );
+        return mapGameToDTO(game);
     }
 
-    public Page<GetSearchGameDTO> getSearchGameDTO(SearchGameRequestDTO dto) {
+    public Page<GetGameDetailDTO> getSearchGameDTO(SearchGameRequestDTO dto) {
         int size = dto.getSize();
         int page = dto.getPage()-1;
         String keyword = dto.getKeyword();
@@ -170,71 +115,36 @@ public class GameService {
             sort = sort.and(Sort.by(Sort.Direction.valueOf(dto.getDateSortDirection()), "releaseDate"));
         }
 
-
-
         Pageable pageable = PageRequest.of(page, size, sort);
 
         Page<Game> gameList = gameQueryRepository.searchGame(keyword, categoryIds, minPrice, maxPrice, isFree, startDate, endDate, pageable);
 
-        List<GetSearchGameDTO> getSearchGameDTOList = new ArrayList<>();
+        List<GetGameDetailDTO> getSearchGameDTOList = new ArrayList<>();
 
-            for (Game game : gameList) {
-            GetSearchGameDTO searchGameDTO;
-            List<Category> categoryList = new ArrayList<>();
-            game.getGameCategoryList().forEach(gameCategory -> categoryList.add(gameCategory.getCategory()));
-
-            List<GetGameCategoryDTO> getGameCategoryDTOList = categoryList.stream()
-                    .map(category -> new GetGameCategoryDTO(category.getId(), category.getName()))
-                    .collect(Collectors.toList());
-
-            searchGameDTO = new GetSearchGameDTO(game.getAppId(), game.getName(), game.getHeaderImagePath(), game.getPrice(),game.getPositive(),game.getKoIsPosible(),game.getEnIsPosible(),game.getJpIsPosible(),getGameCategoryDTOList);
-
+        for (Game game : gameList) {
+            GetGameDetailDTO searchGameDTO = mapGameToDTO(game);
             getSearchGameDTOList.add(searchGameDTO);
         }
-
-
-
         if (getSearchGameDTOList.isEmpty()) {
             throw new CustomException(ErrorCodeEnum.NOT_FOUND_GAME);
         }
-
         return new PageImpl<>(getSearchGameDTOList, PageRequest.of(page, size), getSearchGameDTOList.size());
 
     }
 
-    public Page<GetGameListDTO> getReleaseGameDTO(int page, int size) {
+    public Page<GetGameDetailDTO> getReleaseGameDTO(int page, int size) {
         Sort sort = Sort.by(Sort.Direction.DESC, "releaseDate");
 
         Pageable pageable = PageRequest.of(page, size, sort);
 
         Page<Game> gameList = gameQueryRepository.gameList(pageable);
 
-        List<GetGameListDTO> getGameListDTOList = new ArrayList<>();
+        List<GetGameDetailDTO> getGameListDTOList = new ArrayList<>();
 
         for (Game game : gameList) {
-            GetGameListDTO gameReleaseDTO;
-            List<Screenshot> screenshotList = game.getScreenshotList();
-            List<Achievement> achievementList = game.getAchievementList();
-            List<Category> categoryList = new ArrayList<>();
-            game.getGameCategoryList().forEach(gameCategory -> categoryList.add(gameCategory.getCategory()));
-
-            List<GetGameCategoryDTO> getGameCategoryDTOList = categoryList.stream()
-                    .map(category -> new GetGameCategoryDTO(category.getId(), category.getName()))
-                    .collect(Collectors.toList());
-            List<GetGameScreenshotDTO> getGameScreenshotDTOList = screenshotList.stream()
-                    .map(screenshot -> new GetGameScreenshotDTO(screenshot.getId(),screenshot.getThumbnailImagePath(),screenshot.getFullImagePath()))
-                    .collect(Collectors.toList());
-
-            List<GetGameAchievementDTO> getGameAchievementDTOList = achievementList.stream()
-                    .map(achievement -> new GetGameAchievementDTO(achievement.getId(), achievement.getName(), achievement.getImagePath(),achievement.getHidden(),achievement.getDescription()))
-                    .collect(Collectors.toList());
-
-
-            gameReleaseDTO = new GetGameListDTO(game.getAppId(), game.getName(), game.getDescription(), game.getDeveloper(), game.getPublisher(), game.getRequirement(), game.getPrice(), game.getReleaseDate(), game.getRecommendation(),game.getPositive(), game.getHeaderImagePath(), game.getKoIsPosible(), game.getEnIsPosible(), game.getJpIsPosible(), getGameCategoryDTOList, getGameScreenshotDTOList, getGameAchievementDTOList);
-
+            GetGameDetailDTO gameReleaseDTO = mapGameToDTO(game);
             getGameListDTOList.add(gameReleaseDTO);
         }
-
 
         if (getGameListDTOList.isEmpty()) {
             throw new CustomException(ErrorCodeEnum.NOT_FOUND_GAME);
@@ -243,39 +153,19 @@ public class GameService {
         return new PageImpl<>(getGameListDTOList, PageRequest.of(page, size), getGameListDTOList.size());
     }
 
-    public Page<GetGameListDTO> getRecomandGameDTO(int page, int size) {
+    public Page<GetGameDetailDTO> getRecomandGameDTO(int page, int size) {
         Sort sort = Sort.by(Sort.Direction.DESC, "recommendation");
 
         Pageable pageable = PageRequest.of(page, size, sort);
 
         Page<Game> gameList = gameQueryRepository.gameList(pageable);
 
-        List<GetGameListDTO> getGameListDTOList = new ArrayList<>();
+        List<GetGameDetailDTO> getGameListDTOList = new ArrayList<>();
 
         for (Game game : gameList) {
-            GetGameListDTO gameReleaseDTO;
-            List<Screenshot> screenshotList = game.getScreenshotList();
-            List<Achievement> achievementList = game.getAchievementList();
-            List<Category> categoryList = new ArrayList<>();
-            game.getGameCategoryList().forEach(gameCategory -> categoryList.add(gameCategory.getCategory()));
-
-            List<GetGameCategoryDTO> getGameCategoryDTOList = categoryList.stream()
-                    .map(category -> new GetGameCategoryDTO(category.getId(), category.getName()))
-                    .collect(Collectors.toList());
-            List<GetGameScreenshotDTO> getGameScreenshotDTOList = screenshotList.stream()
-                    .map(screenshot -> new GetGameScreenshotDTO(screenshot.getId(),screenshot.getThumbnailImagePath(),screenshot.getFullImagePath()))
-                    .collect(Collectors.toList());
-
-            List<GetGameAchievementDTO> getGameAchievementDTOList = achievementList.stream()
-                    .map(achievement -> new GetGameAchievementDTO(achievement.getId(), achievement.getName(), achievement.getImagePath(),achievement.getHidden(),achievement.getDescription()))
-                    .collect(Collectors.toList());
-
-
-            gameReleaseDTO = new GetGameListDTO(game.getAppId(), game.getName(), game.getDescription(), game.getDeveloper(), game.getPublisher(), game.getRequirement(), game.getPrice(), game.getReleaseDate(), game.getRecommendation(),game.getPositive(), game.getHeaderImagePath(), game.getKoIsPosible(), game.getEnIsPosible(), game.getJpIsPosible(), getGameCategoryDTOList, getGameScreenshotDTOList, getGameAchievementDTOList);
-
+            GetGameDetailDTO gameReleaseDTO = mapGameToDTO(game);
             getGameListDTOList.add(gameReleaseDTO);
         }
-
 
         if (getGameListDTOList.isEmpty()) {
             throw new CustomException(ErrorCodeEnum.NOT_FOUND_GAME);
@@ -284,45 +174,63 @@ public class GameService {
         return new PageImpl<>(getGameListDTOList, PageRequest.of(page, size), getGameListDTOList.size());
     }
 
-    public Page<GetGameListDTO> getPositiveGameDTO(int page, int size) {
+    public Page<GetGameDetailDTO> getPositiveGameDTO(int page, int size) {
         Sort sort = Sort.by(Sort.Direction.DESC, "recommendation");
 
         Pageable pageable = PageRequest.of(page, size, sort);
 
         Page<Game> gameList = gameQueryRepository.gameList(pageable);
 
-        List<GetGameListDTO> getGameListDTOList = new ArrayList<>();
+        List<GetGameDetailDTO> getGameListDTOList = new ArrayList<>();
 
         for (Game game : gameList) {
-            GetGameListDTO gameReleaseDTO;
-            List<Screenshot> screenshotList = game.getScreenshotList();
-            List<Achievement> achievementList = game.getAchievementList();
-            List<Category> categoryList = new ArrayList<>();
-            game.getGameCategoryList().forEach(gameCategory -> categoryList.add(gameCategory.getCategory()));
-
-            List<GetGameCategoryDTO> getGameCategoryDTOList = categoryList.stream()
-                    .map(category -> new GetGameCategoryDTO(category.getId(), category.getName()))
-                    .collect(Collectors.toList());
-            List<GetGameScreenshotDTO> getGameScreenshotDTOList = screenshotList.stream()
-                    .map(screenshot -> new GetGameScreenshotDTO(screenshot.getId(),screenshot.getThumbnailImagePath(),screenshot.getFullImagePath()))
-                    .collect(Collectors.toList());
-
-            List<GetGameAchievementDTO> getGameAchievementDTOList = achievementList.stream()
-                    .map(achievement -> new GetGameAchievementDTO(achievement.getId(), achievement.getName(), achievement.getImagePath(),achievement.getHidden(),achievement.getDescription()))
-                    .collect(Collectors.toList());
-
-
-            gameReleaseDTO = new GetGameListDTO(game.getAppId(), game.getName(), game.getDescription(), game.getDeveloper(), game.getPublisher(), game.getRequirement(), game.getPrice(), game.getReleaseDate(), game.getRecommendation(),game.getPositive(), game.getHeaderImagePath(), game.getKoIsPosible(), game.getEnIsPosible(), game.getJpIsPosible(), getGameCategoryDTOList, getGameScreenshotDTOList, getGameAchievementDTOList);
-
+            GetGameDetailDTO gameReleaseDTO = mapGameToDTO(game);
             getGameListDTOList.add(gameReleaseDTO);
         }
-
 
         if (getGameListDTOList.isEmpty()) {
             throw new CustomException(ErrorCodeEnum.NOT_FOUND_GAME);
         }
 
         return new PageImpl<>(getGameListDTOList, PageRequest.of(page, size), getGameListDTOList.size());
+    }
+
+    private GetGameDetailDTO mapGameToDTO(Game game) {
+        List<Category> categoryList = game.getGameCategoryList().stream()
+                .map(GameCategory::getCategory)
+                .collect(Collectors.toList());
+
+        List<GetGameCategoryDTO> getGameCategoryDTOList = categoryList.stream()
+                .map(category -> new GetGameCategoryDTO(category.getId(), category.getName()))
+                .collect(Collectors.toList());
+
+        List<GetGameScreenshotDTO> getGameScreenshotDTOList = game.getScreenshotList().stream()
+                .map(screenshot -> new GetGameScreenshotDTO(screenshot.getId(), screenshot.getThumbnailImagePath(), screenshot.getFullImagePath()))
+                .collect(Collectors.toList());
+
+        List<GetGameAchievementDTO> getGameAchievementDTOList = game.getAchievementList().stream()
+                .map(achievement -> new GetGameAchievementDTO(achievement.getId(), achievement.getName(), achievement.getImagePath(), achievement.getHidden(), achievement.getDescription()))
+                .collect(Collectors.toList());
+
+        return new GetGameDetailDTO(
+                game.getAppId(),
+                game.getName(),
+                game.getDescription(),
+                game.getDeveloper(),
+                game.getPublisher(),
+                game.getRequirement(),
+                game.getPrice(),
+                game.getReleaseDate(),
+                game.getRecommendation(),
+                game.getPositive(),
+                game.getHeaderImagePath(),
+                game.getKoIsPosible(),
+                game.getEnIsPosible(),
+                game.getJpIsPosible(),
+                getGameCategoryDTOList,
+                getGameScreenshotDTOList,
+                getGameAchievementDTOList
+        );
     }
 
 }
