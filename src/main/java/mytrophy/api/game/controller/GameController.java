@@ -1,13 +1,10 @@
 package mytrophy.api.game.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import mytrophy.api.game.dto.ResponseDTO.GetGameListDTO;
 import mytrophy.api.game.dto.RequestDTO.SearchGameRequestDTO;
-import mytrophy.api.game.dto.ResponseDTO.GetAllGameDTO;
 import mytrophy.api.game.dto.ResponseDTO.GetGamePlayerNumberDTO;
 import mytrophy.api.game.dto.ResponseDTO.GetTopGameDTO;
 import mytrophy.api.game.dto.ResponseDTO.GetGameDetailDTO;
-import mytrophy.api.game.dto.ResponseDTO.GetSearchGameDTO;
 import mytrophy.api.game.service.GameDataService;
 import mytrophy.api.game.service.GameService;
 import mytrophy.global.scheduler.GameDataScheduler;
@@ -34,7 +31,7 @@ public class GameController {
     }
 
     @GetMapping
-    public ResponseEntity<Page<GetAllGameDTO>> getAllGame(@RequestParam(name = "page", defaultValue = "1") int page,
+    public ResponseEntity<Page<GetGameDetailDTO>> getAllGame(@RequestParam(name = "page", defaultValue = "1") int page,
                                                           @RequestParam(name = "size", defaultValue = "10") int size) {
 
         return ResponseEntity.status(HttpStatus.OK).body(gameService.getAllGameDTO(page - 1, size));
@@ -48,7 +45,7 @@ public class GameController {
     }
 
     @GetMapping("/search")
-    public ResponseEntity<Page<GetSearchGameDTO>> getSearchGame(@RequestBody SearchGameRequestDTO searchGameRequestDTO) {
+    public ResponseEntity<Page<GetGameDetailDTO>> getSearchGame(@RequestBody SearchGameRequestDTO searchGameRequestDTO) {
 
         return ResponseEntity.status(HttpStatus.OK).body(gameService.getSearchGameDTO(searchGameRequestDTO));
     }
@@ -62,7 +59,7 @@ public class GameController {
     }
 
     @GetMapping("/release")
-    public ResponseEntity<Page<GetGameListDTO>> getReleaseSortGame(
+    public ResponseEntity<Page<GetGameDetailDTO>> getReleaseSortGame(
             @RequestParam(name = "page", defaultValue = "1") int page,
             @RequestParam(name = "size", defaultValue = "10") int size) {
 
@@ -70,7 +67,7 @@ public class GameController {
     }
 
     @GetMapping("/recommend")
-    public ResponseEntity<Page<GetGameListDTO>> getRecommendSortGame(
+    public ResponseEntity<Page<GetGameDetailDTO>> getRecommendSortGame(
             @RequestParam(name = "page", defaultValue = "1") int page,
             @RequestParam(name = "size", defaultValue = "10") int size) {
 
@@ -78,7 +75,7 @@ public class GameController {
     }
 
     @GetMapping("/positive")
-    public ResponseEntity<Page<GetGameListDTO>> getPositiveGame(
+    public ResponseEntity<Page<GetGameDetailDTO>> getPositiveGame(
             @RequestParam(name = "page", defaultValue = "1") int page,
             @RequestParam(name = "size", defaultValue = "10") int size) {
 
