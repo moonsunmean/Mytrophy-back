@@ -1,20 +1,24 @@
 package mytrophy.api.game.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import mytrophy.api.game.dto.ResponseDTO.GetGameListDTO;
+import mytrophy.api.article.dto.ArticleResponseDto;
+import mytrophy.api.article.service.ArticleService;
 import mytrophy.api.game.dto.RequestDTO.SearchGameRequestDTO;
-import mytrophy.api.game.dto.ResponseDTO.GetAllGameDTO;
+import mytrophy.api.game.dto.ResponseDTO.GetGamePlayerNumberDTO;
 import mytrophy.api.game.dto.ResponseDTO.GetTopGameDTO;
 import mytrophy.api.game.dto.ResponseDTO.GetGameDetailDTO;
-import mytrophy.api.game.dto.ResponseDTO.GetSearchGameDTO;
 import mytrophy.api.game.service.GameDataService;
 import mytrophy.api.game.service.GameService;
+import mytrophy.api.member.entity.Member;
+import mytrophy.api.member.service.MemberService;
+import mytrophy.global.jwt.CustomUserDetails;
 import mytrophy.global.scheduler.GameDataScheduler;
 import org.hibernate.mapping.Any;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -26,7 +30,7 @@ public class GameController {
     private final GameDataScheduler gameDataScheduler;
 
     @Autowired
-    public GameController(GameService gameService, GameDataService gameDataService, GameDataScheduler gameDataScheduler) {
+    public GameController(GameService gameService, GameDataService gameDataService, GameDataScheduler gameDataScheduler, ArticleService articleService, MemberService memberService) {
         this.gameService = gameService;
         this.gameDataService = gameDataService;
         this.gameDataScheduler = gameDataScheduler;
@@ -34,7 +38,8 @@ public class GameController {
 
 
     @GetMapping
-    public ResponseEntity<Page<GetAllGameDTO>> getAllGameDetails(@RequestParam(name = "page", defaultValue = "1") int page,
+
+    public ResponseEntity<Page<GetGameDetailDTO>> getAllGame(@RequestParam(name = "page", defaultValue = "1") int page,
                                                           @RequestParam(name = "size", defaultValue = "10") int size) {
 
         return ResponseEntity.status(HttpStatus.OK).body(gameService.getAllGameDTO(page - 1, size));
@@ -47,7 +52,7 @@ public class GameController {
     }
 
     @GetMapping("/search")
-    public ResponseEntity<Page<GetSearchGameDTO>> getSearchGame(@RequestBody SearchGameRequestDTO searchGameRequestDTO) {
+    public ResponseEntity<Page<GetGameDetailDTO>> getSearchGame(@RequestBody SearchGameRequestDTO searchGameRequestDTO) {
 
         return ResponseEntity.status(HttpStatus.OK).body(gameService.getSearchGameDTO(searchGameRequestDTO));
     }
@@ -61,7 +66,7 @@ public class GameController {
     }
 
     @GetMapping("/release")
-    public ResponseEntity<Page<GetGameListDTO>> getReleaseSortGame(
+    public ResponseEntity<Page<GetGameDetailDTO>> getReleaseSortGame(
             @RequestParam(name = "page", defaultValue = "1") int page,
             @RequestParam(name = "size", defaultValue = "10") int size) {
 
@@ -69,11 +74,27 @@ public class GameController {
     }
 
     @GetMapping("/recommend")
-    public ResponseEntity<Page<GetGameListDTO>> getRecommendSortGame(
+    public ResponseEntity<Page<GetGameDetailDTO>> getRecommendSortGame(
             @RequestParam(name = "page", defaultValue = "1") int page,
             @RequestParam(name = "size", defaultValue = "10") int size) {
 
         return ResponseEntity.status(HttpStatus.OK).body(gameService.getRecomandGameDTO(page-1,size));
+    }
+
+    @GetMapping("/positive")
+    public ResponseEntity<Page<GetGameDetailDTO>> getPositiveGame(
+            @RequestParam(name = "page", defaultValue = "1") int page,
+            @RequestParam(name = "size", defaultValue = "10") int size) {
+
+        return ResponseEntity.status(HttpStatus.OK).body(gameService.getPositiveGameDTO(page-1,size));
+    }
+
+    @GetMapping("/like")
+    public ResponseEntity<Page<GetGameDetailDTO>> createArticle(@AuthenticationPrincipal CustomUserDetails userInfo,
+                                                                @RequestParam(name = "page", defaultValue = "1") int page,
+                                                                @RequestParam(name = "size", defaultValue = "10") int size) {
+
+        return ResponseEntity.status(HttpStatus.OK).body(gameService.getLikeGameDTO(page-1,size,userInfo));
     }
 
     ///////                       스팀에서 서버로 다운                            ////////
@@ -115,6 +136,13 @@ public class GameController {
             throw new RuntimeException(e);
         }
         return ResponseEntity.ok(null);
+    }
+
+    // 상세게임 페이지 로딩시 현재 플레이어 수
+    @GetMapping("/request/players/{id}")
+    public ResponseEntity<GetGamePlayerNumberDTO> readSteamCategoryData(@PathVariable(name = "id") String id) throws JsonProcessingException {
+
+        return ResponseEntity.ok(gameDataService.getGamePlayerNumber(id));
     }
 
     // json 파일의 카테고리 리스트를 db에 저장

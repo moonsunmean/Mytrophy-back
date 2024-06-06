@@ -47,6 +47,8 @@ public class QGame extends EntityPathBase<Game> {
 
     public final StringPath name = createString("name");
 
+    public final EnumPath<mytrophy.api.game.enumentity.Positive> positive = createEnum("positive", mytrophy.api.game.enumentity.Positive.class);
+
     public final NumberPath<Integer> price = createNumber("price", Integer.class);
 
     public final StringPath publisher = createString("publisher");

@@ -69,21 +69,12 @@ public class MemberService {
         memberRepository.save(signupMember);
     }
 
-
-
-
-
-
-    // 회원 조회
-    public Member findMemberById(Long id) {
-        return memberRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("다음 ID에 해당하는 회원을 찾을 수 없습니다: " + id));
-    }
-
     // 회원 수정
-    public boolean updateMemberById(Long id, MemberDto memberDto) {
-        Member member = memberRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("다음 ID에 해당하는 회원을 찾을 수 없습니다: " + id));
+    public boolean updateMemberByUsername(String username, MemberDto memberDto) {
+        Member member = memberRepository.findByUsername(username);
+        if (member == null) {
+            throw new IllegalArgumentException("다음 Username에 해당하는 회원을 찾을 수 없습니다: " + username);
+        }
 
 
             member.setName(memberDto.getName());
@@ -100,14 +91,13 @@ public class MemberService {
             return true;
     }
 
-
-
+    //회원삭제
     @Transactional
-    public boolean deleteMemberById(Long id) {
-        if (!memberRepository.existsById(id)) {
-            throw new IllegalArgumentException("다음 ID에 해당하는 회원을 찾을 수 없습니다: " + id);
+    public boolean deleteMemberByUsername(String username) {
+        if (!memberRepository.existsByUsername(username)) {
+            throw new IllegalArgumentException("다음 ID에 해당하는 회원을 찾을 수 없습니다: " + username);
         }
-        memberRepository.deleteById(id);
+        memberRepository.deleteByUsername(username);
         return true;
     }
     public void linkSteamAccount(String username, String steamId) {
@@ -148,6 +138,5 @@ public class MemberService {
     public Member findMemberByUsername(String username) {
         return memberRepository.findByUsername(username);
     }
-
 
 }
