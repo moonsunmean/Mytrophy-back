@@ -1,18 +1,24 @@
 package mytrophy.api.game.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import mytrophy.api.article.dto.ArticleResponseDto;
+import mytrophy.api.article.service.ArticleService;
 import mytrophy.api.game.dto.RequestDTO.SearchGameRequestDTO;
 import mytrophy.api.game.dto.ResponseDTO.GetGamePlayerNumberDTO;
 import mytrophy.api.game.dto.ResponseDTO.GetTopGameDTO;
 import mytrophy.api.game.dto.ResponseDTO.GetGameDetailDTO;
 import mytrophy.api.game.service.GameDataService;
 import mytrophy.api.game.service.GameService;
+import mytrophy.api.member.entity.Member;
+import mytrophy.api.member.service.MemberService;
+import mytrophy.global.jwt.CustomUserDetails;
 import mytrophy.global.scheduler.GameDataScheduler;
 import org.hibernate.mapping.Any;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -24,7 +30,7 @@ public class GameController {
     private final GameDataScheduler gameDataScheduler;
 
     @Autowired
-    public GameController(GameService gameService, GameDataService gameDataService, GameDataScheduler gameDataScheduler) {
+    public GameController(GameService gameService, GameDataService gameDataService, GameDataScheduler gameDataScheduler, ArticleService articleService, MemberService memberService) {
         this.gameService = gameService;
         this.gameDataService = gameDataService;
         this.gameDataScheduler = gameDataScheduler;
@@ -80,6 +86,14 @@ public class GameController {
             @RequestParam(name = "size", defaultValue = "10") int size) {
 
         return ResponseEntity.status(HttpStatus.OK).body(gameService.getPositiveGameDTO(page-1,size));
+    }
+
+    @GetMapping("/like")
+    public ResponseEntity<Page<GetGameDetailDTO>> createArticle(@AuthenticationPrincipal CustomUserDetails userInfo,
+                                                                @RequestParam(name = "page", defaultValue = "1") int page,
+                                                                @RequestParam(name = "size", defaultValue = "10") int size) {
+
+        return ResponseEntity.status(HttpStatus.OK).body(gameService.getLikeGameDTO(page-1,size,userInfo));
     }
 
     ///////                       스팀에서 서버로 다운                            ////////
