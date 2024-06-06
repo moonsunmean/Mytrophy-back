@@ -1,6 +1,10 @@
 package mytrophy.api.game.service;
 
 
+import mytrophy.api.article.entity.Article;
+import mytrophy.api.article.enumentity.Header;
+import mytrophy.api.article.repository.ArticleRepository;
+import mytrophy.api.article.service.ArticleService;
 import mytrophy.api.game.dto.RequestDTO.SearchGameRequestDTO;
 import mytrophy.api.game.dto.ResponseDTO.GetGameAchievementDTO;
 import mytrophy.api.game.dto.ResponseDTO.GetGameScreenshotDTO;
@@ -10,8 +14,12 @@ import mytrophy.api.game.dto.ResponseDTO.GetGameDetailDTO;
 import mytrophy.api.game.entity.*;
 import mytrophy.api.game.querydsl.GameQueryRepository;
 import mytrophy.api.game.repository.*;
+import mytrophy.api.member.entity.Member;
+import mytrophy.api.member.repository.MemberRepository;
+import mytrophy.api.member.service.MemberService;
 import mytrophy.global.handler.CustomException;
 import mytrophy.global.handler.ErrorCodeEnum;
+import mytrophy.global.jwt.CustomUserDetails;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
@@ -27,11 +35,19 @@ import java.util.stream.Collectors;
 public class GameService {
     private final GameRepository gameRepository;
     private final GameQueryRepository gameQueryRepository;
+    private final MemberService memberService;
+    private final MemberRepository memberRepository;
+    private final ArticleService articleService;
+    private final ArticleRepository articleRepository;
 
     @Autowired
-    public GameService(GameRepository gameRepository, GameQueryRepository gameQueryRepository) {
+    public GameService(GameRepository gameRepository, GameQueryRepository gameQueryRepository, MemberService memberService, MemberRepository memberRepository, ArticleService articleService, ArticleRepository articleRepository) {
         this.gameRepository = gameRepository;
         this.gameQueryRepository = gameQueryRepository;
+        this.memberService = memberService;
+        this.memberRepository = memberRepository;
+        this.articleService = articleService;
+        this.articleRepository = articleRepository;
     }
 
     public Page<GetGameDetailDTO> getAllGameDTO(int page, int size) {
@@ -195,6 +211,40 @@ public class GameService {
         return new PageImpl<>(getGameListDTOList, PageRequest.of(page, size), getGameListDTOList.size());
     }
 
+    public Page<GetGameDetailDTO> getLikeGameDTO(int page, int size, CustomUserDetails userInfo) {
+        //토큰에서 username 빼내기
+        String username = userInfo.getUsername();
+        Member member = memberService.findMemberByUsername(username);
+
+        List<Article> articleList = member.getArticles();
+        List<Game> gameList = new ArrayList<>();
+
+        for (Article article : articleList) {
+            if (article.getHeader() == Header.REVIEW) {
+                gameList.add(gameRepository.findByAppId(article.getAppId().intValue()));
+            }
+        }
+
+        List<GetGameDetailDTO> getGameListDTOList = new ArrayList<>();
+
+        for (Game game : gameList) {
+            GetGameDetailDTO gameReleaseDTO = mapGameToDTO(game);
+            getGameListDTOList.add(gameReleaseDTO);
+        }
+
+        if (getGameListDTOList.isEmpty()) {
+            throw new CustomException(ErrorCodeEnum.NOT_FOUND_GAME);
+        }
+
+        int start = page * size;
+        int end = Math.min(start + size, getGameListDTOList.size());
+
+        List<GetGameDetailDTO> pageList = getGameListDTOList.subList(start, end);
+
+        return new PageImpl<>(pageList, PageRequest.of(page, size), pageList.size());
+
+    }
+
     private GetGameDetailDTO mapGameToDTO(Game game) {
         List<Category> categoryList = game.getGameCategoryList().stream()
                 .map(GameCategory::getCategory)
@@ -232,5 +282,4 @@ public class GameService {
                 getGameAchievementDTOList
         );
     }
-
 }
