@@ -190,7 +190,7 @@ public class ArticleController {
     }
 
     // appId로 게시글 조회
-    @GetMapping("/app/{appId}")
+    @GetMapping("/appId/{appId}")
     public ResponseEntity<Page<ArticleResponseDto>> getArticleByAppId(@PathVariable("appId") int appId,
                                                                       @PageableDefault(size = 10) Pageable pageable) {
         Page<ArticleResponseDto> article = articleService.findByAppId(appId, pageable);
