@@ -5,9 +5,8 @@ pipeline {
         DOCKERHUB_CREDENTIALS = credentials('dockerhub-credentials-id')
         DOCKERHUB_REPO = 'qpfriday/mytrophy'
         DOCKER_IMAGE_TAG = "${DOCKERHUB_REPO}:${BUILD_NUMBER}"
-        SERVER_USERNAME = 'elice' // 사용자 이름
-        SERVER_PASSWORD = 'e0w5y63uw7hzte6mwy94ore7ppdis6on' // 비밀번호
-        SERVER_IP = '34.64.52.132' // 서버 IP 주소
+        SERVER_CREDENTIALS = credentials('server-credentials-id')
+        SERVER_IP = '34.64.52.132'
     }
 
     stages {
