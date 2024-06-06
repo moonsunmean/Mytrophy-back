@@ -7,6 +7,7 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import mytrophy.api.game.entity.Game;
 import mytrophy.api.game.entity.QGame;
+import mytrophy.api.game.enumentity.Positive;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -64,6 +65,23 @@ public class GameQueryRepository {
         // 쿼리 실행 및 페이징하여 결과 반환
         QueryResults<Game> results = jpaQueryFactory
                 .selectFrom(qGame)
+                .orderBy(getOrderSpecifier(sort))
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize())
+                .fetchResults();
+
+        return new PageImpl<>(results.getResults(), pageable, results.getTotal());
+    }
+
+    public Page<Game> gamePositiveList(Pageable pageable) {
+
+        // 정렬 방향 설정
+        Sort sort = pageable.getSort();
+
+        // 쿼리 실행 및 페이징하여 결과 반환
+        QueryResults<Game> results = jpaQueryFactory
+                .selectFrom(qGame)
+                .where(qGame.positive.eq(Positive.OVERWHELMING_POSITIVE))
                 .orderBy(getOrderSpecifier(sort))
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())

@@ -1,10 +1,11 @@
 package mytrophy.api.article.repository;
 
+import mytrophy.api.article.dto.ArticleResponseDto;
 import mytrophy.api.article.entity.Article;
 import mytrophy.api.article.enumentity.Header;
-import mytrophy.api.comment.entity.Comment;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -12,9 +13,11 @@ import java.util.List;
 @Repository
 public interface ArticleRepository extends JpaRepository<Article, Long> {
 
-    List<Article> findByHeader(Header header);
+    Page<Article> findAll(Pageable pageable);
+
+    Page<Article> findAllByHeader(Header header, Pageable pageable);
 
     Article findByIdAndHeader(Long id, Header header);
 
-
+    Page<Article> findByAppId(int appId, Pageable pageable);
 }
