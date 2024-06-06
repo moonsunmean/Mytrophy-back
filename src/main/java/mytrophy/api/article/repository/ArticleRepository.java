@@ -19,5 +19,5 @@ public interface ArticleRepository extends JpaRepository<Article, Long> {
 
     Article findByIdAndHeader(Long id, Header header);
 
-    Page<ArticleResponseDto> findByAppId(int appId, Pageable pageable);
+    Page<Article> findByAppId(int appId, Pageable pageable);
 }

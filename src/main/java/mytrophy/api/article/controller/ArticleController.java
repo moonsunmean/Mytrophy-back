@@ -194,11 +194,9 @@ public class ArticleController {
     public ResponseEntity<Page<ArticleResponseDto>> getArticleByAppId(@PathVariable("appId") int appId,
                                                                       @PageableDefault(size = 10) Pageable pageable) {
         Page<ArticleResponseDto> article = articleService.findByAppId(appId, pageable);
-
         if (article == null) {
             return ResponseEntity.notFound().build();
         }
-
         return ResponseEntity.ok().body(article);
     }
 
