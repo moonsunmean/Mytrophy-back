@@ -25,5 +25,4 @@ public class GameCategory  {
     @JoinColumn(name = "category_id")
     private Category category;
 
-
 }
