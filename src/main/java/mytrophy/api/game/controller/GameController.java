@@ -43,7 +43,6 @@ public class GameController {
         return ResponseEntity.status(HttpStatus.OK).body(gameService.getAllGameDTO(page - 1, size));
     }
 
-
     @GetMapping("/{id}")
     public ResponseEntity<GetGameDetailDTO> getGameDetail(@PathVariable(name = "id") Integer id) {
 
