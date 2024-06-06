@@ -81,7 +81,7 @@ public class GameQueryRepository {
         // 쿼리 실행 및 페이징하여 결과 반환
         QueryResults<Game> results = jpaQueryFactory
                 .selectFrom(qGame)
-                .where(qGame.positive.eq(Positive.VERY_POSITIVE))
+                .where(qGame.positive.eq(Positive.OVERWHELMING_POSITIVE))
                 .orderBy(getOrderSpecifier(sort))
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
