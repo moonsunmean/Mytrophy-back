@@ -5,6 +5,8 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import mytrophy.api.member.dto.CustomOAuth2User;
+import mytrophy.api.member.entity.Member;
+import mytrophy.api.member.repository.MemberRepository;
 import mytrophy.api.member.security.SteamUserPrincipal;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
@@ -21,9 +23,10 @@ import java.io.IOException;
 public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
 
     private final JWTUtil jwtUtil;
-
-    public CustomSuccessHandler(JWTUtil jwtUtil) {
+    private final MemberRepository memberRepository;
+    public CustomSuccessHandler(JWTUtil jwtUtil,MemberRepository memberRepository) {
         this.jwtUtil = jwtUtil;
+        this.memberRepository = memberRepository;
     }
 
     @Override
@@ -40,21 +43,25 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
             SteamUserPrincipal steamUserDetails = (SteamUserPrincipal) authentication.getPrincipal();
             username = steamUserDetails.getUsername();
             role = "ROLE_STEAM_USER";
-            System.out.println(username);
         } else {
             super.onAuthenticationSuccess(request, response, authentication);
             return;
         }
-
+        Member AccessUser = memberRepository.findByUsername(username);
+        boolean firstLogin = AccessUser.isFirstLogin();
         String token = jwtUtil.createJwt("refresh",username, role, 60 * 60 * 60L);
-        System.out.println(token);
         response.addCookie(createCookie("refresh", token));
 
-        if ("ROLE_STEAM_USER".equals(role)) {
-            response.sendRedirect("/api/members/steam/profile");
-        } else {
-            response.sendRedirect("/my");
+
+        if(firstLogin){
+            response.sendRedirect("/select-category");
+            AccessUser.setFirstLogin(false);
+            memberRepository.save(AccessUser);
+        }else{
+            response.sendRedirect("/");
         }
+
+
         response.setStatus(HttpStatus.OK.value());
 
     }

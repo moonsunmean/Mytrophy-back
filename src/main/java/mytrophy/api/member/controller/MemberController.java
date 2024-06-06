@@ -11,11 +11,13 @@ import mytrophy.api.member.entity.Member;
 import mytrophy.api.member.security.SteamAutenticationToken;
 import mytrophy.api.member.security.SteamUserPrincipal;
 import mytrophy.api.member.service.SteamService;
+import mytrophy.global.jwt.CustomUserDetails;
 import mytrophy.global.jwt.JWTUtil;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
@@ -58,9 +60,10 @@ public class MemberController {
     }
 
     // 회원 조회
-    @GetMapping("/{id}")
-    public ResponseEntity<Member> getMemberById(@PathVariable("id") Long id) {
-        Member member = memberService.findMemberById(id);
+    @GetMapping("/get-userinfo")
+    public ResponseEntity<Member> getMemberById(@AuthenticationPrincipal CustomUserDetails userInfo) {
+        String username = userInfo.getUsername();
+        Member member = memberService.findMemberByUsername(username);
         if (member == null) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
@@ -69,9 +72,12 @@ public class MemberController {
     }
 
     // 회원 수정
-    @PatchMapping("/{id}")
-    public ResponseEntity<String> updateMember(@PathVariable("id") Long id, @RequestBody MemberDto memberDto) {
-        boolean isUpdated = memberService.updateMemberById(id, memberDto);
+    @PatchMapping("/modify-userinfo")
+    public ResponseEntity<String> updateMember(@AuthenticationPrincipal CustomUserDetails userInfo,
+                                               @RequestBody MemberDto memberDto) {
+        String username = userInfo.getUsername();
+        log.info("Username:{}",username);
+        boolean isUpdated = memberService.updateMemberByUsername(username, memberDto);
         if (isUpdated) {
             return new ResponseEntity<>("회원 수정 성공", HttpStatus.OK);
         } else {
@@ -80,10 +86,12 @@ public class MemberController {
 
     }
 
+
     // 회원 삭제
-    @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteMember(@PathVariable("id") Long id) {
-        boolean isDeleted = memberService.deleteMemberById(id);
+    @DeleteMapping("/delete-userinfo")
+    public ResponseEntity<String> deleteMember(@AuthenticationPrincipal CustomUserDetails userInfo) {
+        String username = userInfo.getUsername();
+        boolean isDeleted = memberService.deleteMemberByUsername(username);
         if (isDeleted) {
             return new ResponseEntity<>("회원 삭제 성공", HttpStatus.OK);
         } else {

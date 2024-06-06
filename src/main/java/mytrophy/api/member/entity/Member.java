@@ -7,6 +7,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import mytrophy.api.article.entity.Article;
+import mytrophy.api.common.base.BaseEntity;
 import mytrophy.api.game.entity.Category;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -21,7 +22,7 @@ import java.time.LocalDate;
 @Getter
 @Setter
 @Entity
-public class Member {
+public class Member extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -51,16 +52,12 @@ public class Member {
     @Column(nullable = true)
     private String imagePath;;// 프로필 이미지
 
-
-
     @Column(nullable = false)
     private String role;// 권한 (ROLE_USER, ROLE_ADMIN)
 
-    @CreationTimestamp
-    @Column(nullable = false)
-    private LocalDate createdAt;
-
-
+    @Setter
+    @Getter
+    private boolean firstLogin = true; // 기본값을 true(첫로그인이후 false로 변경)
 
     @OneToMany(mappedBy = "member", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JsonIgnoreProperties("member") // 순환 참조 방지
@@ -68,10 +65,4 @@ public class Member {
 
     @ManyToMany(fetch = FetchType.LAZY)
     private List<Category> categories;
-
-    @CreationTimestamp
-    private LocalDateTime created_at; // 생성날짜
-
-    @UpdateTimestamp
-    private LocalDateTime update_at; // 수정날짜
 }
