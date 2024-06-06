@@ -5,9 +5,8 @@ pipeline {
         DOCKERHUB_CREDENTIALS = credentials('dockerhub-credentials-id')
         DOCKERHUB_REPO = 'qpfriday/mytrophy'
         DOCKER_IMAGE_TAG = "${DOCKERHUB_REPO}:${BUILD_NUMBER}"
-        SERVER_USERNAME = 'elice' // 사용자 이름
-        SERVER_PASSWORD = 'e0w5y63uw7hzte6mwy94ore7ppdis6on' // 비밀번호
-        SERVER_IP = '34.64.52.132' // 서버 IP 주소
+        SERVER_CREDENTIALS = credentials('server-credentials-id')
+        SERVER_IP = '34.64.52.132'
     }
 
     stages {
@@ -70,7 +69,7 @@ pipeline {
             steps {
                 script {
                     // SSH로 서버에 연결하여 명령 실행
-                    sh "sshpass -p ${SERVER_PASSWORD} ssh -o StrictHostKeyChecking=no ${SERVER_USERNAME}@${SERVER_IP} 'whoami'"
+                    sh "sshpass -p ${SERVER_CREDENTIALS_PSW} ssh -o StrictHostKeyChecking=no ${SERVER_CREDENTIALS_USR}@${SERVER_IP} 'whoami'"
                 }
             }
         }
@@ -78,9 +77,12 @@ pipeline {
         stage('Docker Pull and Run'){
             steps {
                 script {
-                    // 서버에서 Docker 이미지를 풀고 실행
-                    sh "sshpass -p ${SERVER_PASSWORD} ssh -o StrictHostKeyChecking=no ${SERVER_USERNAME}@${SERVER_IP} 'docker pull ${DOCKER_IMAGE_TAG}'"
-                    sh "sshpass -p ${SERVER_PASSWORD} ssh -o StrictHostKeyChecking=no ${SERVER_USERNAME}@${SERVER_IP} 'docker run -d --name mytrophy-service -p 8080:8080 ${DOCKER_IMAGE_TAG}'"
+                    // 서버에서 Docker 이미지를 pull
+                    sh "sshpass -p ${SERVER_CREDENTIALS_PSW} ssh -o StrictHostKeyChecking=no ${SERVER_CREDENTIALS_USR}@${SERVER_IP} 'docker pull ${DOCKER_IMAGE_TAG}'"
+                    // 중지하고 이미 있는 컨테이너 삭제
+                    sh "sshpass -p ${SERVER_CREDENTIALS_PSW} ssh -o StrictHostKeyChecking=no ${SERVER_CREDENTIALS_USR}@${SERVER_IP} 'docker stop mytrophy-service || true && docker rm mytrophy-service || true'"
+                    // 새로 받은 컨테이너 실행
+                    sh "sshpass -p ${SERVER_CREDENTIALS_PSW} ssh -o StrictHostKeyChecking=no ${SERVER_CREDENTIALS_USR}@${SERVER_IP} 'docker run -d --name mytrophy-service -p 8080:8080 ${DOCKER_IMAGE_TAG}'"
                 }
             }
         }

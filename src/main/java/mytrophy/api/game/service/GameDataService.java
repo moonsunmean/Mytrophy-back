@@ -493,7 +493,9 @@ public class GameDataService {
 
             int result = positive * 100 / (positive + negative);
 
-            if (result >= 80) {
+            if(positive+negative>500 && result>=95){
+                return Positive.OVERWHELMING_POSITIVE;
+            }else if (result >= 80) {
                 return Positive.VERY_POSITIVE;
             } else if (result >= 70) {
                 return Positive.MOSTLY_POSITIVE;
@@ -502,12 +504,15 @@ public class GameDataService {
             } else if (result >= 20) {
                 return Positive.MOSTLY_NEGATIVE;
             }
-            return Positive.VERY_NEGATIVE;
+            return Positive.MOSTLY_NEGATIVE;
+
         } catch (Exception e) {
             // 에러 메시지 한국어로 반환
             throw new RuntimeException("게임 평가를 가져오는 도중에 오류가 발생했습니다");
         }
+
     }
+
 
 
 }
