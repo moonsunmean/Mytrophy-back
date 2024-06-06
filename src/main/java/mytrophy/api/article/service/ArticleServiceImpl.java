@@ -3,6 +3,8 @@ package mytrophy.api.article.service;
 import mytrophy.api.article.dto.ArticleResponseDto;
 import mytrophy.api.article.entity.ArticleLike;
 import mytrophy.api.article.repository.ArticleLikeRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import mytrophy.api.article.dto.ArticleRequestDto;
@@ -16,8 +18,7 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
+
 
 @Service
 @RequiredArgsConstructor
@@ -57,14 +58,11 @@ public class ArticleServiceImpl implements ArticleService {
 
     // 게시글 리스트 조회
     @Override
-    public List<ArticleResponseDto> findAll() {
-        List<Article> articles = articleRepository.findAll();
-        return articles.stream()
-            .map(article -> {
-                int commentCount = article.getComments().size();
-                return ArticleResponseDto.fromEntityWithCommentCount(article, commentCount);
-            })
-            .collect(Collectors.toList());
+    public Page<ArticleResponseDto> findAll(Pageable pageable) {
+        return articleRepository.findAll(pageable).map(article -> {
+            int commentCount = article.getComments().size();
+            return ArticleResponseDto.fromEntityWithCommentCount(article, commentCount);
+        });
     }
 
     // 해당 게시글 조회
@@ -77,14 +75,11 @@ public class ArticleServiceImpl implements ArticleService {
 
     // 말머리 별 게시글 리스트 조회
     @Override
-    public List<ArticleResponseDto> findAllByHeader(Header header) {
-        List<Article> articles = articleRepository.findByHeader(header);
-        return articles.stream()
-            .map(article -> {
-                int commentCount = article.getComments().size();
-                return ArticleResponseDto.fromEntityWithCommentCount(article, commentCount);
-            })
-            .collect(Collectors.toList());
+    public Page<ArticleResponseDto> findAllByHeader(Header header, Pageable pageable) {
+        return articleRepository.findAllByHeader(header, pageable).map(article -> {
+            int commentCount = article.getComments().size();
+            return ArticleResponseDto.fromEntityWithCommentCount(article, commentCount);
+        });
     }
 
     // 말머리 별 해당 게시글 조회
@@ -179,4 +174,14 @@ public class ArticleServiceImpl implements ArticleService {
         articleLikeRepository.delete(articleLike);
         article.likeDown();
     }
+
+    // appId로 게시글 조회
+    @Override
+    public Page<ArticleResponseDto> findByAppId(int appId, Pageable pageable) {
+        return articleRepository.findByAppId(appId, pageable).map(article -> {
+            int commentCount = article.getComments().size();
+            return ArticleResponseDto.fromEntityWithCommentCount(article, commentCount);
+        });
+    }
+
 }

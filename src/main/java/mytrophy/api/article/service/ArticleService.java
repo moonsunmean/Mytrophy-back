@@ -4,8 +4,9 @@ package mytrophy.api.article.service;
 
 import mytrophy.api.article.dto.ArticleRequestDto;
 import mytrophy.api.article.dto.ArticleResponseDto;
-import mytrophy.api.article.entity.Article;
 import mytrophy.api.article.enumentity.Header;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.io.IOException;
 import java.util.List;
@@ -16,13 +17,13 @@ public interface ArticleService {
     ArticleResponseDto createArticle(Long memberId, ArticleRequestDto articleRequestDto, List<String> imagePath) throws IOException;
 
     // 게시글 리스트 조회
-    List<ArticleResponseDto> findAll();
+    Page<ArticleResponseDto> findAll(Pageable pageable);
 
     // 해당 게시글 조회
     ArticleResponseDto findById(Long id);
 
     // 말머리 별 게시글 리스트 조회
-    List<ArticleResponseDto> findAllByHeader(Header header);
+    Page<ArticleResponseDto> findAllByHeader(Header header, Pageable pageable);
 
     // 말머리 별 해당 게시글 조회
     ArticleResponseDto findByIdAndHeader(Long id, Header header);
@@ -43,4 +44,6 @@ public interface ArticleService {
     void articleLikeUp(Long articleId, Long memberId);
 
     void articleLikeDown(Long articleId, Long memberId);
+
+    Page<ArticleResponseDto> findByAppId(int appId, Pageable pageable);
 }
