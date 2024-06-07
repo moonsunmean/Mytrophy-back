@@ -126,6 +126,28 @@ public class MemberService {
         memberRepository.save(member);
     }
 
+    // 회원 수정
+    public boolean updateMemberById(Long id, MemberDto memberDto) {
+        Member member = memberRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("다음 ID에 해당하는 회원을 찾을 수 없습니다: " + id));
+
+        mapDtoToMember(memberDto, member);
+        member.setPassword(bCryptPasswordEncoder.encode(memberDto.getPassword()));
+        memberRepository.save(member);
+        return true;
+    }
+
+    // 회원 삭제
+    @Transactional
+    public boolean deleteMemberById(Long id) {
+        if (!memberRepository.existsById(id)) {
+            throw new IllegalArgumentException("다음 ID에 해당하는 회원을 찾을 수 없습니다: " + id);
+        }
+        memberRepository.deleteById(id);
+        return true;
+    }
+
+
     private MemberResponseDto mapMemberToDto(Member member) {
         MemberResponseDto dto = new MemberResponseDto();
         dto.setUsername(member.getUsername());
