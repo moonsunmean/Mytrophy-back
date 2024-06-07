@@ -2,6 +2,7 @@ package mytrophy.api.member.entity;
 
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -56,9 +57,10 @@ public class Member extends BaseEntity {
     private String role;// 권한 (ROLE_USER, ROLE_ADMIN)
 
     @OneToMany(mappedBy = "member", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    @JsonIgnoreProperties("member") // 순환 참조 방지
+    @JsonIgnore
     private List<Article> articles = new ArrayList<>();
 
     @ManyToMany(fetch = FetchType.LAZY)
+    @JsonIgnore
     private List<Category> categories;
 }
