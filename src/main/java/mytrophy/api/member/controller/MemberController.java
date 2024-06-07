@@ -109,7 +109,7 @@ public class MemberController {
         }
     }
 
-    // 회원 수정
+    // 회원 수정 (id)
     @PatchMapping("/{id}")
     public ResponseEntity<String> updateMemberById(@PathVariable("id") Long id, @RequestBody MemberDto memberDto) {
         boolean isUpdated = memberService.updateMemberById(id, memberDto);
