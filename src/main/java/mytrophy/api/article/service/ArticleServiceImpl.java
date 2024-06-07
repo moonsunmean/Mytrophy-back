@@ -37,7 +37,7 @@ public class ArticleServiceImpl implements ArticleService {
             .orElseThrow(() -> new RuntimeException("회원 정보를 찾을 수 없습니다."));
 
         if (articleRequestDto.getAppId() == null) {
-            return null;
+            throw new IllegalArgumentException("appId가 존재하지 않습니다.");
         }
 
         // 이미지 경로가 null이 아닌 경우
