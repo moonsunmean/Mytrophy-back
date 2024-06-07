@@ -55,8 +55,14 @@ public class Member extends BaseEntity {
     @Column(nullable = false)
     private String role;// 권한 (ROLE_USER, ROLE_ADMIN)
 
+    @Column(nullable = true)
+    private LocalDateTime createdAt;
+
+    @Column(nullable = true)
+    private LocalDateTime updatedAt;
+
     @OneToMany(mappedBy = "member", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    @JsonIgnoreProperties("member") // 순환 참조 방지
+    @JsonIgnoreProperties({"member", "articles"}) // 순환 참조 방지
     private List<Article> articles = new ArrayList<>();
 
     @ManyToMany(fetch = FetchType.LAZY)

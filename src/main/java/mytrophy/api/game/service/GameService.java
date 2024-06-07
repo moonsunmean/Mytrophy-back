@@ -245,6 +245,10 @@ public class GameService {
 
     }
 
+    public long getGameCount() {
+        return gameRepository.count();
+    }
+
     private GetGameDetailDTO mapGameToDTO(Game game) {
         List<Category> categoryList = game.getGameCategoryList().stream()
                 .map(GameCategory::getCategory)

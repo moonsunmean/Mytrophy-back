@@ -92,6 +92,12 @@ public class ArticleServiceImpl implements ArticleService {
         return ArticleResponseDto.fromEntity(article);
     }
 
+    // 게시글 수 조회
+    @Override
+    public long getArticleCount() {
+        return articleRepository.count();
+    }
+
     // 게시글 수정
     @Override
     public ArticleResponseDto updateArticle(Long memberId, Long id, ArticleRequestDto articleRequestDto) {

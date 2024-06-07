@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import mytrophy.global.jwt.CustomSuccessHandler;
 import mytrophy.api.member.dto.MemberDto;
+import mytrophy.api.member.dto.MemberResponseDto;
 import mytrophy.api.member.dto.SteamOpenidLoginDto;
 import mytrophy.api.member.entity.Member;
 import mytrophy.api.member.security.SteamAutenticationToken;
@@ -42,8 +43,6 @@ public class MemberController {
     private final JWTUtil jwtUtil;
     private final ImageService imageService;
 
-
-
     // 중복 회원 검증
     @GetMapping("/checkUsername")
     public boolean isUsernameExists(@RequestParam String username) {
@@ -59,13 +58,26 @@ public class MemberController {
 
     // 회원 조회
     @GetMapping("/{id}")
-    public ResponseEntity<Member> getMemberById(@PathVariable("id") Long id) {
-        Member member = memberService.findMemberById(id);
+    public ResponseEntity<MemberResponseDto> getMemberById(@PathVariable("id") Long id) {
+        MemberResponseDto member = memberService.getMemberDtoById(id);
         if (member == null) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
         return ResponseEntity.ok(member);
+    }
 
+    // 회원 수 조회
+    @GetMapping("/count")
+    public ResponseEntity<Long> getMemberCount() {
+        long count = memberService.getMemberCount();
+        return ResponseEntity.ok(count);
+    }
+
+    // 회원 리스트 조회
+    @GetMapping("/list")
+    public ResponseEntity<List<MemberResponseDto>> getAllMembers() {
+        List<MemberResponseDto> members = memberService.findAll();
+        return ResponseEntity.ok(members);
     }
 
     // 회원 수정
