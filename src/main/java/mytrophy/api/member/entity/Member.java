@@ -59,6 +59,12 @@ public class Member extends BaseEntity {
     @Getter
     private boolean firstLogin = true; // 기본값을 true(첫로그인이후 false로 변경)
 
+    @Column(nullable = true)
+    private LocalDateTime createdAt;
+
+    @Column(nullable = true)
+    private LocalDateTime updatedAt;
+
     @OneToMany(mappedBy = "member", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JsonIgnoreProperties("member") // 순환 참조 방지
     private List<Article> articles = new ArrayList<>();
