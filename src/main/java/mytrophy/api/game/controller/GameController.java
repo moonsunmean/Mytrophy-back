@@ -38,10 +38,10 @@ public class GameController {
 
 
     @GetMapping
-    public ResponseEntity<Page<GetGameDetailDTO>> getAllGame(@RequestParam(name = "page", defaultValue = "0") int page,
+    public ResponseEntity<Page<GetGameDetailDTO>> getAllGame(@RequestParam(name = "page", defaultValue = "1") int page,
                                                           @RequestParam(name = "size", defaultValue = "10") int size) {
 
-        return ResponseEntity.status(HttpStatus.OK).body(gameService.getAllGameDTO(page, size));
+        return ResponseEntity.status(HttpStatus.OK).body(gameService.getAllGameDTO(page - 1, size));
     }
 
     @GetMapping("/{id}")
