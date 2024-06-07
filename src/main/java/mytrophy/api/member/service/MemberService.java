@@ -127,15 +127,6 @@ public class MemberService {
         memberRepository.deleteByUsername(username);
         return true;
     }
-    public void linkSteamAccount(String username, String steamId) {
-        System.out.println("linkSteam username : "+username);
-        Member member = memberRepository.findByUsername(username);
-        if (member == null) {
-            throw new IllegalArgumentException("사용자를 찾을 수 없습니다.");
-        }
-        member.setSteamId(steamId);
-        memberRepository.save(member);
-    }
 
     // 회원 삭제 (id)
     @Transactional
@@ -147,6 +138,15 @@ public class MemberService {
         return true;
     }
 
+    public void linkSteamAccount(String username, String steamId) {
+        System.out.println("linkSteam username : "+username);
+        Member member = memberRepository.findByUsername(username);
+        if (member == null) {
+            throw new IllegalArgumentException("사용자를 찾을 수 없습니다.");
+        }
+        member.setSteamId(steamId);
+        memberRepository.save(member);
+    }
 
     private MemberResponseDto mapMemberToDto(Member member) {
         MemberResponseDto dto = new MemberResponseDto();
