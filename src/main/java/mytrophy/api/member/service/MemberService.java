@@ -94,7 +94,7 @@ public class MemberService {
                 .collect(Collectors.toList());
     }
 
-    // 회원 수정
+    // 회원 수정 (토큰)
     public boolean updateMemberByUsername(String username, MemberDto memberDto) {
         Member member = memberRepository.findByUsername(username);
         if (member == null) {
@@ -107,7 +107,18 @@ public class MemberService {
         return true;
     }
 
-    //회원삭제
+    // 회원 수정 (id)
+    public boolean updateMemberById(Long id, MemberDto memberDto) {
+        Member member = memberRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("다음 ID에 해당하는 회원을 찾을 수 없습니다: " + id));
+
+        mapDtoToMember(memberDto, member);
+        member.setPassword(bCryptPasswordEncoder.encode(memberDto.getPassword()));
+        memberRepository.save(member);
+        return true;
+    }
+
+    // 회원삭제 (토큰)
     @Transactional
     public boolean deleteMemberByUsername(String username) {
         if (!memberRepository.existsByUsername(username)) {
@@ -126,18 +137,7 @@ public class MemberService {
         memberRepository.save(member);
     }
 
-    // 회원 수정
-    public boolean updateMemberById(Long id, MemberDto memberDto) {
-        Member member = memberRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("다음 ID에 해당하는 회원을 찾을 수 없습니다: " + id));
-
-        mapDtoToMember(memberDto, member);
-        member.setPassword(bCryptPasswordEncoder.encode(memberDto.getPassword()));
-        memberRepository.save(member);
-        return true;
-    }
-
-    // 회원 삭제
+    // 회원 삭제 (id)
     @Transactional
     public boolean deleteMemberById(Long id) {
         if (!memberRepository.existsById(id)) {
