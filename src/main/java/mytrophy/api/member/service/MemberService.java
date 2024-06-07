@@ -75,6 +75,7 @@ public class MemberService {
 
 
     // 회원 조회
+    @Transactional
     public Member findMemberById(Long id) {
         return memberRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("다음 ID에 해당하는 회원을 찾을 수 없습니다: " + id));
