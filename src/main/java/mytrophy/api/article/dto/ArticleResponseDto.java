@@ -36,8 +36,8 @@ public class ArticleResponseDto {
         Member member = article.getMember();
         if (member != null) {
             this.memberId = member.getId();
-            this.username = member.getUsername();
         }
+        this.username = member.getUsername();
         //지연로딩 에러 해결 -> comments를 commentDto로 변환해서 할당
         if (article.getComments() != null) {
             this.comments = article.getComments().stream()
@@ -67,11 +67,9 @@ public class ArticleResponseDto {
         this.appId = article.getAppId();
         Member member = article.getMember();
         if (member != null) {
-            MemberDto memberDto = new MemberDto();
-            memberDto.setUsername(member.getUsername());
-            // 다른 필드들도 필요에 따라 추가 설정
-            this.memberId = memberDto.getId();
+            this.memberId = member.getId();
         }
+        this.username = member.getUsername();
 
         if (article.getComments() != null) {
             this.comments = article.getComments().stream()
