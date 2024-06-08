@@ -95,6 +95,14 @@ public class GameController {
         return ResponseEntity.status(HttpStatus.OK).body(gameService.getLikeGameDTO(page-1,size,userInfo));
     }
 
+    @GetMapping("/category/{id}")
+    public ResponseEntity<Page<GetGameDetailDTO>> categoryGame(@PathVariable(name = "id") Long id,
+                                                               @RequestParam(name = "page", defaultValue = "1") int page,
+                                                               @RequestParam(name = "size", defaultValue = "10") int size) {
+
+        return ResponseEntity.status(HttpStatus.OK).body(gameService.getCategoryGameDTO(page - 1, size, id));
+    }
+
     ///////                       스팀에서 서버로 다운                            ////////
 
     // 스팀의 전체 게임목록 DB에 다운
