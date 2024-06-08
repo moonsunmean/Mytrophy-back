@@ -6,6 +6,8 @@ import mytrophy.api.member.dto.MemberDto;
 import mytrophy.api.member.dto.MemberResponseDto;
 import mytrophy.api.member.entity.Member;
 import mytrophy.api.member.repository.MemberRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import java.util.Optional;
@@ -76,11 +78,9 @@ public class MemberService {
     }
 
     // 회원 리스트 조회
-    public List<MemberResponseDto> findAll() {
-        List<Member> members = memberRepository.findAll();
-        return members.stream()
-                .map(this::mapMemberToDto)
-                .collect(Collectors.toList());
+    public Page<MemberResponseDto> findAll(Pageable pageable) {
+        Page<Member> members = memberRepository.findAll(pageable);
+        return members.map(this::mapMemberToDto);
     }
 
     // 회원 수정 (토큰)
@@ -139,6 +139,7 @@ public class MemberService {
 
     private MemberResponseDto mapMemberToDto(Member member) {
         MemberResponseDto dto = new MemberResponseDto();
+        dto.setId(member.getId());
         dto.setUsername(member.getUsername());
         dto.setName(member.getName());
         dto.setNickname(member.getNickname());
