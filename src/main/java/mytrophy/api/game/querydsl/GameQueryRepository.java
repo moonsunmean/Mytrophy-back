@@ -7,7 +7,7 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import mytrophy.api.game.entity.Game;
 import mytrophy.api.game.entity.QGame;
-import mytrophy.api.game.enumentity.Positive;
+import mytrophy.api.game.enums.Positive;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -33,6 +33,36 @@ public class GameQueryRepository {
 
         // 검색 조건 생성
         BooleanExpression predicate = buildSearchPredicate(keyword, categoryIds, minPrice, maxPrice, isFree, startDate, endDate);
+
+        // 정렬 방향 설정
+        Sort sort = Sort.unsorted();
+
+        if (pageable.getSort().isSorted()) {
+            sort = pageable.getSort();
+        } else {
+            // 기본적으로 적용할 정렬 방향 지정
+            sort = Sort.by(Sort.Direction.DESC, "id"); // 예시로 ID를 기본적으로 내림차순으로 정렬
+        }
+
+        // 쿼리 실행 및 페이징하여 결과 반환
+        QueryResults<Game> results = jpaQueryFactory
+                .selectFrom(qGame)
+                .leftJoin(qGame.gameCategoryList).fetchJoin()
+                .where(predicate)
+                .orderBy(getOrderSpecifier(sort))
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize())
+                .fetchResults();
+
+        return new PageImpl<>(results.getResults(), pageable, results.getTotal());
+    }
+
+    public Page<Game> categoryGame(
+            List<Long> categoryIds,
+            Pageable pageable) {
+
+        // 검색 조건 생성
+        BooleanExpression predicate = buildSearchPredicate(null, categoryIds, 0, null, true, null, null);
 
         // 정렬 방향 설정
         Sort sort = Sort.unsorted();
