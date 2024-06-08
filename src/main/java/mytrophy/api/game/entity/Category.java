@@ -17,16 +17,15 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Category extends BaseEntity {
+public class Category {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO) // 기본 키 자동 생성 안 함
     private Long id;
 
     @Column
     private String name;
 
-    @OneToMany(fetch = FetchType.EAGER, mappedBy = "category")
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "category")
     @JsonIgnore
     private List<GameCategory> gameCategoryList = new ArrayList<>();
 }

@@ -6,6 +6,7 @@ import mytrophy.api.article.enumentity.Header;
 import mytrophy.api.comment.dto.CommentDto;
 import mytrophy.api.member.entity.Member;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -35,18 +36,22 @@ public class ArticleResponseDto {
             this.username = member.getUsername();
         }
         //지연로딩 에러 해결 -> comments를 commentDto로 변환해서 할당
-        this.comments = article.getComments().stream()
+        if (article.getComments() != null) {
+            this.comments = article.getComments().stream()
                 .map(comment -> new CommentDto(
-                        comment.getId(),
-                        comment.getContent(),
-                        comment.getMember().getId(),
-                        comment.getArticle().getId(),
-                        comment.getLikes(),
-                        comment.getParentComment() != null ? comment.getParentComment().getId() : null
+                    comment.getId(),
+                    comment.getContent(),
+                    comment.getMember().getId(),
+                    comment.getArticle().getId(),
+                    comment.getLikes(),
+                    comment.getParentComment() != null ? comment.getParentComment().getId() : null
                 ))
                 .collect(Collectors.toList());
+        } else {
+            this.comments = new ArrayList<>();
+        }
 
-        this.commentCount = commentCount;
+        this.commentCount = article.getCommentCount();
     }
 
     public ArticleResponseDto(Article article) {
@@ -62,19 +67,23 @@ public class ArticleResponseDto {
             this.username = member.getUsername();
         }
 
-        this.comments = article.getComments().stream()
+        if (article.getComments() != null) {
+            this.comments = article.getComments().stream()
                 .map(comment -> new CommentDto(
-                        comment.getId(),
-                        comment.getContent(),
-                        comment.getMember().getId(),
-                        comment.getArticle().getId(),
-                        comment.getLikes(),
-                        comment.getParentComment() != null ? comment.getParentComment().getId() : null
+                    comment.getId(),
+                    comment.getContent(),
+                    comment.getMember().getId(),
+                    comment.getArticle().getId(),
+                    comment.getLikes(),
+                    comment.getParentComment() != null ? comment.getParentComment().getId() : null
                 ))
                 .collect(Collectors.toList());
+        } else {
+            this.comments = new ArrayList<>();
+        }
 
         // 댓글 수 초기화
-        this.commentCount = commentCount;
+        this.commentCount = article.getCommentCount();
     }
 
     public static ArticleResponseDto fromEntity(Article article) {
