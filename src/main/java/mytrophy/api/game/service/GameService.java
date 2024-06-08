@@ -96,6 +96,8 @@ public class GameService {
     }
 
 
+
+
     public GetGameDetailDTO getGameDetailDTO(Integer id) {
 
         if (!gameRepository.existsByAppId(id)) throw new CustomException(ErrorCodeEnum.NOT_EXISTS_GAME_ID);
@@ -104,6 +106,7 @@ public class GameService {
 
         return mapGameToDTO(game);
     }
+
 
     public Page<GetGameDetailDTO> getSearchGameDTO(SearchGameRequestDTO dto) {
         int size = dto.getSize();
@@ -267,6 +270,10 @@ public class GameService {
         }
 
         return new PageImpl<>(getGameListDTOList, PageRequest.of(page, size), getGameListDTOList.size());
+    }
+
+    public long getGameCount() {
+        return gameRepository.count();
     }
 
     private GetGameDetailDTO mapGameToDTO(Game game) {

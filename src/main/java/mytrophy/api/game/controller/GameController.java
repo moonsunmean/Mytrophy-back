@@ -103,6 +103,13 @@ public class GameController {
         return ResponseEntity.status(HttpStatus.OK).body(gameService.getCategoryGameDTO(page - 1, size, id));
     }
 
+    // 게임 수 조회
+    @GetMapping("/count")
+    public ResponseEntity<Long> getGameCount() {
+        long count = gameService.getGameCount();
+        return ResponseEntity.ok(count);
+    }
+
     ///////                       스팀에서 서버로 다운                            ////////
 
     // 스팀의 전체 게임목록 DB에 다운
