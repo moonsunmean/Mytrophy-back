@@ -1,24 +1,13 @@
 package mytrophy.api.member.service;
 
-
-import lombok.RequiredArgsConstructor;
-import mytrophy.api.article.dto.ArticleResponseDto;
 import mytrophy.api.game.entity.Category;
 import mytrophy.api.game.repository.CategoryRepository;
 import mytrophy.api.member.dto.MemberDto;
 import mytrophy.api.member.dto.MemberResponseDto;
 import mytrophy.api.member.entity.Member;
 import mytrophy.api.member.repository.MemberRepository;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-
-import java.util.Collections;
 import java.util.Optional;
 import java.util.List;
 import java.util.stream.Collectors;
