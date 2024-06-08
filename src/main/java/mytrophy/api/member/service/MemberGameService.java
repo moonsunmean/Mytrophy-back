@@ -36,7 +36,7 @@ public class MemberGameService {
         }
 
         Member member = memberOptional.get();
-        Long steamId = member.getSteamId();
+        String steamId = member.getSteamId();
 
         // Steam API 호출 URL 구성
         String url = "https://api.steampowered.com/IPlayerService/GetOwnedGames/v0001/"
@@ -60,7 +60,7 @@ public class MemberGameService {
         }
 
         Member member = memberOptional.get();
-        Long steamId = member.getSteamId();
+        String steamId = member.getSteamId();
 
         // Steam API 호출 URL 구성
         String url = "https://api.steampowered.com/IPlayerService/GetOwnedGames/v0001/"
@@ -101,7 +101,7 @@ public class MemberGameService {
         }
 
         Member member = memberOptional.get();
-        Long steamId = member.getSteamId();
+        String steamId = member.getSteamId();
 
         // Steam API 호출 URL 구성
         String url = "https://api.steampowered.com/ISteamUserStats/GetPlayerAchievements/v0001/"

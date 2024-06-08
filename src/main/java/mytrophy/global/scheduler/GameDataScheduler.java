@@ -14,8 +14,7 @@ public class GameDataScheduler {
     private boolean isContinue = false;
     private int downSize = 20;
     private boolean downType = false; // false 면 스케줄러 true 면 메뉴얼
-    private int sleepTime = 1000;
-    private int test = 1;
+    private int sleepTime = 10;
     private static boolean serverFirstStartCheck = false;
 
 

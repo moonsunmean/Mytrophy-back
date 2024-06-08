@@ -4,7 +4,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import mytrophy.api.game.entity.*;
-import mytrophy.api.game.enums.ReadType;
+import mytrophy.api.game.dto.ResponseDTO.GetGamePlayerNumberDTO;
+import mytrophy.api.game.enums.Positive;
 import mytrophy.api.game.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -15,10 +16,14 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.*;
 
 @Service
@@ -119,7 +124,7 @@ public class GameDataService {
     }
 
     // 스팀 게임 top100 목록을 저장하는 메서드
-    public List<Long> receiveTopSteamGameList(int size, String type) throws JsonProcessingException {
+    public List<Integer> receiveTopSteamGameList(int size, String type) throws JsonProcessingException {
 
         RestTemplate restTemplate = new RestTemplate();
         String url = "https://steamspy.com/api.php?request=top100in2weeks";
@@ -127,7 +132,7 @@ public class GameDataService {
         JsonNode rootNode = new ObjectMapper().readTree(response.getBody());
 
         int count = 1;
-        List<Long> appList = new ArrayList<>();
+        List<Integer> appList = new ArrayList<>();
 
         for (JsonNode appNode : rootNode) {
             int appId = appNode.get("appid").asInt();
@@ -137,7 +142,7 @@ public class GameDataService {
                 gameDetail(appId);
             }
             else {
-                appList.add(Long.valueOf(appId));
+                appList.add(appId);
             }
 
             if (count >= size) break;
@@ -165,13 +170,19 @@ public class GameDataService {
 
         // JSON 데이터를 가지고 게임 엔티티를 생성하고 저장
         Game game = createGameFromJson(appNode.get("data"), appId);
+        // 출시 예정 게임이므로 건너뛰기
+        if (game.getPrice() == null || game.getReleaseDate() == null) {
+            return;
+        }
         game.setAchievementList(achievementRepository.saveAll(saveGameAchievement(appId)));
         game.setScreenshotList(screenshotRepository.saveAll(saveGameScreenshot(appNode.get("data").get("screenshots"))));
         game = gameRepository.save(game);
 
         // 받아온 게임의 카테고리 연결하여 DB에 저장
         saveGameCategory(appNode.get("data").get("genres"),game);
+        saveGameGenres(appNode.get("data").get("categories"),game);
     }
+
 
     // 주어진 URL로부터 JSON 데이터를 받아와서 해당 앱의 노드를 반환
     private JsonNode getAppNodeFromUrl(String url, String strId) {
@@ -193,7 +204,7 @@ public class GameDataService {
         }
     }
     // JSON 데이터에서 게임 정보를 추출하여 게임 엔티티를 생성
-    private Game createGameFromJson(JsonNode appNode, int appId) {
+    private Game createGameFromJson(JsonNode appNode, int appId) throws JsonProcessingException {
         String name = appNode.hasNonNull("name") ? appNode.get("name").asText() : null;
         String description = appNode.hasNonNull("short_description") ? appNode.get("short_description").asText() : null;
 
@@ -213,7 +224,7 @@ public class GameDataService {
         if (publishersNode != null && publishersNode.isArray() && publishersNode.size() > 0) {
             for (JsonNode publisherNode : publishersNode) {
                 gamePublisher += publisherNode.asText();
-                gamePublisher += ",";
+                gamePublisher += "&";
             }
         }
 
@@ -225,12 +236,13 @@ public class GameDataService {
         Boolean jpPosible = checkList.get(2);
 
         // 출시 날짜
-        String date = appNode.hasNonNull("release_date") ? appNode.get("release_date").get("date").asText() : null;
+        String dateString = appNode.hasNonNull("release_date") ? appNode.get("release_date").get("date").asText() : null;
+        LocalDate date = convertToDate(dateString);
 
         // 추천수
-        Integer recommandation = appNode.hasNonNull("recommendations") ? appNode.get("recommendations").get("total").asInt() : null;
+        Integer recommandation = appNode.hasNonNull("recommendations") ? appNode.get("recommendations").get("total").asInt() : 0;
 
-        // 헤어 이미지
+        // 헤어 이미지x
         String headerImagePath = appNode.hasNonNull("header_image") ? appNode.get("header_image").asText() : null;
 
         // 게임 가격
@@ -243,6 +255,8 @@ public class GameDataService {
                     appNode.get("price_overview").get("final").asInt() / 100 : null;
         }
 
+        Positive positive = getGamePositiveNumber(appId);
+
         // 컴퓨터 권장 사양
         JsonNode requirementHader = appNode.hasNonNull("pc_requirements") ? appNode.get("pc_requirements") : null;
         String requirement = requirementHader.hasNonNull("minimum") ? requirementHader.get("minimum").asText() : null;
@@ -252,7 +266,7 @@ public class GameDataService {
 
         if (target != null) id = target.getId();
 
-        return new Game(id,appId,name,description,gameDeveloper,gamePublisher,requirement,price,date,recommandation,headerImagePath,koPosible,enPosible,jpPosible,null,null,null);
+        return new Game(id,appId,name,description,gameDeveloper,gamePublisher,requirement,price,date,recommandation,positive,headerImagePath,koPosible,enPosible,jpPosible,null,null,null);
     }
 
     // 게임 업적을 받아와서 업적 리스트를 반환하는 메서드
@@ -278,8 +292,15 @@ public class GameDataService {
         for (JsonNode achievementNode : achievementsNode) {
             String name = achievementNode.get("displayName").asText();
             String imagePath = achievementNode.get("icon").asText();
+            JsonNode hiddenNode = achievementNode.get("hidden");
+            Boolean hidden = hiddenNode != null && hiddenNode.asBoolean();
+            JsonNode descriptionNode = achievementNode.get("description");
+            String description = descriptionNode != null ? descriptionNode.asText() : null;
+            if (hidden && description == null) {
+                description = "숨겨진 업적 입니다.";
+            }
             isExist = achievementRepository.existsByName(name);
-            if(!isExist)achievementList.add(new Achievement(null, name, imagePath));
+            if(!isExist)achievementList.add(new Achievement(null, name, imagePath,hidden,description));
         }
         return achievementList;
     }
@@ -354,10 +375,14 @@ public class GameDataService {
         }
     }
 
-    public Category saveCategoryToDb(int receiveId,String name) {
-        Long id = Long.valueOf(receiveId);
-        return new Category(id, name,null);
+    public Category saveCategoryToDb(int receiveId, String name) {
+        Long id = (long) receiveId;
+        Category category = new Category();
+        category.setId(id);
+        category.setName(name);
+        return category;
     }
+
 
     private void saveGameCategory(JsonNode appsNode, Game game) {
         // null 값이면 바로 종료
@@ -365,9 +390,15 @@ public class GameDataService {
 
         // 게임과 카테고리 연결
         for (JsonNode appNode : appsNode) {
-            Long categoryId = appNode.get("id").asLong();
+            Long categoryId = appNode.get("id").asLong() + 100L;
+            String categoryName = appNode.get("description").asText();
+
             if(!gameCategoryRepository.existsByGameIdAndCategoryId(game.getId(), categoryId)){
                 Category existingCategory = categoryRepository.findById(categoryId).orElse(null);
+                if (existingCategory == null) {
+                    existingCategory = new Category(categoryId, categoryName, null);
+                    existingCategory = categoryRepository.save(existingCategory);
+                }
                 GameCategory gameCategory = new GameCategory();
                 gameCategory.setGame(game);
                 gameCategory.setCategory(existingCategory);
@@ -375,4 +406,113 @@ public class GameDataService {
             }
         }
     }
+
+    private void saveGameGenres(JsonNode appsNode, Game game) {
+
+        // null 값이면 바로 종료
+        if (appsNode == null) return;
+
+        // 게임과 카테고리 연결
+        for (JsonNode appNode : appsNode) {
+            Long categoryId = appNode.get("id").asLong();
+            String categoryName = appNode.get("description").asText();
+
+            if(!gameCategoryRepository.existsByGameIdAndCategoryId(game.getId(), categoryId)){
+                Category existingCategory = categoryRepository.findById(categoryId).orElse(null);
+                if (existingCategory == null) {
+                    existingCategory = new Category(categoryId, categoryName, null);
+                    existingCategory = categoryRepository.save(existingCategory);
+                }
+                GameCategory gameCategory = new GameCategory();
+                gameCategory.setGame(game);
+                gameCategory.setCategory(existingCategory);
+                gameCategoryRepository.save(gameCategory);
+            }
+        }
+    }
+
+    public static LocalDate convertToDate(String dateString) {
+        try {
+            // 날짜 형식 지정
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy년 M월 d일");
+            // 문자열을 LocalDate로 변환하여 반환
+            return LocalDate.parse(dateString, formatter);
+        } catch (DateTimeParseException e) {
+            // 예외 발생 시 기본값으로 null 반환
+            return null;
+        }
+    }
+
+    public GetGamePlayerNumberDTO getGamePlayerNumber(String id) {
+        RestTemplate restTemplate = new RestTemplate();
+        String url = "https://api.steampowered.com/ISteamUserStats/GetNumberOfCurrentPlayers/v1/?key=" + steamKey + "&appid=" + id;
+        try {
+            ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, null, String.class);
+            JsonNode rootNode = new ObjectMapper().readTree(response.getBody());
+            Integer result = rootNode.get("response").get("result").asInt();
+            String playerNumber = (result == 1) ? rootNode.get("response").get("player_count").asText() : "조회 불가 게임";
+            return new GetGamePlayerNumberDTO(playerNumber);
+        } catch (HttpClientErrorException.NotFound e) {
+            // 404 에러가 발생할 경우 처리
+            return new GetGamePlayerNumberDTO("조회 불가 게임");
+        } catch (JsonProcessingException e) {
+            // JSON 처리 오류가 발생할 경우 처리
+            e.printStackTrace();
+            return new GetGamePlayerNumberDTO("조회 불가 게임");
+        } catch (Exception e) {
+            // 기타 예외 발생 시 처리
+            e.printStackTrace();
+            return new GetGamePlayerNumberDTO("조회 불가 게임");
+        }
+    }
+
+    public Positive getGamePositiveNumber(Integer id) throws JsonProcessingException {
+        try {
+            RestTemplate restTemplate = new RestTemplate();
+            String url = "https://steamspy.com/api.php?request=appdetails&appid=" + id + "&l=korean";
+
+            ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, null, String.class);
+            if (response.getStatusCode() != HttpStatus.OK) {
+                throw new RuntimeException("SteamSpy API에서 게임 정보를 가져오는 데 실패했습니다");
+            }
+
+            JsonNode rootNode = new ObjectMapper().readTree(response.getBody());
+            JsonNode positiveNode = rootNode.path("positive");
+            JsonNode negativeNode = rootNode.path("negative");
+
+            if (positiveNode.isMissingNode() || negativeNode.isMissingNode()) {
+                throw new RuntimeException("API 응답에서 긍정적 또는 부정적인 리뷰 수를 찾을 수 없습니다");
+            }
+
+            int positive = positiveNode.asInt();
+            int negative = negativeNode.asInt();
+
+            if (positive + negative == 0) {
+                return Positive.UNKNOWN; // 리뷰 없음
+            }
+
+            int result = positive * 100 / (positive + negative);
+
+            if(positive+negative>500 && result>=95){
+                return Positive.OVERWHELMING_POSITIVE;
+            }else if (result >= 80) {
+                return Positive.VERY_POSITIVE;
+            } else if (result >= 70) {
+                return Positive.MOSTLY_POSITIVE;
+            } else if (result >= 40) {
+                return Positive.MIXED;
+            } else if (result >= 20) {
+                return Positive.MOSTLY_NEGATIVE;
+            }
+            return Positive.MOSTLY_NEGATIVE;
+
+        } catch (Exception e) {
+            // 에러 메시지 한국어로 반환
+            throw new RuntimeException("게임 평가를 가져오는 도중에 오류가 발생했습니다");
+        }
+
+    }
+
+
+
 }

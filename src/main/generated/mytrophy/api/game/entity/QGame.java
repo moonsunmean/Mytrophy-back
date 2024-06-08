@@ -26,12 +26,9 @@ public class QGame extends EntityPathBase<Game> {
 
     public final NumberPath<Integer> appId = createNumber("appId", Integer.class);
 
-<<<<<<< HEAD
     //inherited
     public final DateTimePath<java.time.LocalDateTime> createdAt = _super.createdAt;
 
-=======
->>>>>>> cf4026e880bd58e569949d77a0e2c22366fb8c1b
     public final StringPath description = createString("description");
 
     public final StringPath developer = createString("developer");
@@ -50,13 +47,15 @@ public class QGame extends EntityPathBase<Game> {
 
     public final StringPath name = createString("name");
 
+    public final EnumPath<mytrophy.api.game.enums.Positive> positive = createEnum("positive", mytrophy.api.game.enums.Positive.class);
+
     public final NumberPath<Integer> price = createNumber("price", Integer.class);
 
     public final StringPath publisher = createString("publisher");
 
     public final NumberPath<Integer> recommendation = createNumber("recommendation", Integer.class);
 
-    public final StringPath releaseDate = createString("releaseDate");
+    public final DatePath<java.time.LocalDate> releaseDate = createDate("releaseDate", java.time.LocalDate.class);
 
     public final StringPath requirement = createString("requirement");
 
