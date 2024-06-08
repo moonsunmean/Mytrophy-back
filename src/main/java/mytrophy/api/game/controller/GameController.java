@@ -1,19 +1,24 @@
 package mytrophy.api.game.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import mytrophy.api.game.dto.tsetDTO;
-import mytrophy.api.game.dto.ResponseDTO.GetAllGameDTO;
+import mytrophy.api.article.dto.ArticleResponseDto;
+import mytrophy.api.article.service.ArticleService;
+import mytrophy.api.game.dto.RequestDTO.SearchGameRequestDTO;
+import mytrophy.api.game.dto.ResponseDTO.GetGamePlayerNumberDTO;
 import mytrophy.api.game.dto.ResponseDTO.GetTopGameDTO;
 import mytrophy.api.game.dto.ResponseDTO.GetGameDetailDTO;
-import mytrophy.api.game.dto.ResponseDTO.GetSearchGameDTO;
 import mytrophy.api.game.service.GameDataService;
 import mytrophy.api.game.service.GameService;
+import mytrophy.api.member.entity.Member;
+import mytrophy.api.member.service.MemberService;
+import mytrophy.global.jwt.CustomUserDetails;
 import mytrophy.global.scheduler.GameDataScheduler;
 import org.hibernate.mapping.Any;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -25,26 +30,18 @@ public class GameController {
     private final GameDataScheduler gameDataScheduler;
 
     @Autowired
-    public GameController(GameService gameService, GameDataService gameDataService, GameDataScheduler gameDataScheduler) {
+    public GameController(GameService gameService, GameDataService gameDataService, GameDataScheduler gameDataScheduler, ArticleService articleService, MemberService memberService) {
         this.gameService = gameService;
         this.gameDataService = gameDataService;
         this.gameDataScheduler = gameDataScheduler;
     }
 
-    @GetMapping("/test")
-    public ResponseEntity<String> test(@RequestBody tsetDTO test) {
-        String asd = test.getTest1() + test.getTest2();
-        return ResponseEntity.ok(asd);
-    }
-
-
     @GetMapping
-    public ResponseEntity<Page<GetAllGameDTO>> getAllGame(@RequestParam(name = "page", defaultValue = "1") int page,
+    public ResponseEntity<Page<GetGameDetailDTO>> getAllGame(@RequestParam(name = "page", defaultValue = "1") int page,
                                                           @RequestParam(name = "size", defaultValue = "10") int size) {
 
         return ResponseEntity.status(HttpStatus.OK).body(gameService.getAllGameDTO(page - 1, size));
     }
-
 
     @GetMapping("/{id}")
     public ResponseEntity<GetGameDetailDTO> getGameDetail(@PathVariable(name = "id") Integer id) {
@@ -53,13 +50,9 @@ public class GameController {
     }
 
     @GetMapping("/search")
-    public ResponseEntity<Page<GetSearchGameDTO>> getSearchGame(@RequestParam(value = "keyword", defaultValue = "") String keyword,
-                                                                @RequestParam(value = "categoryId", defaultValue = "0") Long categoryId,
-                                                                @RequestParam(name = "page", defaultValue = "1") int page,
-                                                                @RequestParam(name = "size", defaultValue = "10") int size
-    ) {
+    public ResponseEntity<Page<GetGameDetailDTO>> getSearchGame(@RequestBody SearchGameRequestDTO searchGameRequestDTO) {
 
-        return ResponseEntity.status(HttpStatus.OK).body(gameService.getSearchGameDTO(keyword, page - 1, size, categoryId));
+        return ResponseEntity.status(HttpStatus.OK).body(gameService.getSearchGameDTO(searchGameRequestDTO));
     }
 
     @GetMapping("/top100")
@@ -70,19 +63,64 @@ public class GameController {
         return ResponseEntity.status(HttpStatus.OK).body(gameService.getTopGameDTO(page-1,size,gameDataService.receiveTopSteamGameList(100,"request")));
     }
 
+    @GetMapping("/release")
+    public ResponseEntity<Page<GetGameDetailDTO>> getReleaseSortGame(
+            @RequestParam(name = "page", defaultValue = "1") int page,
+            @RequestParam(name = "size", defaultValue = "10") int size) {
 
+        return ResponseEntity.status(HttpStatus.OK).body(gameService.getReleaseGameDTO(page-1,size));
+    }
+
+    @GetMapping("/recommend")
+    public ResponseEntity<Page<GetGameDetailDTO>> getRecommendSortGame(
+            @RequestParam(name = "page", defaultValue = "1") int page,
+            @RequestParam(name = "size", defaultValue = "10") int size) {
+
+        return ResponseEntity.status(HttpStatus.OK).body(gameService.getRecomandGameDTO(page-1,size));
+    }
+
+    @GetMapping("/positive")
+    public ResponseEntity<Page<GetGameDetailDTO>> getPositiveGame(
+            @RequestParam(name = "page", defaultValue = "1") int page,
+            @RequestParam(name = "size", defaultValue = "10") int size) {
+
+        return ResponseEntity.status(HttpStatus.OK).body(gameService.getPositiveGameDTO(page-1,size));
+    }
+
+    @GetMapping("/like")
+    public ResponseEntity<Page<GetGameDetailDTO>> createArticle(@AuthenticationPrincipal CustomUserDetails userInfo,
+                                                                @RequestParam(name = "page", defaultValue = "1") int page,
+                                                                @RequestParam(name = "size", defaultValue = "10") int size) {
+
+        return ResponseEntity.status(HttpStatus.OK).body(gameService.getLikeGameDTO(page-1,size,userInfo));
+    }
+
+    @GetMapping("/category/{id}")
+    public ResponseEntity<Page<GetGameDetailDTO>> categoryGame(@PathVariable(name = "id") Long id,
+                                                               @RequestParam(name = "page", defaultValue = "1") int page,
+                                                               @RequestParam(name = "size", defaultValue = "10") int size) {
+
+        return ResponseEntity.status(HttpStatus.OK).body(gameService.getCategoryGameDTO(page - 1, size, id));
+    }
+
+    // 게임 수 조회
+    @GetMapping("/count")
+    public ResponseEntity<Long> getGameCount() {
+        long count = gameService.getGameCount();
+        return ResponseEntity.ok(count);
+    }
 
     ///////                       스팀에서 서버로 다운                            ////////
 
     // 스팀의 전체 게임목록 DB에 다운
-    @PostMapping("/request/game/list")
+    @GetMapping("/request/game/list")
     public ResponseEntity<Any> readSteamGameData() throws JsonProcessingException {
         gameDataService.receiveSteamGameList();
         return ResponseEntity.ok(null);
     }
 
     // 스팀의 전체 상세게임정보 DB에서 다운
-    @PostMapping("/request/game/detail")
+    @GetMapping("/request/game/detail")
     public ResponseEntity<Any> saveDetailSteamGameData(
             @RequestParam(name = "size", defaultValue = "10") int size,
             @RequestParam(name = "isContinue", defaultValue = "false") Boolean isContinue
@@ -92,7 +130,7 @@ public class GameController {
     }
 
     // 스팀의 게임 하나 다운
-    @PostMapping("/request/game/{id}")
+    @GetMapping("/request/game/{id}")
     public ResponseEntity<Any> readSteamGameDataOne(@PathVariable(name = "id") int id) {
         try {
             gameDataService.gameDetail(id);
@@ -103,7 +141,7 @@ public class GameController {
     }
 
     // 스팀의 TOP100 목록 다운
-    @PostMapping("/request/game/top")
+    @GetMapping("/request/game/top")
     public ResponseEntity<Any> readTopSteamGameData() {
         try {
             gameDataService.receiveTopSteamGameList(100,"read");
@@ -113,7 +151,15 @@ public class GameController {
         return ResponseEntity.ok(null);
     }
 
-    @PostMapping("/request/category")
+    // 상세게임 페이지 로딩시 현재 플레이어 수
+    @GetMapping("/request/players/{id}")
+    public ResponseEntity<GetGamePlayerNumberDTO> readSteamCategoryData(@PathVariable(name = "id") String id) throws JsonProcessingException {
+
+        return ResponseEntity.ok(gameDataService.getGamePlayerNumber(id));
+    }
+
+    // json 파일의 카테고리 리스트를 db에 저장
+    @GetMapping("/request/category")
     public ResponseEntity<Any> readSteamCategoryData() {
         gameDataService.readCategoryList();
         return ResponseEntity.ok(null);

@@ -3,8 +3,9 @@ package mytrophy.api.game.entity;
 import jakarta.persistence.*;
 import lombok.*;
 import mytrophy.api.common.base.BaseEntity;
+import mytrophy.api.game.enums.Positive;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,10 +21,10 @@ public class Game extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column
+    @Column(unique = true)
     private Integer appId;
 
-    @Column(unique = true)
+    @Column(length = 2000)
     private String name;
 
     @Column(length = 2000)
@@ -42,12 +43,16 @@ public class Game extends BaseEntity {
     private Integer price;
 
     @Column
-    private String releaseDate;
+    private LocalDate releaseDate;
 
     @Column
     private Integer recommendation;
 
-    @Column
+    @Column(length = 1000)
+    @Enumerated(EnumType.STRING)
+    private Positive positive;
+
+    @Column(length = 2000)
     private String headerImagePath;
 
     @Column
@@ -68,4 +73,6 @@ public class Game extends BaseEntity {
 
     @OneToMany(fetch = FetchType.LAZY)
     private List<Screenshot> screenshotList;
+
+
 }

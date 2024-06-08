@@ -24,6 +24,10 @@ public class QAchievement extends EntityPathBase<Achievement> {
     //inherited
     public final DateTimePath<java.time.LocalDateTime> createdAt = _super.createdAt;
 
+    public final StringPath description = createString("description");
+
+    public final BooleanPath hidden = createBoolean("hidden");
+
     public final NumberPath<Long> id = createNumber("id", Long.class);
 
     public final StringPath imagePath = createString("imagePath");

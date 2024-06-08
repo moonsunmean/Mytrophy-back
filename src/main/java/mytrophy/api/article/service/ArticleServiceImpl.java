@@ -3,6 +3,8 @@ package mytrophy.api.article.service;
 import mytrophy.api.article.dto.ArticleResponseDto;
 import mytrophy.api.article.entity.ArticleLike;
 import mytrophy.api.article.repository.ArticleLikeRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import mytrophy.api.article.dto.ArticleRequestDto;
@@ -16,11 +18,11 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
+
 
 @Service
 @RequiredArgsConstructor
+@Transactional // 트랜잭션 전역 처리
 public class ArticleServiceImpl implements ArticleService {
 
     private final ArticleRepository articleRepository;
@@ -29,38 +31,24 @@ public class ArticleServiceImpl implements ArticleService {
 
     // 게시글 생성
     @Override
-    @Transactional // 트랜잭션 처리
     public ArticleResponseDto createArticle(Long memberId, ArticleRequestDto articleRequestDto, List<String> imagePath) throws IOException {
         // 회원 정보 가져오기
         Member member = memberRepository.findById(memberId)
             .orElseThrow(() -> new RuntimeException("회원 정보를 찾을 수 없습니다."));
-
-        Article article;
 
         if (articleRequestDto.getAppId() == null) {
             return null;
         }
 
         // 이미지 경로가 null이 아닌 경우
-        if (imagePath != null && !imagePath.isEmpty()) {
-            article = Article.builder()
-                .header(articleRequestDto.getHeader())
-                .name(articleRequestDto.getName())
-                .content(articleRequestDto.getContent())
-                .imagePath(articleRequestDto.getImagePath())
-                .appId(articleRequestDto.getAppId())
-                .member(member)
-                .build();
-        } else {
-            // 이미지 경로가 null이거나 비어있는 경우
-            article = Article.builder()
-                .header(articleRequestDto.getHeader())
-                .name(articleRequestDto.getName())
-                .content(articleRequestDto.getContent())
-                .appId(articleRequestDto.getAppId())
-                .member(member)
-                .build();
-        }
+        Article article = Article.builder()
+            .header(articleRequestDto.getHeader())
+            .name(articleRequestDto.getName())
+            .content(articleRequestDto.getContent())
+            .imagePath(imagePath != null && !imagePath.isEmpty() ? String.join(",", imagePath) : null)
+            .appId(articleRequestDto.getAppId())
+            .member(member)
+            .build();
 
         Article savedArticle = articleRepository.save(article);
 
@@ -70,20 +58,15 @@ public class ArticleServiceImpl implements ArticleService {
 
     // 게시글 리스트 조회
     @Override
-    @Transactional
-    public List<ArticleResponseDto> findAll() {
-        List<Article> articles = articleRepository.findAll();
-        return articles.stream()
-            .map(article -> {
-                int commentCount = article.getComments().size();
-                return ArticleResponseDto.fromEntityWithCommentCount(article, commentCount);
-            })
-            .collect(Collectors.toList());
+    public Page<ArticleResponseDto> findAll(Pageable pageable) {
+        return articleRepository.findAll(pageable).map(article -> {
+            int commentCount = article.getComments().size();
+            return ArticleResponseDto.fromEntityWithCommentCount(article, commentCount);
+        });
     }
 
     // 해당 게시글 조회
     @Override
-    @Transactional
     public ArticleResponseDto findById(Long id) {
         Article article = articleRepository.findById(id)
             .orElseThrow(() -> new IllegalArgumentException("해당 게시글이 존재하지 않습니다."));
@@ -92,20 +75,15 @@ public class ArticleServiceImpl implements ArticleService {
 
     // 말머리 별 게시글 리스트 조회
     @Override
-    @Transactional
-    public List<ArticleResponseDto> findAllByHeader(Header header) {
-        List<Article> articles = articleRepository.findByHeader(header);
-        return articles.stream()
-            .map(article -> {
-                int commentCount = article.getComments().size();
-                return ArticleResponseDto.fromEntityWithCommentCount(article, commentCount);
-            })
-            .collect(Collectors.toList());
+    public Page<ArticleResponseDto> findAllByHeader(Header header, Pageable pageable) {
+        return articleRepository.findAllByHeader(header, pageable).map(article -> {
+            int commentCount = article.getComments().size();
+            return ArticleResponseDto.fromEntityWithCommentCount(article, commentCount);
+        });
     }
 
     // 말머리 별 해당 게시글 조회
     @Override
-    @Transactional
     public ArticleResponseDto findByIdAndHeader(Long id, Header header) {
         Article article = articleRepository.findByIdAndHeader(id, header);
         if (article == null) {
@@ -114,9 +92,14 @@ public class ArticleServiceImpl implements ArticleService {
         return ArticleResponseDto.fromEntity(article);
     }
 
+    // 게시글 수 조회
+    @Override
+    public long getArticleCount() {
+        return articleRepository.count();
+    }
+
     // 게시글 수정
     @Override
-    @Transactional
     public ArticleResponseDto updateArticle(Long memberId, Long id, ArticleRequestDto articleRequestDto) {
         // 회원 정보 가져오기
         Member member = memberRepository.findById(memberId)
@@ -136,7 +119,6 @@ public class ArticleServiceImpl implements ArticleService {
 
     // 게시글 삭제
     @Override
-    @Transactional
     public void deleteArticle(Long id) {
         // 게시글 정보 가져오기
         Article article = articleRepository.findById(id)
@@ -153,45 +135,59 @@ public class ArticleServiceImpl implements ArticleService {
         return article.getMember().getId().equals(memberId);
     }
 
-    // 게시글 추천
+    // 게시글 추천 여부 확인
     @Override
-    public void likeArticle(Long articleId, Long memberId) {
+    public boolean checkLikeArticle(Long articleId, Long memberId) {
         Article article = articleRepository.findById(articleId)
             .orElseThrow(() -> new RuntimeException("게시글을 찾을 수 없습니다."));
 
         Member member = memberRepository.findById(memberId)
             .orElseThrow(() -> new RuntimeException("회원을 찾을 수 없습니다."));
 
-        Optional<ArticleLike> existingLike = articleLikeRepository.findByArticleAndMember(article, member);
-        if (existingLike.isPresent()) {
-            throw new RuntimeException("이미 추천한 게시글입니다.");
-        }
+        return articleLikeRepository.findByArticleAndMember(article, member).isPresent();
+    }
+
+    // 게시글 추천 증가
+    @Override
+    public void articleLikeUp(Long articleId, Long memberId) {
+        Article article = articleRepository.findById(articleId)
+            .orElseThrow(() -> new RuntimeException("게시글을 찾을 수 없습니다."));
+
+        Member member = memberRepository.findById(memberId)
+            .orElseThrow(() -> new RuntimeException("회원을 찾을 수 없습니다."));
 
         ArticleLike articleLike = ArticleLike.builder()
             .article(article)
             .member(member)
             .build();
-        articleLikeRepository.save(articleLike);
 
+        articleLikeRepository.save(articleLike);
         article.likeUp();
-        articleRepository.save(article);
     }
 
-    // 게시글 추천 취소
+    // 게시글 추천 감소
     @Override
-    public void unlikeArticle(Long articleId, Long memberId) {
+    public void articleLikeDown(Long articleId, Long memberId) {
         Article article = articleRepository.findById(articleId)
             .orElseThrow(() -> new RuntimeException("게시글을 찾을 수 없습니다."));
+
         Member member = memberRepository.findById(memberId)
             .orElseThrow(() -> new RuntimeException("회원을 찾을 수 없습니다."));
 
         ArticleLike articleLike = articleLikeRepository.findByArticleAndMember(article, member)
-            .orElseThrow(() -> new RuntimeException("해당 게시글을 추천하지 않았습니다."));
+            .orElseThrow(() -> new RuntimeException("게시글 추천 정보를 찾을 수 없습니다."));
 
         articleLikeRepository.delete(articleLike);
         article.likeDown();
-        articleRepository.save(article);
     }
 
+    // appId로 게시글 조회
+    @Override
+    public Page<ArticleResponseDto> findByAppId(int appId, Pageable pageable) {
+        return articleRepository.findByAppId(appId, pageable).map(article -> {
+            int commentCount = article.getComments().size();
+            return ArticleResponseDto.fromEntityWithCommentCount(article, commentCount);
+        });
+    }
 
 }
