@@ -11,10 +11,12 @@ import mytrophy.api.member.entity.Member;
 import mytrophy.api.member.service.MemberService;
 import mytrophy.api.querydsl.service.ArticleQueryService;
 import mytrophy.global.jwt.CustomUserDetails;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.parameters.P;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -55,9 +57,16 @@ public class ArticleController {
 
     // 게시글 리스트 조회
     @GetMapping
-    public ResponseEntity<List<ArticleResponseDto>> getAllArticles() {
-        List<ArticleResponseDto> articles = articleService.findAll();
+    public ResponseEntity<Page<ArticleResponseDto>> getAllArticles(@PageableDefault(size = 10) Pageable pageable) {
+        Page<ArticleResponseDto> articles = articleService.findAll(pageable);
         return ResponseEntity.ok().body(articles);
+    }
+
+    // 게시글 수 조회
+    @GetMapping("/count")
+    public ResponseEntity<Long> getArticleCount() {
+        long count = articleService.getArticleCount();
+        return ResponseEntity.ok(count);
     }
 
     // 해당 게시글 조회
@@ -75,8 +84,9 @@ public class ArticleController {
 
     // 말머리 별 게시글 리스트 조회
     @GetMapping("/headers/{header}")
-    public ResponseEntity<List<ArticleResponseDto>> getArticlesByHeader(@PathVariable Header header) {
-        List<ArticleResponseDto> articles;
+    public ResponseEntity<Page<ArticleResponseDto>> getArticlesByHeader(@PathVariable Header header,
+                                                                        @PageableDefault(size = 10) Pageable pageable) {
+        Page<ArticleResponseDto> articles;
         // 헤더가 유효한지 검사
         switch (header) {
             case FREE_BOARD:
@@ -85,7 +95,7 @@ public class ArticleController {
             case REVIEW:
             case CHATING:
                 // 유효한 헤더인 경우 해당 헤더로 게시글 조회
-                articles = articleService.findAllByHeader(header);
+                articles = articleService.findAllByHeader(header, pageable);
                 return ResponseEntity.ok().body(articles);
             default:
                 // 잘못된 헤더인 경우 예외 처리
@@ -184,6 +194,17 @@ public class ArticleController {
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("추천 실패");
         }
+    }
+
+    // appId로 게시글 조회
+    @GetMapping("/appId/{appId}")
+    public ResponseEntity<Page<ArticleResponseDto>> getArticleByAppId(@PathVariable("appId") int appId,
+                                                                      @PageableDefault(size = 10) Pageable pageable) {
+        Page<ArticleResponseDto> article = articleService.findByAppId(appId, pageable);
+        if (article == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok().body(article);
     }
 
 }
