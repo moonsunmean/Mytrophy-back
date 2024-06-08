@@ -95,6 +95,14 @@ public class GameController {
         return ResponseEntity.status(HttpStatus.OK).body(gameService.getLikeGameDTO(page-1,size,userInfo));
     }
 
+    @GetMapping("/category/{id}")
+    public ResponseEntity<Page<GetGameDetailDTO>> categoryGame(@PathVariable(name = "id") Long id,
+                                                               @RequestParam(name = "page", defaultValue = "1") int page,
+                                                               @RequestParam(name = "size", defaultValue = "10") int size) {
+
+        return ResponseEntity.status(HttpStatus.OK).body(gameService.getCategoryGameDTO(page - 1, size, id));
+    }
+
     // 게임 수 조회
     @GetMapping("/count")
     public ResponseEntity<Long> getGameCount() {
