@@ -1,4 +1,4 @@
-package mytrophy.api.game.enumentity;
+package mytrophy.api.game.enums;
 
 public enum Positive {
     OVERWHELMING_POSITIVE,

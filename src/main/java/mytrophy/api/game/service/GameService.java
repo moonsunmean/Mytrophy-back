@@ -195,7 +195,7 @@ public class GameService {
 
         Pageable pageable = PageRequest.of(page, size, sort);
 
-        Page<Game> gameList = gameQueryRepository.gameList(pageable);
+        Page<Game> gameList = gameQueryRepository.gamePositiveList(pageable);
 
         List<GetGameDetailDTO> getGameListDTOList = new ArrayList<>();
 
@@ -242,7 +242,31 @@ public class GameService {
         List<GetGameDetailDTO> pageList = getGameListDTOList.subList(start, end);
 
         return new PageImpl<>(pageList, PageRequest.of(page, size), pageList.size());
+    }
 
+    public Page<GetGameDetailDTO> getCategoryGameDTO(int page, int size, Long id) {
+
+        Sort sort = Sort.by(Sort.Direction.DESC, "id");
+
+        Pageable pageable = PageRequest.of(page, size, sort);
+
+        List<Long> categoryId = new ArrayList<>();
+        categoryId.add(id);
+
+        Page<Game> gameList = gameQueryRepository.categoryGame(categoryId,pageable);
+
+        List<GetGameDetailDTO> getGameListDTOList = new ArrayList<>();
+
+        for (Game game : gameList) {
+            GetGameDetailDTO gameReleaseDTO = mapGameToDTO(game);
+            getGameListDTOList.add(gameReleaseDTO);
+        }
+
+        if (getGameListDTOList.isEmpty()) {
+            throw new CustomException(ErrorCodeEnum.NOT_FOUND_GAME);
+        }
+
+        return new PageImpl<>(getGameListDTOList, PageRequest.of(page, size), getGameListDTOList.size());
     }
 
     private GetGameDetailDTO mapGameToDTO(Game game) {
@@ -282,4 +306,6 @@ public class GameService {
                 getGameAchievementDTOList
         );
     }
+
+
 }
