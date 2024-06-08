@@ -1,6 +1,7 @@
 package mytrophy.api.common.base;
 
 import jakarta.persistence.*;
+import lombok.Getter;
 
 import java.time.LocalDateTime;
 
@@ -11,9 +12,11 @@ public abstract class BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY) // 자동 생성되는 값으로 설정
     private Long id;
 
+    @Getter
     @Column(updatable = false) // 엔티티가 생성될 때만 값을 설정하고, 업데이트 시에는 변경하지 않음
     private LocalDateTime createdAt;
 
+    @Getter
     private LocalDateTime updatedAt;
 
     @PrePersist // 엔티티가 저장되기 전에 실행
@@ -27,4 +30,5 @@ public abstract class BaseEntity {
     public void preUpdate() {
         updatedAt = LocalDateTime.now();
     }
+
 }

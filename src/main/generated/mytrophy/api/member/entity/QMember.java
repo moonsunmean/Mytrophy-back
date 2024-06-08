@@ -26,7 +26,8 @@ public class QMember extends EntityPathBase<Member> {
 
     public final ListPath<mytrophy.api.game.entity.Category, mytrophy.api.game.entity.QCategory> categories = this.<mytrophy.api.game.entity.Category, mytrophy.api.game.entity.QCategory>createList("categories", mytrophy.api.game.entity.Category.class, mytrophy.api.game.entity.QCategory.class, PathInits.DIRECT2);
 
-    public final DateTimePath<java.time.LocalDateTime> createdAt = createDateTime("createdAt", java.time.LocalDateTime.class);
+    //inherited
+    public final DateTimePath<java.time.LocalDateTime> createdAt = _super.createdAt;
 
     public final StringPath email = createString("email");
 
@@ -48,7 +49,8 @@ public class QMember extends EntityPathBase<Member> {
 
     public final StringPath steamId = createString("steamId");
 
-    public final DateTimePath<java.time.LocalDateTime> updatedAt = createDateTime("updatedAt", java.time.LocalDateTime.class);
+    //inherited
+    public final DateTimePath<java.time.LocalDateTime> updatedAt = _super.updatedAt;
 
     public final StringPath username = createString("username");
 

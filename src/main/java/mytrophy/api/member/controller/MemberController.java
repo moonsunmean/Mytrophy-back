@@ -14,6 +14,9 @@ import mytrophy.api.member.security.SteamUserPrincipal;
 import mytrophy.api.member.service.SteamService;
 import mytrophy.global.jwt.CustomUserDetails;
 import mytrophy.global.jwt.JWTUtil;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -90,8 +93,8 @@ public class MemberController {
 
     // 회원 리스트 조회
     @GetMapping("/list")
-    public ResponseEntity<List<MemberResponseDto>> getAllMembers() {
-        List<MemberResponseDto> members = memberService.findAll();
+    public ResponseEntity<Page<MemberResponseDto>> getAllMembers(@PageableDefault(size = 10) Pageable pageable) {
+        Page<MemberResponseDto> members = memberService.findAll(pageable);
         return ResponseEntity.ok(members);
     }
 
