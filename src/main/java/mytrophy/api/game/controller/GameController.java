@@ -36,7 +36,6 @@ public class GameController {
         this.gameDataScheduler = gameDataScheduler;
     }
 
-
     @GetMapping
     public ResponseEntity<Page<GetGameDetailDTO>> getAllGame(@RequestParam(name = "page", defaultValue = "1") int page,
                                                           @RequestParam(name = "size", defaultValue = "10") int size) {
