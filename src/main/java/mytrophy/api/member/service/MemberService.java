@@ -102,7 +102,7 @@ public class MemberService {
                 .orElseThrow(() -> new IllegalArgumentException("다음 ID에 해당하는 회원을 찾을 수 없습니다: " + id));
 
         mapDtoToMember(memberDto, member);
-        member.setPassword(bCryptPasswordEncoder.encode(memberDto.getPassword()));
+//        member.setPassword(bCryptPasswordEncoder.encode(memberDto.getPassword()));
         memberRepository.save(member);
         return true;
     }
