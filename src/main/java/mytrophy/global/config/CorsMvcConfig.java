@@ -9,7 +9,6 @@ public class CorsMvcConfig implements WebMvcConfigurer {
 
     @Override
     public void addCorsMappings(CorsRegistry registry) {
-
         registry.addMapping("/**")                  // 다음 경로로 들어오는 요청에 대해
                 .allowedOrigins("http://localhost:3000", "http://34.64.52.132:3000") // 다음 경로에서 오는 요청을 허용 하며 (현재는 전부)
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "PATCH")   // 허용되는 메서드
