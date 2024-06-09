@@ -44,9 +44,10 @@ public class GameService {
     private final ArticleService articleService;
     private final ArticleRepository articleRepository;
     private final GameCategoryRepository gameCategoryRepository;
+    private final CategoryRepository categoryRepository;
 
     @Autowired
-    public GameService(GameRepository gameRepository, GameQueryRepository gameQueryRepository, MemberService memberService, MemberRepository memberRepository, ArticleService articleService, ArticleRepository articleRepository, GameCategoryRepository gameCategoryRepository) {
+    public GameService(GameRepository gameRepository, GameQueryRepository gameQueryRepository, MemberService memberService, MemberRepository memberRepository, ArticleService articleService, ArticleRepository articleRepository, GameCategoryRepository gameCategoryRepository, CategoryRepository categoryRepository) {
         this.gameRepository = gameRepository;
         this.gameQueryRepository = gameQueryRepository;
         this.memberService = memberService;
@@ -54,6 +55,7 @@ public class GameService {
         this.articleService = articleService;
         this.articleRepository = articleRepository;
         this.gameCategoryRepository = gameCategoryRepository;
+        this.categoryRepository = categoryRepository;
     }
 
     public Page<GetGameDetailDTO> getAllGameDTO(int page, int size) {
@@ -180,6 +182,15 @@ public class GameService {
 
         gameRepository.save(targetGame);
         return true;
+    }
+
+
+
+    public boolean deleteGameDetail(Integer appId) {
+        if (gameRepository.deleteByAppId(appId) == 1) {
+            return true;
+        }
+        return false;
     }
 
 
@@ -389,6 +400,11 @@ public class GameService {
         );
     }
 
+    public List<GetGameCategoryDTO> getCategoryList() {
+        return categoryRepository.findAll().stream()
+                .map(category -> new GetGameCategoryDTO(category.getId(), category.getName()))
+                .collect(Collectors.toList());
+    }
 
 
 }
