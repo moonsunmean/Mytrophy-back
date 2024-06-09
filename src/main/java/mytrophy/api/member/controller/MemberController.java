@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import mytrophy.global.jwt.CustomSuccessHandler;
 import mytrophy.api.member.dto.MemberDto;
+import mytrophy.api.member.dto.MemberResponseDto;
 import mytrophy.api.member.dto.SteamOpenidLoginDto;
 import mytrophy.api.member.entity.Member;
 import mytrophy.api.member.security.SteamAutenticationToken;
@@ -13,6 +14,9 @@ import mytrophy.api.member.security.SteamUserPrincipal;
 import mytrophy.api.member.service.SteamService;
 import mytrophy.global.jwt.CustomUserDetails;
 import mytrophy.global.jwt.JWTUtil;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -59,7 +63,7 @@ public class MemberController {
         return new ResponseEntity<>("회원 가입 성공", HttpStatus.CREATED);
     }
 
-    // 회원 조회
+    // 회원 조회 (토큰)
     @GetMapping("/get-userinfo")
     public ResponseEntity<Member> getMemberById(@AuthenticationPrincipal CustomUserDetails userInfo) {
         String username = userInfo.getUsername();
@@ -68,10 +72,33 @@ public class MemberController {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
         return ResponseEntity.ok(member);
-
     }
 
-    // 회원 수정
+    // 회원 조회 (id)
+    @GetMapping("/{id}")
+    public ResponseEntity<MemberResponseDto> getMemberById(@PathVariable("id") Long id) {
+        MemberResponseDto member = memberService.getMemberDtoById(id);
+        if (member == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        return ResponseEntity.ok(member);
+    }
+
+    // 회원 수 조회
+    @GetMapping("/count")
+    public ResponseEntity<Long> getMemberCount() {
+        long count = memberService.getMemberCount();
+        return ResponseEntity.ok(count);
+    }
+
+    // 회원 리스트 조회
+    @GetMapping("/list")
+    public ResponseEntity<Page<MemberResponseDto>> getAllMembers(@PageableDefault(size = 10) Pageable pageable) {
+        Page<MemberResponseDto> members = memberService.findAll(pageable);
+        return ResponseEntity.ok(members);
+    }
+
+    // 회원 수정 (토큰)
     @PatchMapping("/modify-userinfo")
     public ResponseEntity<String> updateMember(@AuthenticationPrincipal CustomUserDetails userInfo,
                                                @RequestBody MemberDto memberDto) {
@@ -83,11 +110,20 @@ public class MemberController {
         } else {
             return new ResponseEntity<>("회원 수정 실패", HttpStatus.NOT_FOUND);
         }
-
     }
 
+    // 회원 수정 (id)
+    @PatchMapping("/{id}")
+    public ResponseEntity<String> updateMemberById(@PathVariable("id") Long id, @RequestBody MemberDto memberDto) {
+        boolean isUpdated = memberService.updateMemberById(id, memberDto);
+        if (isUpdated) {
+            return new ResponseEntity<>("회원 수정 성공", HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>("회원 수정 실패", HttpStatus.NOT_FOUND);
+        }
+    }
 
-    // 회원 삭제
+    // 회원 삭제 (토큰)
     @DeleteMapping("/delete-userinfo")
     public ResponseEntity<String> deleteMember(@AuthenticationPrincipal CustomUserDetails userInfo) {
         String username = userInfo.getUsername();
@@ -98,6 +134,18 @@ public class MemberController {
             return new ResponseEntity<>("회원 삭제 실패", HttpStatus.NOT_FOUND);
         }
     }
+
+    // 회원 삭제 (id)
+    @DeleteMapping("/{id}")
+    public ResponseEntity<String> deleteMemberById(@PathVariable("id") Long id) {
+        boolean isDeleted = memberService.deleteMemberById(id);
+        if (isDeleted) {
+            return new ResponseEntity<>("회원 삭제 성공", HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>("회원 삭제 실패", HttpStatus.NOT_FOUND);
+        }
+    }
+
     @GetMapping("/steam/login")
     public void login(HttpServletRequest request, HttpServletResponse response, @RequestHeader("access") String token) throws IOException {
 
