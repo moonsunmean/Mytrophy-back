@@ -10,6 +10,7 @@ import java.util.List;
 @Getter
 @Setter
 public class MemberDto {
+    private Long id; // 회원 번호
     private String username; // 여기서 username 이 로그인할 때 입력하는 로그인 아이디
     private String password; // 비밀번호
     private String role; // 권한 (ROLE_USER, ROLE_ADMIN)

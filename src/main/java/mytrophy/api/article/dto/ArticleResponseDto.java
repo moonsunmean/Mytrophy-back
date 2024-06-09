@@ -4,6 +4,7 @@ import lombok.Getter;
 import mytrophy.api.article.entity.Article;
 import mytrophy.api.article.enumentity.Header;
 import mytrophy.api.comment.dto.CommentDto;
+import mytrophy.api.member.dto.MemberDto;
 import mytrophy.api.member.entity.Member;
 
 import java.util.ArrayList;
@@ -17,6 +18,7 @@ public class ArticleResponseDto {
     private String name;
     private String content;
     private String imagePath;
+    private int cntUp;
     private Long appId;
     private Long memberId;
     private String username;
@@ -29,6 +31,7 @@ public class ArticleResponseDto {
         this.name = article.getName();
         this.content = article.getContent();
         this.imagePath = article.getImagePath();
+        this.cntUp = article.getCntUp();
         this.appId = article.getAppId();
         Member member = article.getMember();
         if (member != null) {
@@ -60,11 +63,14 @@ public class ArticleResponseDto {
         this.name = article.getName();
         this.content = article.getContent();
         this.imagePath = article.getImagePath();
+        this.cntUp = article.getCntUp();
         this.appId = article.getAppId();
         Member member = article.getMember();
         if (member != null) {
-            this.memberId = member.getId();
-            this.username = member.getUsername();
+            MemberDto memberDto = new MemberDto();
+            memberDto.setUsername(member.getUsername());
+            // 다른 필드들도 필요에 따라 추가 설정
+            this.memberId = memberDto.getId();
         }
 
         if (article.getComments() != null) {
