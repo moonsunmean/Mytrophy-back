@@ -3,6 +3,8 @@ package mytrophy.api.game.controller;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import mytrophy.api.article.dto.ArticleResponseDto;
 import mytrophy.api.article.service.ArticleService;
+import mytrophy.api.game.dto.RequestDTO.UpdateGameRequestDTO;
+import mytrophy.api.game.dto.RequestDTO.UpdateGameCategoryDTO;
 import mytrophy.api.game.dto.RequestDTO.SearchGameRequestDTO;
 import mytrophy.api.game.dto.ResponseDTO.GetGamePlayerNumberDTO;
 import mytrophy.api.game.dto.ResponseDTO.GetTopGameDTO;
@@ -43,10 +45,18 @@ public class GameController {
         return ResponseEntity.status(HttpStatus.OK).body(gameService.getAllGameDTO(page - 1, size));
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<GetGameDetailDTO> getGameDetail(@PathVariable(name = "id") Integer id) {
+    @GetMapping("/{appId}")
+    public ResponseEntity<GetGameDetailDTO> getGameDetail(@PathVariable(name = "appId") Integer appId) {
 
-        return ResponseEntity.status(HttpStatus.OK).body(gameService.getGameDetailDTO(id));
+        return ResponseEntity.status(HttpStatus.OK).body(gameService.getGameDetailDTO(appId));
+    }
+
+    @PostMapping("/{appId}")
+    public ResponseEntity<String> updateGameDetail(@PathVariable(name = "appId") Integer appId,@RequestBody UpdateGameRequestDTO updateGameRequestDTO) {
+        if (gameService.updateGameDetail(appId,updateGameRequestDTO)) {
+            return ResponseEntity.status(HttpStatus.OK).body("게임정보 수정에 성공했습니다.");
+        }
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("게임정보 수정에 실패했습니다.");
     }
 
     @GetMapping("/search")
