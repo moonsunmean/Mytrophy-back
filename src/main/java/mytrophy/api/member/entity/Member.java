@@ -2,6 +2,7 @@ package mytrophy.api.member.entity;
 
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -66,5 +67,4 @@ public class Member extends BaseEntity {
 
     @ManyToMany(fetch = FetchType.LAZY)
     private List<Category> categories;
-
 }
