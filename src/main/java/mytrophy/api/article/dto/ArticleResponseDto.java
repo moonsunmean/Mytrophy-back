@@ -4,24 +4,29 @@ import lombok.Getter;
 import mytrophy.api.article.entity.Article;
 import mytrophy.api.article.enumentity.Header;
 import mytrophy.api.comment.dto.CommentDto;
+import mytrophy.api.common.base.BaseEntity;
 import mytrophy.api.member.dto.MemberDto;
 import mytrophy.api.member.entity.Member;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Getter
-public class ArticleResponseDto {
+public class ArticleResponseDto extends BaseEntity {
     private Long id;
     private Header header;
     private String name;
     private String content;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
     private String imagePath;
     private int cntUp;
     private Long appId;
     private Long memberId;
     private String username;
+    private String nickname;
     private List<CommentDto> comments;
     private int commentCount;
 
@@ -30,6 +35,8 @@ public class ArticleResponseDto {
         this.header = article.getHeader();
         this.name = article.getName();
         this.content = article.getContent();
+        this.createdAt = article.getCreatedAt();
+        this.updatedAt = article.getUpdatedAt();
         this.imagePath = article.getImagePath();
         this.cntUp = article.getCntUp();
         this.appId = article.getAppId();
@@ -38,6 +45,7 @@ public class ArticleResponseDto {
             this.memberId = member.getId();
         }
         this.username = member.getUsername();
+        this.nickname = member.getNickname();
         //지연로딩 에러 해결 -> comments를 commentDto로 변환해서 할당
         if (article.getComments() != null) {
             this.comments = article.getComments().stream()
@@ -62,6 +70,8 @@ public class ArticleResponseDto {
         this.header = article.getHeader();
         this.name = article.getName();
         this.content = article.getContent();
+        this.createdAt = article.getCreatedAt();
+        this.updatedAt = article.getUpdatedAt();
         this.imagePath = article.getImagePath();
         this.cntUp = article.getCntUp();
         this.appId = article.getAppId();
@@ -70,6 +80,7 @@ public class ArticleResponseDto {
             this.memberId = member.getId();
         }
         this.username = member.getUsername();
+        this.nickname = member.getNickname();
 
         if (article.getComments() != null) {
             this.comments = article.getComments().stream()
