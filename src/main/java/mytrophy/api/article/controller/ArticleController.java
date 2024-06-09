@@ -62,6 +62,13 @@ public class ArticleController {
         return ResponseEntity.ok().body(articles);
     }
 
+    // 게시글 수 조회
+    @GetMapping("/count")
+    public ResponseEntity<Long> getArticleCount() {
+        long count = articleService.getArticleCount();
+        return ResponseEntity.ok(count);
+    }
+
     // 해당 게시글 조회
 //    @GetMapping("/articles/{id}")
 //    public ResponseEntity<List<ArticleResponseDto>> getArticleById(@PathVariable("id") Long id) {
