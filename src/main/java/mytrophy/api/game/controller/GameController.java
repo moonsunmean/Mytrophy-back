@@ -6,6 +6,8 @@ import mytrophy.api.article.service.ArticleService;
 import mytrophy.api.game.dto.RequestDTO.UpdateGameRequestDTO;
 import mytrophy.api.game.dto.RequestDTO.UpdateGameCategoryDTO;
 import mytrophy.api.game.dto.RequestDTO.SearchGameRequestDTO;
+import mytrophy.api.game.dto.ResponseDTO;
+import mytrophy.api.game.dto.ResponseDTO.GetGameCategoryDTO;
 import mytrophy.api.game.dto.ResponseDTO.GetGamePlayerNumberDTO;
 import mytrophy.api.game.dto.ResponseDTO.GetTopGameDTO;
 import mytrophy.api.game.dto.ResponseDTO.GetGameDetailDTO;
@@ -22,6 +24,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/games")
@@ -57,6 +61,14 @@ public class GameController {
             return ResponseEntity.status(HttpStatus.OK).body("게임정보 수정에 성공했습니다.");
         }
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("게임정보 수정에 실패했습니다.");
+    }
+
+    @DeleteMapping("/{appId}")
+    public ResponseEntity<String> deleteGameDetail(@PathVariable("appId") Integer appId) {
+        if (gameService.deleteGameDetail(appId)) {
+            return ResponseEntity.status(HttpStatus.OK).body("게임정보 삭제에 성공했습니다.");
+        }
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("게임정보 삭제에 실패했습니다.");
     }
 
     @GetMapping("/search")
@@ -111,6 +123,12 @@ public class GameController {
                                                                @RequestParam(name = "size", defaultValue = "10") int size) {
 
         return ResponseEntity.status(HttpStatus.OK).body(gameService.getCategoryGameDTO(page - 1, size, id));
+    }
+
+    @GetMapping("/category")
+    public ResponseEntity<List<GetGameCategoryDTO>> GetCategoryList() {
+
+        return ResponseEntity.status(HttpStatus.OK).body(gameService.getCategoryList());
     }
 
     // 게임 수 조회
