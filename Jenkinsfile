@@ -74,14 +74,37 @@ pipeline {
             }
         }
 
-        stage('Docker Pull and Run'){
+        stage('Remove Previous Docker Container'){
             steps {
                 script {
-                    // 서버에서 Docker 이미지를 pull
-                    sh "sshpass -p ${SERVER_CREDENTIALS_PSW} ssh -o StrictHostKeyChecking=no ${SERVER_CREDENTIALS_USR}@${SERVER_IP} 'docker pull ${DOCKER_IMAGE_TAG}'"
-                    // 중지하고 이미 있는 컨테이너 삭제
+                    // 이전 컨테이너 중지 및 삭제
                     sh "sshpass -p ${SERVER_CREDENTIALS_PSW} ssh -o StrictHostKeyChecking=no ${SERVER_CREDENTIALS_USR}@${SERVER_IP} 'docker stop mytrophy-service || true && docker rm mytrophy-service || true'"
-                    // 새로 받은 컨테이너 실행
+                }
+            }
+        }
+
+        stage('Pull New Docker Image'){
+            steps {
+                script {
+                    // 새 이미지 pull
+                    sh "sshpass -p ${SERVER_CREDENTIALS_PSW} ssh -o StrictHostKeyChecking=no ${SERVER_CREDENTIALS_USR}@${SERVER_IP} 'docker pull ${DOCKER_IMAGE_TAG}'"
+                }
+            }
+        }
+
+        stage('Remove Old Docker Image'){
+            steps {
+                script {
+                    // 이전 이미지 삭제
+                    sh "sshpass -p ${SERVER_CREDENTIALS_PSW} ssh -o StrictHostKeyChecking=no ${SERVER_CREDENTIALS_USR}@${SERVER_IP} 'docker rmi -f ${DOCKERHUB_REPO}:latest'"
+                }
+            }
+        }
+
+        stage('Run Docker Container'){
+            steps {
+                script {
+                    // 새로운 컨테이너 실행
                     sh "sshpass -p ${SERVER_CREDENTIALS_PSW} ssh -o StrictHostKeyChecking=no ${SERVER_CREDENTIALS_USR}@${SERVER_IP} 'docker run -d --name mytrophy-service -p 8080:8080 ${DOCKER_IMAGE_TAG}'"
                 }
             }
