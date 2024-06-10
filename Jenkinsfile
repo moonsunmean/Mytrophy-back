@@ -83,20 +83,20 @@ pipeline {
             }
         }
 
-        stage('Pull New Docker Image'){
-            steps {
-                script {
-                    // 새 이미지 pull
-                    sh "sshpass -p ${SERVER_CREDENTIALS_PSW} ssh -o StrictHostKeyChecking=no ${SERVER_CREDENTIALS_USR}@${SERVER_IP} 'docker pull ${DOCKER_IMAGE_TAG}'"
-                }
-            }
-        }
-
         stage('Remove Old Docker Image'){
             steps {
                 script {
                     // 이전 이미지 삭제
                     sh "sshpass -p ${SERVER_CREDENTIALS_PSW} ssh -o StrictHostKeyChecking=no ${SERVER_CREDENTIALS_USR}@${SERVER_IP} 'docker rmi -f ${DOCKERHUB_REPO}:latest'"
+                }
+            }
+        }
+
+        stage('Pull New Docker Image'){
+            steps {
+                script {
+                    // 새 이미지 pull
+                    sh "sshpass -p ${SERVER_CREDENTIALS_PSW} ssh -o StrictHostKeyChecking=no ${SERVER_CREDENTIALS_USR}@${SERVER_IP} 'docker pull ${DOCKER_IMAGE_TAG}'"
                 }
             }
         }
