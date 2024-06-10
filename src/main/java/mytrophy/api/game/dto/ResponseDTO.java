@@ -89,4 +89,26 @@ public class ResponseDTO {
         private String playerNumber;
     }
 
+    @Data
+    @AllArgsConstructor
+    public static class GetGameReviewDto {
+        private Integer appId;
+        private Long memberId;
+        private String reviewStatus;
+        private String name;
+        private String description;
+        private Integer price;
+        private Integer recommendation;
+        private Positive positive;
+        private String headerImagePath;
+        private Boolean koIsPosible;
+        private List<GetGameCategoryDTO> getGameCategoryDTOList;
+    }
+
+    @Data
+    @AllArgsConstructor
+    public static class GetGameReviewsDto {
+        private Long memberId;
+        private String reviewStatus;
+    }
 }
