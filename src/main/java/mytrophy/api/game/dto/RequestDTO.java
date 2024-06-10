@@ -3,7 +3,7 @@ package mytrophy.api.game.dto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.data.domain.Sort;
+import mytrophy.api.game.enums.Positive;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -28,5 +28,38 @@ public class RequestDTO {
         private String recommendationSortDirection = null;
         private String nameSortDirection = null;
         private String dateSortDirection = null;
+    }
+
+    @Data
+    @AllArgsConstructor
+    @NoArgsConstructor
+    public static class UpdateGameRequestDTO {
+        private String name;
+        private String description;
+        private String developer;
+        private String publisher;
+        private String requirement;
+        private Integer price;
+        private LocalDate releaseDate;
+        private Integer recommendation;
+        private Positive positive;
+        private Boolean koIsPosible;
+        private Boolean enIsPosible;
+        private Boolean jpIsPosible;
+        private List<UpdateGameCategoryDTO> updateGameCategoryDTOList;
+    }
+
+    @Data
+    @AllArgsConstructor
+    public static class UpdateGameCategoryDTO {
+        private Long id;
+        private String name;
+    }
+
+    @Data
+    @AllArgsConstructor
+    @NoArgsConstructor
+    public static class UpdateGameReviewDto {
+        private String reviewStatus;
     }
 }

@@ -83,6 +83,15 @@ pipeline {
             }
         }
 
+        stage('Remove Old Docker Image'){
+            steps {
+                script {
+                    // 이전 이미지 삭제
+                    sh "sshpass -p ${SERVER_CREDENTIALS_PSW} ssh -o StrictHostKeyChecking=no ${SERVER_CREDENTIALS_USR}@${SERVER_IP} 'docker rmi -f ${DOCKERHUB_REPO}:latest || true'"
+                }
+            }
+        }
+
         stage('Pull New Docker Image'){
             steps {
                 script {
@@ -92,20 +101,29 @@ pipeline {
             }
         }
 
-        stage('Remove Old Docker Image'){
-            steps {
-                script {
-                    // 이전 이미지 삭제
-                    sh "sshpass -p ${SERVER_CREDENTIALS_PSW} ssh -o StrictHostKeyChecking=no ${SERVER_CREDENTIALS_USR}@${SERVER_IP} 'docker rmi -f ${DOCKERHUB_REPO}:latest'"
-                }
-            }
-        }
-
         stage('Run Docker Container'){
             steps {
                 script {
                     // 새로운 컨테이너 실행
                     sh "sshpass -p ${SERVER_CREDENTIALS_PSW} ssh -o StrictHostKeyChecking=no ${SERVER_CREDENTIALS_USR}@${SERVER_IP} 'docker run -d --name mytrophy-service -p 8080:8080 ${DOCKER_IMAGE_TAG}'"
+                }
+            }
+        }
+
+        stage('Clean Up Docker Images on Target Server') {
+            steps {
+                script {
+                    // 타겟 서버의 사용하지 않는 도커 이미지 정리
+                    sh "sshpass -p ${SERVER_CREDENTIALS_PSW} ssh -o StrictHostKeyChecking=no ${SERVER_CREDENTIALS_USR}@${SERVER_IP} 'docker image prune -af'"
+                }
+            }
+        }
+
+        stage('Clean Up Docker Images on Jenkins Server') {
+            steps {
+                script {
+                    // 젠킨스 서버의 사용하지 않는 도커 이미지 정리
+                    sh 'docker image prune -af'
                 }
             }
         }

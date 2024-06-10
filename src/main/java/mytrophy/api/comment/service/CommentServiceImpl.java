@@ -147,14 +147,7 @@ public class CommentServiceImpl implements CommentService{
 
     //entity -> dto
     private CommentDto entityToDto(Comment comment) {
-        return new CommentDto(
-            comment.getId(),
-            comment.getContent(),
-            comment.getMember().getId(),
-            comment.getArticle().getId(),
-            comment.getLikes(),
-            comment.getParentComment() != null ? comment.getParentComment().getId() : null
-        );
+        return new CommentDto(comment);
     }
 
     //dto -> entity

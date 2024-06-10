@@ -16,7 +16,9 @@ public interface GameRepository extends JpaRepository<Game, Long> {
 
     Game findByAppId(Integer appId);
 
-    boolean existsByAppId(Integer id);
+    Boolean existsByAppId(Integer id);
+
+    Integer deleteByAppId(Integer appId);
 }
 
 
