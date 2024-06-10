@@ -1,5 +1,6 @@
 package mytrophy.api.member.service;
 
+import lombok.extern.slf4j.Slf4j;
 import mytrophy.api.game.entity.Category;
 import mytrophy.api.game.repository.CategoryRepository;
 import mytrophy.api.member.dto.MemberDto;
@@ -18,6 +19,7 @@ import java.util.stream.Collectors;
 import org.springframework.transaction.annotation.Transactional;
 
 
+@Slf4j
 @Service
 public class MemberService {
 
@@ -188,7 +190,17 @@ public class MemberService {
     }
 
     // 회원 username으로 조회
+    @Transactional(readOnly = true)
+    public MemberResponseDto findMemberDtoByUsername(String username) {
+        Member member = memberRepository.findByUsernameWithCategories(username)
+                .orElseThrow(() -> new IllegalArgumentException("다음 Username에 해당하는 회원을 찾을 수 없습니다: " + username));
+        return mapMemberToDto(member);
+    }
+    // 회원 username으로 조회
+    @Transactional(readOnly = true)
     public Member findMemberByUsername(String username) {
         return memberRepository.findByUsername(username);
     }
+
+
 }

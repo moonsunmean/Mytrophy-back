@@ -1,6 +1,8 @@
 package mytrophy.api.game.service;
 
 
+import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.Predicate;
 import mytrophy.api.article.entity.Article;
 import mytrophy.api.article.enumentity.Header;
 import mytrophy.api.article.repository.ArticleRepository;
@@ -26,6 +28,7 @@ import mytrophy.global.handler.ErrorCodeEnum;
 import mytrophy.global.jwt.CustomUserDetails;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.*;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
