@@ -2,7 +2,9 @@ package mytrophy.api.comment.dto;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.RequiredArgsConstructor;
+import mytrophy.api.comment.entity.Comment;
+
+import java.time.LocalDateTime;
 
 @Getter
 @NoArgsConstructor
@@ -14,13 +16,21 @@ public class CommentDto {
     private Long articleId;
     private int likes;
     private Long parentCommentId;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
+    private String imagePath;   //프로필이미지
+    private String nickname;
 
-    public CommentDto(Long id, String content, Long memberId, Long articleId, int likes, Long parentCommentId) {
-        this.id = id;
-        this.content = content;
-        this.memberId = memberId;
-        this.articleId = articleId;
-        this.likes = likes;
-        this.parentCommentId = parentCommentId;
+    public CommentDto(Comment comment) {
+        this.id = comment.getId();
+        this.content = comment.getContent();
+        this.memberId = comment.getMember().getId();
+        this.articleId = comment.getArticle().getId();
+        this.likes = comment.getLikes();
+        this.parentCommentId = comment.getParentComment() != null ? comment.getParentComment().getId() : null;
+        this.createdAt = comment.getCreatedAt();
+        this.updatedAt = comment.getUpdatedAt();
+        this.imagePath = comment.getMember().getImagePath();
+        this.nickname = comment.getMember().getNickname();
     }
 }
