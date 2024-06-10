@@ -1,7 +1,5 @@
 package mytrophy.api.article.service;
 
-
-
 import mytrophy.api.article.dto.ArticleRequestDto;
 import mytrophy.api.article.dto.ArticleResponseDto;
 import mytrophy.api.article.enumentity.Header;
@@ -27,6 +25,9 @@ public interface ArticleService {
 
     // 말머리 별 해당 게시글 조회
     ArticleResponseDto findByIdAndHeader(Long id, Header header);
+
+    // 게시글 수 조회
+    long getArticleCount();
 
     // 게시글 수정
     ArticleResponseDto updateArticle(Long memberId, Long id, ArticleRequestDto articleRequestDto);

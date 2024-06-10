@@ -1,6 +1,8 @@
 package mytrophy.api.game.service;
 
 
+import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.Predicate;
 import mytrophy.api.article.entity.Article;
 import mytrophy.api.article.enumentity.Header;
 import mytrophy.api.article.repository.ArticleRepository;
@@ -22,6 +24,7 @@ import mytrophy.global.handler.ErrorCodeEnum;
 import mytrophy.global.jwt.CustomUserDetails;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.*;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -198,7 +201,7 @@ public class GameService {
 
         Pageable pageable = PageRequest.of(page, size, sort);
 
-        Page<Game> gameList = gameQueryRepository.gameList(pageable);
+        Page<Game> gameList = gameQueryRepository.gamePositiveList(pageable);
 
         List<GetGameDetailDTO> getGameListDTOList = new ArrayList<>();
 
@@ -245,7 +248,35 @@ public class GameService {
         List<GetGameDetailDTO> pageList = getGameListDTOList.subList(start, end);
 
         return new PageImpl<>(pageList, PageRequest.of(page, size), pageList.size());
+    }
 
+    public Page<GetGameDetailDTO> getCategoryGameDTO(int page, int size, Long id) {
+
+        Sort sort = Sort.by(Sort.Direction.DESC, "id");
+
+        Pageable pageable = PageRequest.of(page, size, sort);
+
+        List<Long> categoryId = new ArrayList<>();
+        categoryId.add(id);
+
+        Page<Game> gameList = gameQueryRepository.categoryGame(categoryId,pageable);
+
+        List<GetGameDetailDTO> getGameListDTOList = new ArrayList<>();
+
+        for (Game game : gameList) {
+            GetGameDetailDTO gameReleaseDTO = mapGameToDTO(game);
+            getGameListDTOList.add(gameReleaseDTO);
+        }
+
+        if (getGameListDTOList.isEmpty()) {
+            throw new CustomException(ErrorCodeEnum.NOT_FOUND_GAME);
+        }
+
+        return new PageImpl<>(getGameListDTOList, PageRequest.of(page, size), getGameListDTOList.size());
+    }
+
+    public long getGameCount() {
+        return gameRepository.count();
     }
 
     private GetGameDetailDTO mapGameToDTO(Game game) {
@@ -285,4 +316,6 @@ public class GameService {
                 getGameAchievementDTOList
         );
     }
+
+
 }

@@ -37,12 +37,11 @@ public class ArticleController {
     // 게시글 생성
     @PostMapping
     public ResponseEntity<ArticleResponseDto> createArticle(@AuthenticationPrincipal CustomUserDetails userInfo,
-                                                 @RequestBody ArticleRequestDto articleRequestDto,
-                                                 @RequestParam(value = "imagePath", required = false) List<String> imagePath) throws IOException {
+                                                            @RequestBody ArticleRequestDto articleRequestDto,
+                                                            @RequestParam(value = "imagePath", required = false) List<String> imagePath) throws IOException {
         //토큰에서 username 빼내기
         String username = userInfo.getUsername();
         Member member = memberService.findMemberByUsername(username);
-        log.info("memberId: {}", member.getId());
 
         // 이미지 업로드 및 경로 설정
         if (imagePath != null) {
@@ -55,11 +54,19 @@ public class ArticleController {
         return ResponseEntity.status(HttpStatus.CREATED).body(articleResponseDto);
     }
 
+
     // 게시글 리스트 조회
     @GetMapping
     public ResponseEntity<Page<ArticleResponseDto>> getAllArticles(@PageableDefault(size = 10) Pageable pageable) {
         Page<ArticleResponseDto> articles = articleService.findAll(pageable);
         return ResponseEntity.ok().body(articles);
+    }
+
+    // 게시글 수 조회
+    @GetMapping("/count")
+    public ResponseEntity<Long> getArticleCount() {
+        long count = articleService.getArticleCount();
+        return ResponseEntity.ok(count);
     }
 
     // 해당 게시글 조회

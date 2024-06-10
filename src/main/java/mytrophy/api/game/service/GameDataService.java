@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import mytrophy.api.game.entity.*;
 import mytrophy.api.game.dto.ResponseDTO.GetGamePlayerNumberDTO;
-import mytrophy.api.game.enumentity.Positive;
+import mytrophy.api.game.enums.Positive;
 import mytrophy.api.game.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
