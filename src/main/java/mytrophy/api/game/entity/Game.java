@@ -64,15 +64,14 @@ public class Game extends BaseEntity {
     @Column
     private Boolean jpIsPosible;
 
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "game")
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "game", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<GameCategory> gameCategoryList = new ArrayList<>();
 
-    // 카테고리를 제외한 나머지는 단방향 맵핑
-    @OneToMany(fetch = FetchType.LAZY)
-    private List<Achievement> achievementList;
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Achievement> achievementList = new ArrayList<>();
 
-    @OneToMany(fetch = FetchType.LAZY)
-    private List<Screenshot> screenshotList;
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Screenshot> screenshotList = new ArrayList<>();
 
 
 }
