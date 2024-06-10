@@ -37,7 +37,7 @@ public class ArticleServiceImpl implements ArticleService {
             .orElseThrow(() -> new RuntimeException("회원 정보를 찾을 수 없습니다."));
 
         if (articleRequestDto.getAppId() == null) {
-            return null;
+            throw new IllegalArgumentException("appId가 존재하지 않습니다.");
         }
 
         // 이미지 경로가 null이 아닌 경우
@@ -90,6 +90,12 @@ public class ArticleServiceImpl implements ArticleService {
             throw new ResourceNotFoundException("해당 게시글이 존재하지 않습니다.");
         }
         return ArticleResponseDto.fromEntity(article);
+    }
+
+    // 게시글 수 조회
+    @Override
+    public long getArticleCount() {
+        return articleRepository.count();
     }
 
     // 게시글 수정

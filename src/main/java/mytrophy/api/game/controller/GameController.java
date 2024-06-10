@@ -21,6 +21,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/games")
 public class GameController {
@@ -38,7 +40,6 @@ public class GameController {
 
 
     @GetMapping
-
     public ResponseEntity<Page<GetGameDetailDTO>> getAllGame(@RequestParam(name = "page", defaultValue = "1") int page,
                                                           @RequestParam(name = "size", defaultValue = "10") int size) {
 
@@ -51,7 +52,7 @@ public class GameController {
         return ResponseEntity.status(HttpStatus.OK).body(gameService.getGameDetailDTO(id));
     }
 
-    @GetMapping("/search")
+    @PostMapping("/search")
     public ResponseEntity<Page<GetGameDetailDTO>> getSearchGame(@RequestBody SearchGameRequestDTO searchGameRequestDTO) {
 
         return ResponseEntity.status(HttpStatus.OK).body(gameService.getSearchGameDTO(searchGameRequestDTO));
@@ -95,6 +96,21 @@ public class GameController {
                                                                 @RequestParam(name = "size", defaultValue = "10") int size) {
 
         return ResponseEntity.status(HttpStatus.OK).body(gameService.getLikeGameDTO(page-1,size,userInfo));
+    }
+
+    @GetMapping("/category/{id}")
+    public ResponseEntity<Page<GetGameDetailDTO>> categoryGame(@PathVariable(name = "id") Long id,
+                                                               @RequestParam(name = "page", defaultValue = "1") int page,
+                                                               @RequestParam(name = "size", defaultValue = "10") int size) {
+
+        return ResponseEntity.status(HttpStatus.OK).body(gameService.getCategoryGameDTO(page - 1, size, id));
+    }
+
+    // 게임 수 조회
+    @GetMapping("/count")
+    public ResponseEntity<Long> getGameCount() {
+        long count = gameService.getGameCount();
+        return ResponseEntity.ok(count);
     }
 
     ///////                       스팀에서 서버로 다운                            ////////
