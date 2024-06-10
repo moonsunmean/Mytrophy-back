@@ -119,17 +119,39 @@ public class GameService {
         if (!gameRepository.existsByAppId(appId)) throw new CustomException(ErrorCodeEnum.NOT_EXISTS_GAME_ID);
 
         Game targetGame = gameRepository.findByAppId(appId);
-        targetGame.setName(updateGameRequestDTO.getName());
-        targetGame.setDescription(updateGameRequestDTO.getDescription());
-        targetGame.setPrice(updateGameRequestDTO.getPrice());
-        targetGame.setRecommendation(updateGameRequestDTO.getRecommendation());
-        targetGame.setReleaseDate(updateGameRequestDTO.getReleaseDate());
-        targetGame.setPositive(updateGameRequestDTO.getPositive());
-        targetGame.setKoIsPosible(updateGameRequestDTO.getKoIsPosible());
-        targetGame.setEnIsPosible(updateGameRequestDTO.getEnIsPosible());
-        targetGame.setJpIsPosible(updateGameRequestDTO.getJpIsPosible());
-        targetGame.setDeveloper(updateGameRequestDTO.getDeveloper());
-        targetGame.setPublisher(updateGameRequestDTO.getDeveloper());
+        if (updateGameRequestDTO.getName() != null) {
+            targetGame.setName(updateGameRequestDTO.getName());
+        }
+        if (updateGameRequestDTO.getDescription() != null) {
+            targetGame.setDescription(updateGameRequestDTO.getDescription());
+        }
+        if (updateGameRequestDTO.getPrice() != null) {
+            targetGame.setPrice(updateGameRequestDTO.getPrice());
+        }
+        if (updateGameRequestDTO.getRecommendation() != null) {
+            targetGame.setRecommendation(updateGameRequestDTO.getRecommendation());
+        }
+        if (updateGameRequestDTO.getReleaseDate() != null) {
+            targetGame.setReleaseDate(updateGameRequestDTO.getReleaseDate());
+        }
+        if (updateGameRequestDTO.getPositive() != null) {
+            targetGame.setPositive(updateGameRequestDTO.getPositive());
+        }
+        if (updateGameRequestDTO.getKoIsPosible() != null) {
+            targetGame.setKoIsPosible(updateGameRequestDTO.getKoIsPosible());
+        }
+        if (updateGameRequestDTO.getEnIsPosible() != null) {
+            targetGame.setEnIsPosible(updateGameRequestDTO.getEnIsPosible());
+        }
+        if (updateGameRequestDTO.getJpIsPosible() != null) {
+            targetGame.setJpIsPosible(updateGameRequestDTO.getJpIsPosible());
+        }
+        if (updateGameRequestDTO.getDeveloper() != null) {
+            targetGame.setDeveloper(updateGameRequestDTO.getDeveloper());
+        }
+        if (updateGameRequestDTO.getPublisher() != null) {
+            targetGame.setPublisher(updateGameRequestDTO.getPublisher());
+        }
 
         List<GameCategory> targetGameCategoryList = targetGame.getGameCategoryList();
         List<UpdateGameCategoryDTO> updateGameCategoryDTOList = updateGameRequestDTO.getUpdateGameCategoryDTOList();
