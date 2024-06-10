@@ -64,6 +64,7 @@ public class MemberService {
     }
 
     // 회원 조회
+    @Transactional
     public MemberResponseDto getMemberDtoById(Long id) {
         Member member = memberRepository.findById(id).orElse(null);
         if (member == null) {
@@ -150,6 +151,12 @@ public class MemberService {
         dto.setRole(member.getRole());
         dto.setCreatedAt(member.getCreatedAt());
         dto.setUpdatedAt(member.getUpdatedAt());
+
+        List<Long> categoryIds = member.getCategories().stream()
+                .map(Category::getId)
+                .collect(Collectors.toList());
+        dto.setCategoryIds(categoryIds);
+
         return dto;
     }
 
