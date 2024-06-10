@@ -5,13 +5,17 @@ import mytrophy.api.article.entity.Article;
 import mytrophy.api.article.enumentity.Header;
 import mytrophy.api.article.repository.ArticleRepository;
 import mytrophy.api.article.service.ArticleService;
+import mytrophy.api.game.dto.RequestDTO;
 import mytrophy.api.game.dto.RequestDTO.SearchGameRequestDTO;
 import mytrophy.api.game.dto.ResponseDTO.GetGameAchievementDTO;
 import mytrophy.api.game.dto.ResponseDTO.GetGameScreenshotDTO;
 import mytrophy.api.game.dto.ResponseDTO.GetGameCategoryDTO;
 import mytrophy.api.game.dto.ResponseDTO.GetTopGameDTO;
 import mytrophy.api.game.dto.ResponseDTO.GetGameDetailDTO;
+import mytrophy.api.game.dto.RequestDTO.UpdateGameRequestDTO;
+import mytrophy.api.game.dto.RequestDTO.UpdateGameCategoryDTO;
 import mytrophy.api.game.entity.*;
+import mytrophy.api.game.enums.Positive;
 import mytrophy.api.game.querydsl.GameQueryRepository;
 import mytrophy.api.game.repository.*;
 import mytrophy.api.member.entity.Member;
@@ -26,8 +30,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
@@ -39,15 +43,19 @@ public class GameService {
     private final MemberRepository memberRepository;
     private final ArticleService articleService;
     private final ArticleRepository articleRepository;
+    private final GameCategoryRepository gameCategoryRepository;
+    private final CategoryRepository categoryRepository;
 
     @Autowired
-    public GameService(GameRepository gameRepository, GameQueryRepository gameQueryRepository, MemberService memberService, MemberRepository memberRepository, ArticleService articleService, ArticleRepository articleRepository) {
+    public GameService(GameRepository gameRepository, GameQueryRepository gameQueryRepository, MemberService memberService, MemberRepository memberRepository, ArticleService articleService, ArticleRepository articleRepository, GameCategoryRepository gameCategoryRepository, CategoryRepository categoryRepository) {
         this.gameRepository = gameRepository;
         this.gameQueryRepository = gameQueryRepository;
         this.memberService = memberService;
         this.memberRepository = memberRepository;
         this.articleService = articleService;
         this.articleRepository = articleRepository;
+        this.gameCategoryRepository = gameCategoryRepository;
+        this.categoryRepository = categoryRepository;
     }
 
     public Page<GetGameDetailDTO> getAllGameDTO(int page, int size) {
@@ -98,13 +106,91 @@ public class GameService {
 
 
 
-    public GetGameDetailDTO getGameDetailDTO(Integer id) {
+    public GetGameDetailDTO getGameDetailDTO(Integer appId) {
 
-        if (!gameRepository.existsByAppId(id)) throw new CustomException(ErrorCodeEnum.NOT_EXISTS_GAME_ID);
+        if (!gameRepository.existsByAppId(appId)) throw new CustomException(ErrorCodeEnum.NOT_EXISTS_GAME_ID);
 
-        Game game = gameRepository.findByAppId(id);
+        Game game = gameRepository.findByAppId(appId);
 
         return mapGameToDTO(game);
+    }
+
+    public boolean updateGameDetail(Integer appId, UpdateGameRequestDTO updateGameRequestDTO) {
+        if (!gameRepository.existsByAppId(appId)) throw new CustomException(ErrorCodeEnum.NOT_EXISTS_GAME_ID);
+
+        Game targetGame = gameRepository.findByAppId(appId);
+        targetGame.setName(updateGameRequestDTO.getName());
+        targetGame.setDescription(updateGameRequestDTO.getDescription());
+        targetGame.setPrice(updateGameRequestDTO.getPrice());
+        targetGame.setRecommendation(updateGameRequestDTO.getRecommendation());
+        targetGame.setReleaseDate(updateGameRequestDTO.getReleaseDate());
+        targetGame.setPositive(updateGameRequestDTO.getPositive());
+        targetGame.setKoIsPosible(updateGameRequestDTO.getKoIsPosible());
+        targetGame.setEnIsPosible(updateGameRequestDTO.getEnIsPosible());
+        targetGame.setJpIsPosible(updateGameRequestDTO.getJpIsPosible());
+        targetGame.setDeveloper(updateGameRequestDTO.getDeveloper());
+        targetGame.setPublisher(updateGameRequestDTO.getDeveloper());
+
+        List<GameCategory> targetGameCategoryList = targetGame.getGameCategoryList();
+        List<UpdateGameCategoryDTO> updateGameCategoryDTOList = updateGameRequestDTO.getUpdateGameCategoryDTOList();
+
+        // Set으로 변환하여 빠르게 비교할 수 있도록 함
+        Set<Long> existingCategoryIds = targetGameCategoryList.stream()
+                .map(gameCategory -> gameCategory.getCategory().getId())
+                .collect(Collectors.toSet());
+
+        Set<Long> newCategoryIds = updateGameCategoryDTOList.stream()
+                .map(UpdateGameCategoryDTO::getId)
+                .collect(Collectors.toSet());
+
+        // 삭제할 카테고리 (existing - new)
+        Set<Long> toRemove = new HashSet<>(existingCategoryIds);
+        toRemove.removeAll(newCategoryIds);
+
+        // 추가할 카테고리 (new - existing)
+        Set<Long> toAdd = new HashSet<>(newCategoryIds);
+        toAdd.removeAll(existingCategoryIds);
+
+        // 기존 카테고리 리스트에서 삭제할 항목 제거 및 삭제
+        Iterator<GameCategory> iterator = targetGameCategoryList.iterator();
+        while (iterator.hasNext()) {
+            GameCategory gameCategory = iterator.next();
+            if (toRemove.contains(gameCategory.getCategory().getId())) {
+                gameCategoryRepository.delete(gameCategory);
+                iterator.remove();
+            }
+        }
+
+        // 추가할 항목 추가 및 저장
+        for (UpdateGameCategoryDTO dto : updateGameCategoryDTOList) {
+            if (toAdd.contains(dto.getId())) {
+                Category category = new Category();
+                category.setId(dto.getId());
+                category.setName(dto.getName());
+
+                GameCategory newCategory = GameCategory.builder()
+                        .game(targetGame)
+                        .category(category)
+                        .build();
+
+                gameCategoryRepository.save(newCategory); // DB에 저장
+                targetGameCategoryList.add(newCategory);
+            }
+        }
+
+        targetGame.setGameCategoryList(targetGameCategoryList);  // 변경된 리스트를 다시 설정
+
+        gameRepository.save(targetGame);
+        return true;
+    }
+
+
+
+    public boolean deleteGameDetail(Integer appId) {
+        if (gameRepository.deleteByAppId(appId) == 1) {
+            return true;
+        }
+        return false;
     }
 
 
@@ -312,6 +398,12 @@ public class GameService {
                 getGameScreenshotDTOList,
                 getGameAchievementDTOList
         );
+    }
+
+    public List<GetGameCategoryDTO> getCategoryList() {
+        return categoryRepository.findAll().stream()
+                .map(category -> new GetGameCategoryDTO(category.getId(), category.getName()))
+                .collect(Collectors.toList());
     }
 
 
