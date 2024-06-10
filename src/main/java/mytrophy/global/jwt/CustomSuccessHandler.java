@@ -60,8 +60,6 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         }else{
             response.sendRedirect("/");
         }
-
-
         response.setStatus(HttpStatus.OK.value());
 
     }
