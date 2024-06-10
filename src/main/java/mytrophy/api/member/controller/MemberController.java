@@ -65,9 +65,9 @@ public class MemberController {
 
     // 회원 조회 (토큰)
     @GetMapping("/get-userinfo")
-    public ResponseEntity<Member> getMemberById(@AuthenticationPrincipal CustomUserDetails userInfo) {
+    public ResponseEntity<MemberResponseDto> getMemberById(@AuthenticationPrincipal CustomUserDetails userInfo) {
         String username = userInfo.getUsername();
-        Member member = memberService.findMemberByUsername(username);
+        MemberResponseDto member = memberService.findMemberDtoByUsername(username);
         if (member == null) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
