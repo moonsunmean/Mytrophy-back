@@ -92,4 +92,9 @@ public class Article extends BaseEntity {
         this.cntUp--;
     }
 
+    // 댓글 수 반환
+    public int getCommentCount() {
+        return comments.size();
+    }
+
 }
