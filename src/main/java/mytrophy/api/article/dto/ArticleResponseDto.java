@@ -43,24 +43,14 @@ public class ArticleResponseDto extends BaseEntity {
         Member member = article.getMember();
         if (member != null) {
             this.memberId = member.getId();
+            this.username = member.getUsername();
+            this.nickname = member.getNickname();
         }
-        this.username = member.getUsername();
-        this.nickname = member.getNickname();
+
         //지연로딩 에러 해결 -> comments를 commentDto로 변환해서 할당
-        if (article.getComments() != null) {
-            this.comments = article.getComments().stream()
-                .map(comment -> new CommentDto(
-                    comment.getId(),
-                    comment.getContent(),
-                    comment.getMember().getId(),
-                    comment.getArticle().getId(),
-                    comment.getLikes(),
-                    comment.getParentComment() != null ? comment.getParentComment().getId() : null
-                ))
-                .collect(Collectors.toList());
-        } else {
-            this.comments = new ArrayList<>();
-        }
+        this.comments = article.getComments() != null ? article.getComments().stream()
+                .map(CommentDto::new) // CommentDto 생성자 사용
+                .collect(Collectors.toList()) : new ArrayList<>();
 
         this.commentCount = article.getCommentCount();
     }
@@ -78,24 +68,13 @@ public class ArticleResponseDto extends BaseEntity {
         Member member = article.getMember();
         if (member != null) {
             this.memberId = member.getId();
+            this.username = member.getUsername();
+            this.nickname = member.getNickname();
         }
-        this.username = member.getUsername();
-        this.nickname = member.getNickname();
 
-        if (article.getComments() != null) {
-            this.comments = article.getComments().stream()
-                .map(comment -> new CommentDto(
-                    comment.getId(),
-                    comment.getContent(),
-                    comment.getMember().getId(),
-                    comment.getArticle().getId(),
-                    comment.getLikes(),
-                    comment.getParentComment() != null ? comment.getParentComment().getId() : null
-                ))
-                .collect(Collectors.toList());
-        } else {
-            this.comments = new ArrayList<>();
-        }
+        this.comments = article.getComments() != null ? article.getComments().stream()
+                .map(CommentDto::new) // CommentDto 생성자 사용
+                .collect(Collectors.toList()) : new ArrayList<>();
 
         // 댓글 수 초기화
         this.commentCount = article.getCommentCount();

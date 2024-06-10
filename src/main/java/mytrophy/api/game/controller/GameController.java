@@ -3,7 +3,11 @@ package mytrophy.api.game.controller;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import mytrophy.api.article.dto.ArticleResponseDto;
 import mytrophy.api.article.service.ArticleService;
+import mytrophy.api.game.dto.RequestDTO.UpdateGameRequestDTO;
+import mytrophy.api.game.dto.RequestDTO.UpdateGameCategoryDTO;
 import mytrophy.api.game.dto.RequestDTO.SearchGameRequestDTO;
+import mytrophy.api.game.dto.ResponseDTO;
+import mytrophy.api.game.dto.ResponseDTO.GetGameCategoryDTO;
 import mytrophy.api.game.dto.ResponseDTO.GetGamePlayerNumberDTO;
 import mytrophy.api.game.dto.ResponseDTO.GetTopGameDTO;
 import mytrophy.api.game.dto.ResponseDTO.GetGameDetailDTO;
@@ -46,10 +50,26 @@ public class GameController {
         return ResponseEntity.status(HttpStatus.OK).body(gameService.getAllGameDTO(page - 1, size));
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<GetGameDetailDTO> getGameDetail(@PathVariable(name = "id") Integer id) {
+    @GetMapping("/{appId}")
+    public ResponseEntity<GetGameDetailDTO> getGameDetail(@PathVariable(name = "appId") Integer appId) {
 
-        return ResponseEntity.status(HttpStatus.OK).body(gameService.getGameDetailDTO(id));
+        return ResponseEntity.status(HttpStatus.OK).body(gameService.getGameDetailDTO(appId));
+    }
+
+    @PostMapping("/{appId}")
+    public ResponseEntity<String> updateGameDetail(@PathVariable(name = "appId") Integer appId,@RequestBody UpdateGameRequestDTO updateGameRequestDTO) {
+        if (gameService.updateGameDetail(appId,updateGameRequestDTO)) {
+            return ResponseEntity.status(HttpStatus.OK).body("게임정보 수정에 성공했습니다.");
+        }
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("게임정보 수정에 실패했습니다.");
+    }
+
+    @DeleteMapping("/{appId}")
+    public ResponseEntity<String> deleteGameDetail(@PathVariable("appId") Integer appId) {
+        if (gameService.deleteGameDetail(appId)) {
+            return ResponseEntity.status(HttpStatus.OK).body("게임정보 삭제에 성공했습니다.");
+        }
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("게임정보 삭제에 실패했습니다.");
     }
 
     @PostMapping("/search")
@@ -104,6 +124,12 @@ public class GameController {
                                                                @RequestParam(name = "size", defaultValue = "10") int size) {
 
         return ResponseEntity.status(HttpStatus.OK).body(gameService.getCategoryGameDTO(page - 1, size, id));
+    }
+
+    @GetMapping("/category")
+    public ResponseEntity<List<GetGameCategoryDTO>> GetCategoryList() {
+
+        return ResponseEntity.status(HttpStatus.OK).body(gameService.getCategoryList());
     }
 
     // 게임 수 조회
