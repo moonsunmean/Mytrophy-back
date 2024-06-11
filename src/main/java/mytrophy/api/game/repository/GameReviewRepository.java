@@ -23,4 +23,5 @@ public interface GameReviewRepository extends JpaRepository<GameReview, Long> {
     //특정 회원의 평가 (평가기준별)
     List<GameReview> findByMemberAndReviewStatus(Member member, ReviewStatus reviewStatus);
 
+
 }
