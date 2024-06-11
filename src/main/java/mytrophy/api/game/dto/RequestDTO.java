@@ -55,4 +55,11 @@ public class RequestDTO {
         private Long id;
         private String name;
     }
+
+    @Data
+    @AllArgsConstructor
+    @NoArgsConstructor
+    public static class UpdateGameReviewDto {
+        private String reviewStatus;
+    }
 }

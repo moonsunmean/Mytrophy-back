@@ -42,6 +42,7 @@ public class GameController {
         this.gameDataScheduler = gameDataScheduler;
     }
 
+
     @GetMapping
     public ResponseEntity<Page<GetGameDetailDTO>> getAllGame(@RequestParam(name = "page", defaultValue = "1") int page,
                                                           @RequestParam(name = "size", defaultValue = "10") int size) {
@@ -71,7 +72,7 @@ public class GameController {
         return ResponseEntity.badRequest().body("게임정보 삭제에 실패했습니다.");
     }
 
-    @GetMapping("/search")
+    @PostMapping("/search")
     public ResponseEntity<Page<GetGameDetailDTO>> getSearchGame(@RequestBody SearchGameRequestDTO searchGameRequestDTO) {
 
         return ResponseEntity.ok(gameService.getSearchGameDTO(searchGameRequestDTO));

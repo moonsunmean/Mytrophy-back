@@ -1,5 +1,6 @@
 package mytrophy.api.member.service;
 
+import lombok.extern.slf4j.Slf4j;
 import mytrophy.api.game.entity.Category;
 import mytrophy.api.game.repository.CategoryRepository;
 import mytrophy.api.member.dto.MemberDto;
@@ -18,6 +19,7 @@ import java.util.stream.Collectors;
 import org.springframework.transaction.annotation.Transactional;
 
 
+@Slf4j
 @Service
 public class MemberService {
 
@@ -64,6 +66,7 @@ public class MemberService {
     }
 
     // 회원 조회
+    @Transactional
     public MemberResponseDto getMemberDtoById(Long id) {
         Member member = memberRepository.findById(id).orElse(null);
         if (member == null) {
@@ -73,17 +76,20 @@ public class MemberService {
     }
 
     // 회원 수 조회
+    @Transactional
     public long getMemberCount() {
         return memberRepository.count();
     }
 
     // 회원 리스트 조회
+    @Transactional
     public Page<MemberResponseDto> findAll(Pageable pageable) {
         Page<Member> members = memberRepository.findAll(pageable);
         return members.map(this::mapMemberToDto);
     }
 
     // 회원 수정 (토큰)
+    @Transactional
     public boolean updateMemberByUsername(String username, MemberDto memberDto) {
         Member member = memberRepository.findByUsername(username);
         if (member == null) {
@@ -97,6 +103,7 @@ public class MemberService {
     }
 
     // 회원 수정 (id)
+    @Transactional
     public boolean updateMemberById(Long id, MemberDto memberDto) {
         Member member = memberRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("다음 ID에 해당하는 회원을 찾을 수 없습니다: " + id));
@@ -150,6 +157,12 @@ public class MemberService {
         dto.setRole(member.getRole());
         dto.setCreatedAt(member.getCreatedAt());
         dto.setUpdatedAt(member.getUpdatedAt());
+
+        List<Long> categoryIds = member.getCategories().stream()
+                .map(Category::getId)
+                .collect(Collectors.toList());
+        dto.setCategoryIds(categoryIds);
+
         return dto;
     }
 
@@ -177,7 +190,17 @@ public class MemberService {
     }
 
     // 회원 username으로 조회
+    @Transactional(readOnly = true)
+    public MemberResponseDto findMemberDtoByUsername(String username) {
+        Member member = memberRepository.findByUsernameWithCategories(username)
+                .orElseThrow(() -> new IllegalArgumentException("다음 Username에 해당하는 회원을 찾을 수 없습니다: " + username));
+        return mapMemberToDto(member);
+    }
+    // 회원 username으로 조회
+    @Transactional(readOnly = true)
     public Member findMemberByUsername(String username) {
         return memberRepository.findByUsername(username);
     }
+
+
 }
