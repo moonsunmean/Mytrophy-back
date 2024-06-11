@@ -92,4 +92,12 @@ public class Article extends BaseEntity {
         this.cntUp--;
     }
 
+    // 댓글 수 반환
+    public int getCommentCount() {
+        if (comments == null) {
+            return 0; // comments가 null인 경우 0 반환
+        }
+        return comments.size(); // comments가 null이 아니라면 리스트의 크기 반환
+    }
+
 }

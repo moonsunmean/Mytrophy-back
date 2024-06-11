@@ -49,8 +49,8 @@ public class ArticleResponseDto extends BaseEntity {
 
         //지연로딩 에러 해결 -> comments를 commentDto로 변환해서 할당
         this.comments = article.getComments() != null ? article.getComments().stream()
-                .map(CommentDto::new) // CommentDto 생성자 사용
-                .collect(Collectors.toList()) : new ArrayList<>();
+            .map(CommentDto::new) // CommentDto 생성자 사용
+            .collect(Collectors.toList()) : new ArrayList<>();
 
         this.commentCount = article.getCommentCount();
     }
@@ -73,8 +73,8 @@ public class ArticleResponseDto extends BaseEntity {
         }
 
         this.comments = article.getComments() != null ? article.getComments().stream()
-                .map(CommentDto::new) // CommentDto 생성자 사용
-                .collect(Collectors.toList()) : new ArrayList<>();
+            .map(CommentDto::new) // CommentDto 생성자 사용
+            .collect(Collectors.toList()) : new ArrayList<>();
 
         // 댓글 수 초기화
         this.commentCount = article.getCommentCount();
@@ -88,5 +88,3 @@ public class ArticleResponseDto extends BaseEntity {
         return new ArticleResponseDto(article, commentCount);
     }
 }
-
-
