@@ -3,8 +3,6 @@ package mytrophy.api.game.controller;
 import lombok.RequiredArgsConstructor;
 import mytrophy.api.game.dto.RequestDTO;
 import mytrophy.api.game.dto.ResponseDTO;
-import mytrophy.api.game.entity.GameReview;
-import mytrophy.api.game.enums.ReviewStatus;
 import mytrophy.api.game.service.GameReviewService;
 import mytrophy.api.member.repository.MemberRepository;
 import mytrophy.global.jwt.CustomUserDetails;
@@ -44,7 +42,7 @@ public class GameReviewController {
     }
 
     //내가 평가남긴 게임 조회하기
-    @GetMapping("/reviews/my")
+    @GetMapping("/myreviews")
     public ResponseEntity<List<ResponseDTO.GetGameReviewDto>> getReviewsByMemberId(@AuthenticationPrincipal CustomUserDetails userinfo) {
 
         String username = userinfo.getUsername();
@@ -55,12 +53,23 @@ public class GameReviewController {
     }
 
     //내가 추천한 게임 조회하기
-    @GetMapping("reviews/my/recommended")
+    @GetMapping("/reviews/myrecommended")
     public ResponseEntity<List<ResponseDTO.GetGameReviewDto>> getRecommendedGames(@AuthenticationPrincipal CustomUserDetails userinfo) {
         String username = userinfo.getUsername();
         Long memberId = memberRepository.findByUsername(username).getId();
 
         List<ResponseDTO.GetGameReviewDto> recommendedGames = gameReviewService.getRecommendedGamesByMemberId(memberId);
         return ResponseEntity.ok(recommendedGames);
+    }
+
+    //특정게임에 내가 남긴 리뷰
+    @GetMapping("/{appId}/myreview")
+    public ResponseEntity<ResponseDTO.GetGameReviewsDto> getMyReviewByAppId(@PathVariable("appId") Integer appId,
+                                                                            @AuthenticationPrincipal CustomUserDetails userinfo) {
+        String username = userinfo.getUsername();
+        Long memberId = memberRepository.findByUsername(username).getId();
+
+        ResponseDTO.GetGameReviewsDto reviewDto = gameReviewService.getMyReviewByAppId(memberId, appId);
+        return ResponseEntity.ok(reviewDto);
     }
 }

@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -89,6 +90,21 @@ public class GameReviewServiceImpl implements GameReviewService {
         return perfectReviews.stream()
                 .map(this::toGetGameReviewDto)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public ResponseDTO.GetGameReviewsDto getMyReviewByAppId(Long memberId, Integer appId) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new CustomException(ErrorCodeEnum.NOT_EXISTS_MEMBER_ID));
+        Game game = gameRepository.findByAppId(appId);
+        if (game == null) {
+            throw new CustomException(ErrorCodeEnum.NOT_EXISTS_GAME_ID);
+        }
+
+        Optional<GameReview> review = gameReviewRepository.findByMemberAndGame(member, game);
+
+        return review.map(r -> new ResponseDTO.GetGameReviewsDto(member.getId(), r.getReviewStatus().name()))
+                .orElse(null);
     }
 
     private ResponseDTO.GetGameReviewDto toGetGameReviewDto(GameReview review) {
