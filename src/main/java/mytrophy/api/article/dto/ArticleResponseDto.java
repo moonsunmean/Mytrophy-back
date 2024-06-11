@@ -27,6 +27,7 @@ public class ArticleResponseDto extends BaseEntity {
     private Long memberId;
     private String username;
     private String nickname;
+    private String memberImage;
     private List<CommentDto> comments;
     private int commentCount;
 
@@ -45,6 +46,7 @@ public class ArticleResponseDto extends BaseEntity {
             this.memberId = member.getId();
             this.username = member.getUsername();
             this.nickname = member.getNickname();
+            this.memberImage = member.getImagePath();
         }
 
         //지연로딩 에러 해결 -> comments를 commentDto로 변환해서 할당
@@ -70,6 +72,7 @@ public class ArticleResponseDto extends BaseEntity {
             this.memberId = member.getId();
             this.username = member.getUsername();
             this.nickname = member.getNickname();
+            this.memberImage = member.getImagePath();
         }
 
         this.comments = article.getComments() != null ? article.getComments().stream()
