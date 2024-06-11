@@ -201,9 +201,8 @@ public class ArticleController {
     @GetMapping("/appId/{appId}")
     public ResponseEntity<Page<ArticleResponseDto>> getArticleByAppId(@PathVariable("appId") int appId,
                                                                       @PageableDefault(size = 10) Pageable pageable) {
-        int adjustedPageNumber = pageable.getPageNumber() - 1;
         // 페이지 번호를 조정하여 데이터 조회
-        Page<ArticleResponseDto> article = articleService.findByAppId(appId, PageRequest.of(adjustedPageNumber, pageable.getPageSize()));
+        Page<ArticleResponseDto> article = articleService.findByAppId(appId, PageRequest.of(pageable.getPageNumber() - 1, pageable.getPageSize()));
         if (article == null) {
             return ResponseEntity.notFound().build();
         }
