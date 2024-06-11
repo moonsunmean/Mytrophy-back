@@ -100,7 +100,7 @@ public class GameService {
         int end = Math.min(start + size, topGameDTOList.size());
         List<GetTopGameDTO> pageList = topGameDTOList.subList(start, end);
 
-        return new PageImpl<>(pageList, PageRequest.of(page, size), pageList.size());
+        return new PageImpl<>(pageList, PageRequest.of(page, size), topGameDTOList.size());
     }
 
 
@@ -156,7 +156,7 @@ public class GameService {
         List<GameCategory> targetGameCategoryList = targetGame.getGameCategoryList();
         List<UpdateGameCategoryDTO> updateGameCategoryDTOList = updateGameRequestDTO.getUpdateGameCategoryDTOList();
 
-        // Set으로 변환하여 빠르게 비교할 수 있도록 함
+        // Set으로 변환하여 빠르게 비교
         Set<Long> existingCategoryIds = targetGameCategoryList.stream()
                 .map(gameCategory -> gameCategory.getCategory().getId())
                 .collect(Collectors.toSet());
@@ -165,11 +165,11 @@ public class GameService {
                 .map(UpdateGameCategoryDTO::getId)
                 .collect(Collectors.toSet());
 
-        // 삭제할 카테고리 (existing - new)
+        // 삭제할 카테고리
         Set<Long> toRemove = new HashSet<>(existingCategoryIds);
         toRemove.removeAll(newCategoryIds);
 
-        // 추가할 카테고리 (new - existing)
+        // 추가할 카테고리
         Set<Long> toAdd = new HashSet<>(newCategoryIds);
         toAdd.removeAll(existingCategoryIds);
 
@@ -255,7 +255,7 @@ public class GameService {
         if (getSearchGameDTOList.isEmpty()) {
             throw new CustomException(ErrorCodeEnum.NOT_FOUND_GAME);
         }
-        return new PageImpl<>(getSearchGameDTOList, PageRequest.of(page, size), getSearchGameDTOList.size());
+        return new PageImpl<>(getSearchGameDTOList, PageRequest.of(page, size), gameList.getTotalPages());
 
     }
 
@@ -277,7 +277,7 @@ public class GameService {
             throw new CustomException(ErrorCodeEnum.NOT_FOUND_GAME);
         }
 
-        return new PageImpl<>(getGameListDTOList, PageRequest.of(page, size), getGameListDTOList.size());
+        return new PageImpl<>(getGameListDTOList, PageRequest.of(page, size), gameList.getTotalPages());
     }
 
     public Page<GetGameDetailDTO> getRecomandGameDTO(int page, int size) {
@@ -298,7 +298,7 @@ public class GameService {
             throw new CustomException(ErrorCodeEnum.NOT_FOUND_GAME);
         }
 
-        return new PageImpl<>(getGameListDTOList, PageRequest.of(page, size), getGameListDTOList.size());
+        return new PageImpl<>(getGameListDTOList, PageRequest.of(page, size), gameList.getTotalPages());
     }
 
     public Page<GetGameDetailDTO> getPositiveGameDTO(int page, int size) {
@@ -319,7 +319,7 @@ public class GameService {
             throw new CustomException(ErrorCodeEnum.NOT_FOUND_GAME);
         }
 
-        return new PageImpl<>(getGameListDTOList, PageRequest.of(page, size), getGameListDTOList.size());
+        return new PageImpl<>(getGameListDTOList, PageRequest.of(page, size), gameList.getTotalPages());
     }
 
     public Page<GetGameDetailDTO> getLikeGameDTO(int page, int size, CustomUserDetails userInfo) {
@@ -352,7 +352,7 @@ public class GameService {
 
         List<GetGameDetailDTO> pageList = getGameListDTOList.subList(start, end);
 
-        return new PageImpl<>(pageList, PageRequest.of(page, size), pageList.size());
+        return new PageImpl<>(pageList, PageRequest.of(page, size), getGameListDTOList.size());
     }
 
     public Page<GetGameDetailDTO> getCategoryGameDTO(int page, int size, Long id) {
