@@ -46,35 +46,35 @@ public class GameController {
     public ResponseEntity<Page<GetGameDetailDTO>> getAllGame(@RequestParam(name = "page", defaultValue = "1") int page,
                                                           @RequestParam(name = "size", defaultValue = "10") int size) {
 
-        return ResponseEntity.status(HttpStatus.OK).body(gameService.getAllGameDTO(page - 1, size));
+        return ResponseEntity.ok(gameService.getAllGameDTO(page - 1, size));
     }
 
     @GetMapping("/{appId}")
     public ResponseEntity<GetGameDetailDTO> getGameDetail(@PathVariable(name = "appId") Integer appId) {
 
-        return ResponseEntity.status(HttpStatus.OK).body(gameService.getGameDetailDTO(appId));
+        return ResponseEntity.ok(gameService.getGameDetailDTO(appId));
     }
 
-    @PostMapping("/{appId}")
+    @PatchMapping("/{appId}")
     public ResponseEntity<String> updateGameDetail(@PathVariable(name = "appId") Integer appId,@RequestBody UpdateGameRequestDTO updateGameRequestDTO) {
         if (gameService.updateGameDetail(appId,updateGameRequestDTO)) {
-            return ResponseEntity.status(HttpStatus.OK).body("게임정보 수정에 성공했습니다.");
+            return ResponseEntity.ok("게임정보 수정에 성공했습니다.");
         }
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("게임정보 수정에 실패했습니다.");
+        return ResponseEntity.badRequest().body("게임정보 수정에 실패했습니다.");
     }
 
     @DeleteMapping("/{appId}")
     public ResponseEntity<String> deleteGameDetail(@PathVariable("appId") Integer appId) {
         if (gameService.deleteGameDetail(appId)) {
-            return ResponseEntity.status(HttpStatus.OK).body("게임정보 삭제에 성공했습니다.");
+            return ResponseEntity.ok("게임정보 삭제에 성공했습니다.");
         }
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("게임정보 삭제에 실패했습니다.");
+        return ResponseEntity.badRequest().body("게임정보 삭제에 실패했습니다.");
     }
 
     @GetMapping("/search")
     public ResponseEntity<Page<GetGameDetailDTO>> getSearchGame(@RequestBody SearchGameRequestDTO searchGameRequestDTO) {
 
-        return ResponseEntity.status(HttpStatus.OK).body(gameService.getSearchGameDTO(searchGameRequestDTO));
+        return ResponseEntity.ok(gameService.getSearchGameDTO(searchGameRequestDTO));
     }
 
     @GetMapping("/top100")
@@ -82,7 +82,7 @@ public class GameController {
             @RequestParam(name = "page", defaultValue = "1") int page,
             @RequestParam(name = "size", defaultValue = "10") int size) throws JsonProcessingException {
 
-        return ResponseEntity.status(HttpStatus.OK).body(gameService.getTopGameDTO(page-1,size,gameDataService.receiveTopSteamGameList(100,"request")));
+        return ResponseEntity.ok(gameService.getTopGameDTO(page-1,size,gameDataService.receiveTopSteamGameList(100,"request")));
     }
 
     @GetMapping("/release")
@@ -90,7 +90,7 @@ public class GameController {
             @RequestParam(name = "page", defaultValue = "1") int page,
             @RequestParam(name = "size", defaultValue = "10") int size) {
 
-        return ResponseEntity.status(HttpStatus.OK).body(gameService.getReleaseGameDTO(page-1,size));
+        return ResponseEntity.ok(gameService.getReleaseGameDTO(page-1,size));
     }
 
     @GetMapping("/recommend")
@@ -98,7 +98,7 @@ public class GameController {
             @RequestParam(name = "page", defaultValue = "1") int page,
             @RequestParam(name = "size", defaultValue = "10") int size) {
 
-        return ResponseEntity.status(HttpStatus.OK).body(gameService.getRecomandGameDTO(page-1,size));
+        return ResponseEntity.ok(gameService.getRecomandGameDTO(page-1,size));
     }
 
     @GetMapping("/positive")
@@ -106,7 +106,7 @@ public class GameController {
             @RequestParam(name = "page", defaultValue = "1") int page,
             @RequestParam(name = "size", defaultValue = "10") int size) {
 
-        return ResponseEntity.status(HttpStatus.OK).body(gameService.getPositiveGameDTO(page-1,size));
+        return ResponseEntity.ok(gameService.getPositiveGameDTO(page-1,size));
     }
 
     @GetMapping("/like")
@@ -114,7 +114,7 @@ public class GameController {
                                                                 @RequestParam(name = "page", defaultValue = "1") int page,
                                                                 @RequestParam(name = "size", defaultValue = "10") int size) {
 
-        return ResponseEntity.status(HttpStatus.OK).body(gameService.getLikeGameDTO(page-1,size,userInfo));
+        return ResponseEntity.ok(gameService.getLikeGameDTO(page-1,size,userInfo));
     }
 
     @GetMapping("/category/{id}")
@@ -122,7 +122,7 @@ public class GameController {
                                                                @RequestParam(name = "page", defaultValue = "1") int page,
                                                                @RequestParam(name = "size", defaultValue = "10") int size) {
 
-        return ResponseEntity.status(HttpStatus.OK).body(gameService.getCategoryGameDTO(page - 1, size, id));
+        return ResponseEntity.ok(gameService.getCategoryGameDTO(page - 1, size, id));
     }
 
     @GetMapping("/category")
