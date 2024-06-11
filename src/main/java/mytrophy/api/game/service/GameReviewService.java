@@ -9,6 +9,8 @@ public interface GameReviewService {
 
     ResponseDTO.GetGameReviewDto createOrUpdateReview(Long memberId, Integer appId, RequestDTO.UpdateGameReviewDto dto);
 
+    ResponseDTO.GetGameReviewsDto getMyReviewByAppId(Long memberId, Integer appId);
+
     List<ResponseDTO.GetGameReviewDto> getReviewsByMemberId(Long memberId);
 
     List<ResponseDTO.GetGameReviewsDto> getReviewsByAppId(Integer appId);
