@@ -131,7 +131,7 @@ pipeline {
 
      post {
             success {
-                withCredentials([string(credentialsId: 'Discord-Webhook', variable: 'DISCORD')]) {
+                withCredentials([string(credentialsId: 'discord-webhook', variable: 'DISCORD')]) {
                             discordSend description: """
                             제목 : ${currentBuild.displayName}
                             결과 : ${currentBuild.result}
@@ -143,7 +143,7 @@ pipeline {
                 }
             }
             failure {
-                withCredentials([string(credentialsId: 'Discord-Webhook', variable: 'DISCORD')]) {
+                withCredentials([string(credentialsId: 'discord-webhook', variable: 'DISCORD')]) {
                             discordSend description: """
                             제목 : ${currentBuild.displayName}
                             결과 : ${currentBuild.result}
