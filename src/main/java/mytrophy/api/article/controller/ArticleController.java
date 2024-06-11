@@ -12,6 +12,7 @@ import mytrophy.api.member.service.MemberService;
 import mytrophy.api.querydsl.service.ArticleQueryService;
 import mytrophy.global.jwt.CustomUserDetails;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
@@ -200,7 +201,9 @@ public class ArticleController {
     @GetMapping("/appId/{appId}")
     public ResponseEntity<Page<ArticleResponseDto>> getArticleByAppId(@PathVariable("appId") int appId,
                                                                       @PageableDefault(size = 10) Pageable pageable) {
-        Page<ArticleResponseDto> article = articleService.findByAppId(appId, pageable);
+        int adjustedPageNumber = pageable.getPageNumber() - 1;
+        // 페이지 번호를 조정하여 데이터 조회
+        Page<ArticleResponseDto> article = articleService.findByAppId(appId, PageRequest.of(adjustedPageNumber, pageable.getPageSize()));
         if (article == null) {
             return ResponseEntity.notFound().build();
         }
