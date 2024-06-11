@@ -26,8 +26,6 @@ public class GameDataScheduler {
     @Scheduled(fixedDelay = 1000 * 60 * 60 * 24 * 15) // 15일 간격으로 실행, ms 이기 때문에 * 1000을 해준다.
     public void autoGameDataDownFirstStep() throws JsonProcessingException, InterruptedException {
 
-        System.out.println("~~~~~~~~~~~~~~~~~ 스케줄러 테스트  ~~~~~~~~~~~~~~~~~");
-
         if(!serverFirstStartCheck){
             serverFirstStartCheck = true;
             return;
