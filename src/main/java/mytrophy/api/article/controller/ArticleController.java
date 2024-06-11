@@ -14,6 +14,7 @@ import mytrophy.global.jwt.CustomUserDetails;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -59,6 +60,9 @@ public class ArticleController {
     // 게시글 리스트 조회
     @GetMapping
     public ResponseEntity<Page<ArticleResponseDto>> getAllArticles(@PageableDefault(size = 10) Pageable pageable) {
+        Sort sort = Sort.by("createdAt").descending();
+        pageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sort);
+
         Page<ArticleResponseDto> articles = articleService.findAll(pageable);
         return ResponseEntity.ok().body(articles);
     }
@@ -71,12 +75,6 @@ public class ArticleController {
     }
 
     // 해당 게시글 조회
-//    @GetMapping("/articles/{id}")
-//    public ResponseEntity<List<ArticleResponseDto>> getArticleById(@PathVariable("id") Long id) {
-//        List<ArticleResponseDto> articleResponseDto = articleQueryService.findArticleWithCommentsOrderedByLatest(id);
-//        return ResponseEntity.ok().body(articleResponseDto);
-//    }
-
     @GetMapping("/{id}")
     public ResponseEntity<ArticleResponseDto> getArticleById(@PathVariable("id") Long id) {
         ArticleResponseDto articleResponseDto = articleQueryService.findArticleWithCommentsOrderedByLatest(id);
@@ -96,6 +94,8 @@ public class ArticleController {
             case REVIEW:
             case CHATING:
                 // 유효한 헤더인 경우 해당 헤더로 게시글 조회
+                Sort sort = Sort.by("createdAt").descending();
+                pageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sort);
                 articles = articleService.findAllByHeader(header, pageable);
                 return ResponseEntity.ok().body(articles);
             default:
