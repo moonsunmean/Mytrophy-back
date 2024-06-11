@@ -29,7 +29,7 @@ public class Article extends BaseEntity {
     @Column(nullable = false)
     private String name;
 
-    @Column(nullable = false)
+    @Column(nullable = false,length = 2000)
     private String content;
 
     private int cntUp; // 좋아요 수
@@ -63,14 +63,14 @@ public class Article extends BaseEntity {
     // 게시글 생성 로직
     public static Article createArticle(ArticleRequestDto articleRequestDto, Member member, Long appId) {
         return Article.builder()
-            .header(articleRequestDto.getHeader())
-            .name(articleRequestDto.getName())
-            .content(articleRequestDto.getContent())
-            .cntUp(0)
-            .imagePath(articleRequestDto.getImagePath())
-            .member(member)
-            .appId(appId)
-            .build();
+                .header(articleRequestDto.getHeader())
+                .name(articleRequestDto.getName())
+                .content(articleRequestDto.getContent())
+                .cntUp(0)
+                .imagePath(articleRequestDto.getImagePath())
+                .member(member)
+                .appId(appId)
+                .build();
     }
 
     // 게시글 수정
