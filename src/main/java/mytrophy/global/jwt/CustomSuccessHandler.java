@@ -52,15 +52,17 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         String token = jwtUtil.createJwt("refresh",username, role, 60 * 60 * 60L);
         response.addCookie(createCookie("refresh", token));
 
-
-        if(firstLogin){
-            response.sendRedirect("/select-category");
+        String redirectUrl = String.format("http://localhost:3000/token-reissue/?firstLogin=%b", firstLogin);
+        response.sendRedirect(redirectUrl);
+        if (firstLogin) {
             AccessUser.setFirstLogin(false);
             memberRepository.save(AccessUser);
-        }else{
-            response.sendRedirect("/");
         }
+
+
         response.setStatus(HttpStatus.OK.value());
+
+
 
     }
 
