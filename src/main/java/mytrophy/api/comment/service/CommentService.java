@@ -14,8 +14,7 @@ public interface CommentService {
 
     List<CommentDto> findByMemberId(Long memberId);
 
-    void likeComment(Long commentId, Long memberId);
-    void unlikeComment(Long commentId, Long memberId);
+    void toggleLikeComment(Long commentId, Long memberId);
 
     boolean isAuthorized(Long commentId, Long memberId);
 }
