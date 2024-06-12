@@ -36,6 +36,7 @@ public class SecurityConfig {
     private final JWTUtil jwtUtil;
     private final AuthenticationConfiguration authenticationConfiguration;
     private final CustomUserDetailsService customUserDetailsService;
+    private final CustomFailureHandler customFailureHandler;
 
 
 
@@ -105,6 +106,7 @@ public class SecurityConfig {
                         .userInfoEndpoint((userInfoEndpointConfig) -> userInfoEndpointConfig
                                 .userService(customOAuth2UserService))
                         .successHandler(customSuccessHandler)
+                        .failureHandler(customFailureHandler)
                 );
 
 
