@@ -155,7 +155,7 @@ public class MemberController {
 
 
     @GetMapping("/steam/login/redirect")
-    public ModelAndView loginRedirect(HttpServletRequest request, HttpServletResponse response,@RequestParam Map<String, String> allRequestParams) {
+    public ResponseEntity<String> loginRedirect(HttpServletRequest request, HttpServletResponse response,@RequestParam Map<String, String> allRequestParams) {
         SteamOpenidLoginDto dto = new SteamOpenidLoginDto(
                 allRequestParams.get("openid.ns"),
                 allRequestParams.get("openid.op_endpoint"),
@@ -179,11 +179,17 @@ public class MemberController {
             try {
                 String steamUserId = steamService.validateLoginParameters(dto);
                 memberService.linkSteamAccount(currentUsername, steamUserId);
-                return new ModelAndView("redirect:/steam/login/profile");
+                response.sendRedirect("http://localhost:3000");
+                return new ResponseEntity<>("스팀 연동 성공", HttpStatus.OK);
 
             } catch (Exception e) {
                 e.printStackTrace();
-                return new ModelAndView("redirect:/steam/login/failed");
+                try {
+                    response.sendRedirect("http://localhost:3000?error=steam-link-failed");
+                } catch (IOException ioException) {
+                    ioException.printStackTrace();
+                }
+                return new ResponseEntity<>("스팀 연동 실패", HttpStatus.BAD_REQUEST);
             }
         }
         else{
@@ -198,12 +204,10 @@ public class MemberController {
 
             } catch (Exception e) {
                 e.printStackTrace();
-                return new ModelAndView("redirect:/steam/login/failed");
+                return new ResponseEntity<>("스팀 로그인 실패", HttpStatus.BAD_REQUEST);
             }
         }
 
-
-        //return new ModelAndView("redirect:/steam/login/profile");
     }
 
     @GetMapping("/steam/login/profile")
