@@ -155,7 +155,7 @@ public class MemberController {
 
 
     @GetMapping("/steam/login/redirect")
-    public ResponseEntity<String> loginRedirect(HttpServletRequest request, HttpServletResponse response,@RequestParam Map<String, String> allRequestParams) {
+    public ResponseEntity<?> loginRedirect(HttpServletRequest request, HttpServletResponse response,@RequestParam Map<String, String> allRequestParams) {
         SteamOpenidLoginDto dto = new SteamOpenidLoginDto(
                 allRequestParams.get("openid.ns"),
                 allRequestParams.get("openid.op_endpoint"),
@@ -200,7 +200,8 @@ public class MemberController {
                 SecurityContext sc          = SecurityContextHolder.getContext();
                 sc.setAuthentication(auth);
                 successHandler.onAuthenticationSuccess(request,response, auth);
-                return null;
+                return new ResponseEntity<>("로그인 성공", HttpStatus.OK);
+
 
             } catch (Exception e) {
                 e.printStackTrace();
