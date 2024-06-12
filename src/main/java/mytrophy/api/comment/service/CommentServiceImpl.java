@@ -33,14 +33,13 @@ public class CommentServiceImpl implements CommentService{
 
     //댓글 등록
     @Override
-    public CommentDto createComment(Long memberId, Long articleId, CreateCommentDto createCommentDto) {
+    public CommentDto createComment(Long memberId, Long articleId, CreateCommentDto createCommentDto, Long parentCommentId) {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new CustomException(ErrorCodeEnum.NOT_EXISTS_MEMBER_ID));
         Article article = articleRepository.findById(articleId)
                 .orElseThrow(() -> new CustomException(ErrorCodeEnum.NOT_EXISTS_ARTICLE_ID));
 
         Comment parentComment = null;
-        Long parentCommentId = createCommentDto.getParentCommentId();
 
         if (parentCommentId != null) {
             parentComment = commentRepository.findById(parentCommentId)
@@ -51,7 +50,7 @@ public class CommentServiceImpl implements CommentService{
             }
         }
 
-        Comment comment = dtoToEntity(createCommentDto, member, article);
+        Comment comment = dtoToEntity(createCommentDto, member, article, parentComment);
         Comment createdComment = commentRepository.save(comment);
         return entityToDto(createdComment);
     }
@@ -151,18 +150,12 @@ public class CommentServiceImpl implements CommentService{
     }
 
     //dto -> entity
-    private Comment dtoToEntity(CreateCommentDto createCommentDto, Member member, Article article) {
-        Comment.CommentBuilder commentBuilder = Comment.builder()
+    private Comment dtoToEntity(CreateCommentDto createCommentDto, Member member, Article article, Comment parentComment) {
+        return Comment.builder()
                 .content(createCommentDto.getContent())
                 .member(member)
-                .article(article);
-
-        if (createCommentDto.getParentCommentId() != null) {
-            Comment parentComment = commentRepository.findById(createCommentDto.getParentCommentId())
-                    .orElseThrow(() -> new CustomException(ErrorCodeEnum.NOT_EXISTS_PARENT_COMMENT_ID));
-            commentBuilder.parentComment(parentComment);
-        }
-
-        return commentBuilder.build();
+                .article(article)
+                .parentComment(parentComment)
+                .build();
     }
 }
