@@ -153,6 +153,7 @@ public class GameDataService {
 
     // 특정 게임의 상세 정보를 받아와 DB에 저장하는 메서드
     public void gameDetail(int appId) throws JsonProcessingException {
+        if(gameRepository.existsByAppId(appId)) return;
         String url = "https://store.steampowered.com/api/appdetails?appids=" + appId + "&l=korean";
         JsonNode appNode = getAppNodeFromUrl(url, String.valueOf(appId));
         if (appNode == null) {
@@ -171,11 +172,24 @@ public class GameDataService {
         // JSON 데이터를 가지고 게임 엔티티를 생성하고 저장
         Game game = createGameFromJson(appNode.get("data"), appId);
         // 출시 예정 게임이므로 건너뛰기
-        if (game.getPrice() == null || game.getReleaseDate() == null) {
+        if (game.getReleaseDate() == null) {
             return;
         }
-        game.setAchievementList(achievementRepository.saveAll(saveGameAchievement(appId)));
-        game.setScreenshotList(screenshotRepository.saveAll(saveGameScreenshot(appNode.get("data").get("screenshots"))));
+
+        List<Achievement> gameAchievementList = game.getAchievementList();
+        if (gameAchievementList == null) {
+            gameAchievementList = new ArrayList<>();
+        }
+        gameAchievementList.addAll(achievementRepository.saveAll(saveGameAchievement(appId)));
+        game.setAchievementList(gameAchievementList);
+
+        List<Screenshot> gameScreenshotList = game.getScreenshotList();
+        if (gameScreenshotList == null) {
+            gameScreenshotList = new ArrayList<>();
+        }
+        gameScreenshotList.addAll(screenshotRepository.saveAll(saveGameScreenshot(appNode.get("data").get("screenshots"))));
+        game.setScreenshotList(gameScreenshotList);
+
         game = gameRepository.save(game);
 
         // 받아온 게임의 카테고리 연결하여 DB에 저장
@@ -236,8 +250,10 @@ public class GameDataService {
         Boolean jpPosible = checkList.get(2);
 
         // 출시 날짜
+        LocalDate date = null;
         String dateString = appNode.hasNonNull("release_date") ? appNode.get("release_date").get("date").asText() : null;
-        LocalDate date = convertToDate(dateString);
+        Boolean commingsoon = appNode.hasNonNull("release_date") ? appNode.get("release_date").get("coming_soon").asBoolean() : true;
+        if(!commingsoon) date = convertToDate(dateString);
 
         // 추천수
         Integer recommandation = appNode.hasNonNull("recommendations") ? appNode.get("recommendations").get("total").asInt() : 0;
@@ -255,18 +271,32 @@ public class GameDataService {
                     appNode.get("price_overview").get("final").asInt() / 100 : null;
         }
 
+
         Positive positive = getGamePositiveNumber(appId);
 
         // 컴퓨터 권장 사양
         JsonNode requirementHader = appNode.hasNonNull("pc_requirements") ? appNode.get("pc_requirements") : null;
         String requirement = requirementHader.hasNonNull("minimum") ? requirementHader.get("minimum").asText() : null;
 
-        Long id = null;
         Game target = gameRepository.findByAppId(appId);
 
-        if (target != null) id = target.getId();
-
-        return new Game(id,appId,name,description,gameDeveloper,gamePublisher,requirement,price,date,recommandation,positive,headerImagePath,koPosible,enPosible,jpPosible,null,null,null);
+        if (target != null) {
+            target.setName(name);
+            target.setDescription(description);
+            target.setDeveloper(gameDeveloper);
+            target.setPublisher(gamePublisher);
+            target.setRequirement(requirement);
+            target.setPrice(price);
+            target.setReleaseDate(date);
+            target.setRecommendation(recommandation);
+            target.setPositive(positive);
+            target.setHeaderImagePath(headerImagePath);
+            target.setKoIsPosible(koPosible);
+            target.setEnIsPosible(enPosible);
+            target.setJpIsPosible(jpPosible);
+            return target;
+        }
+        return new Game(null,appId,name,description,gameDeveloper,gamePublisher,requirement,price,date,recommandation,positive,headerImagePath,koPosible,enPosible,jpPosible,null,null,null);
     }
 
     // 게임 업적을 받아와서 업적 리스트를 반환하는 메서드
@@ -383,52 +413,97 @@ public class GameDataService {
         return category;
     }
 
-
-    private void saveGameCategory(JsonNode appsNode, Game game) {
+    @Transactional
+    public void saveGameCategory(JsonNode appsNode, Game game) {
         // null 값이면 바로 종료
         if (appsNode == null) return;
+
+        // 엔티티 병합
+        game = gameRepository.findById(game.getId()).orElse(game);
+
+        if (game.getGameCategoryList() == null) {
+            game.setGameCategoryList(new ArrayList<>());
+        }
+
+        // 현재 게임의 카테고리 목록을 복사하여 임시 저장
+        List<GameCategory> currentCategories = new ArrayList<>(game.getGameCategoryList());
+
+        // 새로운 카테고리 목록을 생성
+        List<GameCategory> newCategories = new ArrayList<>();
 
         // 게임과 카테고리 연결
         for (JsonNode appNode : appsNode) {
             Long categoryId = appNode.get("id").asLong() + 100L;
             String categoryName = appNode.get("description").asText();
 
-            if(!gameCategoryRepository.existsByGameIdAndCategoryId(game.getId(), categoryId)){
-                Category existingCategory = categoryRepository.findById(categoryId).orElse(null);
-                if (existingCategory == null) {
-                    existingCategory = new Category(categoryId, categoryName, null);
-                    existingCategory = categoryRepository.save(existingCategory);
-                }
-                GameCategory gameCategory = new GameCategory();
-                gameCategory.setGame(game);
-                gameCategory.setCategory(existingCategory);
-                gameCategoryRepository.save(gameCategory);
+            Category existingCategory = categoryRepository.findById(categoryId).orElse(null);
+            if (existingCategory == null) {
+                existingCategory = new Category(categoryId, categoryName, null);
+                existingCategory = categoryRepository.save(existingCategory);
             }
+
+            // 새로운 GameCategory 객체 생성
+            GameCategory gameCategory = new GameCategory();
+            gameCategory.setGame(game);
+            gameCategory.setCategory(existingCategory);
+
+            // 새로운 카테고리 목록에 추가
+            newCategories.add(gameCategory);
         }
+
+        // 게임의 카테고리 목록을 새로운 카테고리 목록으로 교체
+        game.getGameCategoryList().clear();
+        game.getGameCategoryList().addAll(newCategories);
+
+        // 변경사항 저장
+        gameRepository.save(game);
     }
+
 
     private void saveGameGenres(JsonNode appsNode, Game game) {
 
         // null 값이면 바로 종료
         if (appsNode == null) return;
 
+        // 엔티티 병합
+        game = gameRepository.findById(game.getId()).orElse(game);
+
+        if (game.getGameCategoryList() == null) {
+            game.setGameCategoryList(new ArrayList<>());
+        }
+
+        // 현재 게임의 카테고리 목록을 복사하여 임시 저장
+        List<GameCategory> currentCategories = new ArrayList<>(game.getGameCategoryList());
+
+        // 새로운 카테고리 목록을 생성
+        List<GameCategory> newCategories = new ArrayList<>();
+
         // 게임과 카테고리 연결
         for (JsonNode appNode : appsNode) {
             Long categoryId = appNode.get("id").asLong();
             String categoryName = appNode.get("description").asText();
 
-            if(!gameCategoryRepository.existsByGameIdAndCategoryId(game.getId(), categoryId)){
-                Category existingCategory = categoryRepository.findById(categoryId).orElse(null);
-                if (existingCategory == null) {
-                    existingCategory = new Category(categoryId, categoryName, null);
-                    existingCategory = categoryRepository.save(existingCategory);
-                }
-                GameCategory gameCategory = new GameCategory();
-                gameCategory.setGame(game);
-                gameCategory.setCategory(existingCategory);
-                gameCategoryRepository.save(gameCategory);
+            Category existingCategory = categoryRepository.findById(categoryId).orElse(null);
+            if (existingCategory == null) {
+                existingCategory = new Category(categoryId, categoryName, null);
+                existingCategory = categoryRepository.save(existingCategory);
             }
+
+            // 새로운 GameCategory 객체 생성
+            GameCategory gameCategory = new GameCategory();
+            gameCategory.setGame(game);
+            gameCategory.setCategory(existingCategory);
+
+            // 새로운 카테고리 목록에 추가
+            newCategories.add(gameCategory);
         }
+
+        // 게임의 카테고리 목록을 새로운 카테고리 목록으로 교체
+        game.getGameCategoryList().clear();
+        game.getGameCategoryList().addAll(newCategories);
+
+        // 변경사항 저장
+        gameRepository.save(game);
     }
 
     public static LocalDate convertToDate(String dateString) {
