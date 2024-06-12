@@ -4,6 +4,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.extern.slf4j.Slf4j;
 import mytrophy.api.member.dto.CustomOAuth2User;
 import mytrophy.api.member.entity.Member;
 import mytrophy.api.member.repository.MemberRepository;
@@ -19,7 +20,7 @@ import java.util.Iterator;
 import java.io.IOException;
 
 @Component
-
+@Slf4j
 public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
 
     private final JWTUtil jwtUtil;
@@ -42,7 +43,8 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         } else if (authentication.getPrincipal() instanceof SteamUserPrincipal) {
             SteamUserPrincipal steamUserDetails = (SteamUserPrincipal) authentication.getPrincipal();
             username = steamUserDetails.getUsername();
-            role = "ROLE_STEAM_USER";
+            Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
+            role = authorities.iterator().next().getAuthority();
         } else {
             super.onAuthenticationSuccess(request, response, authentication);
             return;
