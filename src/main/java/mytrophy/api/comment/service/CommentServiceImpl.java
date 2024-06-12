@@ -98,7 +98,7 @@ public class CommentServiceImpl implements CommentService{
 
     //댓글 추천
     @Override
-    public void likeComment(Long commentId, Long memberId) {
+    public void toggleLikeComment(Long commentId, Long memberId) {
         Comment comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new CustomException(ErrorCodeEnum.NOT_EXISTS_COMMENT_ID));
 
@@ -106,33 +106,21 @@ public class CommentServiceImpl implements CommentService{
                 .orElseThrow(() -> new CustomException(ErrorCodeEnum.NOT_EXISTS_MEMBER_ID));
 
         Optional<CommentLike> existingLike = commentLikeRepository.findByCommentAndMember(comment, member);
+
         if(existingLike.isPresent()) {
-            throw new CustomException(ErrorCodeEnum.ALREADY_LIKED_COMMENT_ID);
+            // 좋아요 취소
+            commentLikeRepository.delete(existingLike.get());
+            comment.decrementLikes();
+        } else {
+            // 좋아요
+            CommentLike commentLike = CommentLike.builder()
+                    .comment(comment)
+                    .member(member)
+                    .build();
+            commentLikeRepository.save(commentLike);
+            comment.incrementLikes();
         }
 
-        CommentLike commentLike = CommentLike.builder()
-                .comment(comment)
-                .member(member)
-                .build();
-        commentLikeRepository.save(commentLike);
-
-        comment.incrementLikes();
-        commentRepository.save(comment);
-    }
-
-    //댓글 추천 취소
-    @Override
-    public void unlikeComment(Long commentId, Long memberId) {
-        Comment comment = commentRepository.findById(commentId)
-                .orElseThrow(() -> new CustomException(ErrorCodeEnum.NOT_EXISTS_COMMENT_ID));
-        Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new CustomException(ErrorCodeEnum.NOT_EXISTS_MEMBER_ID));
-
-        CommentLike commentLike = commentLikeRepository.findByCommentAndMember(comment, member)
-                .orElseThrow(() -> new CustomException(ErrorCodeEnum.NOT_LIKED_COMMENT_ID));
-
-        commentLikeRepository.delete(commentLike);
-        comment.decrementLikes();
         commentRepository.save(comment);
     }
 
