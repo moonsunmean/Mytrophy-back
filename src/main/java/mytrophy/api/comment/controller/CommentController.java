@@ -25,25 +25,26 @@ public class CommentController {
     @PostMapping("/articles/{id}/comments")
     public ResponseEntity<CommentDto> createComment(@PathVariable("id") Long articleId,
                                                     @RequestBody CreateCommentDto createCommentDto,
+                                                    @RequestParam(value = "parentCommentId", required = false) Long parentCommentId,
                                                     @AuthenticationPrincipal CustomUserDetails userinfo) {
         //토큰에서 username 빼내기
         String username = userinfo.getUsername();
         Long memberId = memberRepository.findByUsername(username).getId();
 
-        CommentDto createdComment = commentService.createComment(memberId, articleId, createCommentDto);
+        CommentDto createdComment = commentService.createComment(memberId, articleId, createCommentDto, parentCommentId);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdComment);
     }
 
     //댓글 수정
     @PatchMapping("/comments/{commentId}")
     public ResponseEntity<CommentDto> updateComment(@PathVariable("commentId") Long commentId,
-                                                    @RequestBody String content,
+                                                    @RequestBody CreateCommentDto createCommentDto,
                                                     @AuthenticationPrincipal CustomUserDetails userinfo) {
 
         String username = userinfo.getUsername();
         Long memberId = memberRepository.findByUsername(username).getId();
 
-        CommentDto updatedComment = commentService.updateComment(commentId, memberId, content);
+        CommentDto updatedComment = commentService.updateComment(commentId, memberId, createCommentDto.getContent());
         return ResponseEntity.ok(updatedComment);
     }
 
