@@ -71,27 +71,13 @@ public class CommentController {
         return ResponseEntity.ok(comments);
     }
 
-    //댓글 추천
+    //댓글 좋아용
     @PostMapping("/comments/{id}/like")
-    public ResponseEntity<String> likeComment(@PathVariable("id") Long commentId,
-                                              @AuthenticationPrincipal CustomUserDetails userinfo) {
-
+    public ResponseEntity<Void> toggleLikeComment(@PathVariable("id") Long commentId,
+                                                  @AuthenticationPrincipal CustomUserDetails userinfo) {
         String username = userinfo.getUsername();
         Long memberId = memberRepository.findByUsername(username).getId();
-
-        commentService.likeComment(commentId, memberId);
-        return ResponseEntity.ok().build();
-    }
-
-    //댓글 추천 취소
-    @PostMapping("comments/{id}/unlike")
-    public ResponseEntity<String> unlikeComment(@PathVariable("id") Long commentId,
-                                                @AuthenticationPrincipal CustomUserDetails userinfo) {
-
-        String username = userinfo.getUsername();
-        Long memberId = memberRepository.findByUsername(username).getId();
-
-        commentService.unlikeComment(commentId, memberId);
+        commentService.toggleLikeComment(commentId, memberId);
         return ResponseEntity.ok().build();
     }
 
