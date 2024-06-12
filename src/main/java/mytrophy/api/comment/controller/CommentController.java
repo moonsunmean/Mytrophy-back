@@ -25,25 +25,26 @@ public class CommentController {
     @PostMapping("/articles/{id}/comments")
     public ResponseEntity<CommentDto> createComment(@PathVariable("id") Long articleId,
                                                     @RequestBody CreateCommentDto createCommentDto,
+                                                    @RequestParam(value = "parentCommentId", required = false) Long parentCommentId,
                                                     @AuthenticationPrincipal CustomUserDetails userinfo) {
         //토큰에서 username 빼내기
         String username = userinfo.getUsername();
         Long memberId = memberRepository.findByUsername(username).getId();
 
-        CommentDto createdComment = commentService.createComment(memberId, articleId, createCommentDto);
+        CommentDto createdComment = commentService.createComment(memberId, articleId, createCommentDto, parentCommentId);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdComment);
     }
 
     //댓글 수정
     @PatchMapping("/comments/{commentId}")
     public ResponseEntity<CommentDto> updateComment(@PathVariable("commentId") Long commentId,
-                                                    @RequestBody String content,
+                                                    @RequestBody CreateCommentDto createCommentDto,
                                                     @AuthenticationPrincipal CustomUserDetails userinfo) {
 
         String username = userinfo.getUsername();
         Long memberId = memberRepository.findByUsername(username).getId();
 
-        CommentDto updatedComment = commentService.updateComment(commentId, memberId, content);
+        CommentDto updatedComment = commentService.updateComment(commentId, memberId, createCommentDto.getContent());
         return ResponseEntity.ok(updatedComment);
     }
 
@@ -70,27 +71,13 @@ public class CommentController {
         return ResponseEntity.ok(comments);
     }
 
-    //댓글 추천
+    //댓글 좋아용
     @PostMapping("/comments/{id}/like")
-    public ResponseEntity<String> likeComment(@PathVariable("id") Long commentId,
-                                              @AuthenticationPrincipal CustomUserDetails userinfo) {
-
+    public ResponseEntity<Void> toggleLikeComment(@PathVariable("id") Long commentId,
+                                                  @AuthenticationPrincipal CustomUserDetails userinfo) {
         String username = userinfo.getUsername();
         Long memberId = memberRepository.findByUsername(username).getId();
-
-        commentService.likeComment(commentId, memberId);
-        return ResponseEntity.ok().build();
-    }
-
-    //댓글 추천 취소
-    @PostMapping("comments/{id}/unlike")
-    public ResponseEntity<String> unlikeComment(@PathVariable("id") Long commentId,
-                                                @AuthenticationPrincipal CustomUserDetails userinfo) {
-
-        String username = userinfo.getUsername();
-        Long memberId = memberRepository.findByUsername(username).getId();
-
-        commentService.unlikeComment(commentId, memberId);
+        commentService.toggleLikeComment(commentId, memberId);
         return ResponseEntity.ok().build();
     }
 
