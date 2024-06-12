@@ -3,9 +3,14 @@ package mytrophy.api.game.controller;
 import lombok.RequiredArgsConstructor;
 import mytrophy.api.game.dto.RequestDTO;
 import mytrophy.api.game.dto.ResponseDTO;
+import mytrophy.api.game.entity.Game;
+import mytrophy.api.game.service.GameRecommendService;
 import mytrophy.api.game.service.GameReviewService;
 import mytrophy.api.member.repository.MemberRepository;
 import mytrophy.global.jwt.CustomUserDetails;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -20,6 +25,7 @@ public class GameReviewController {
 
     private final GameReviewService gameReviewService;
     private final MemberRepository memberRepository;
+    private final GameRecommendService gameRecommendService;
 
     //평가남기기 및 업데이트
     @PostMapping("/{appId}/reviews")
@@ -71,5 +77,16 @@ public class GameReviewController {
 
         ResponseDTO.GetGameReviewsDto reviewDto = gameReviewService.getMyReviewByAppId(memberId, appId);
         return ResponseEntity.ok(reviewDto);
+    }
+
+    @GetMapping("/recommendations")
+    public Page<ResponseDTO.GetGameReviewDto> getRecommendations(@AuthenticationPrincipal CustomUserDetails userinfo,
+                                         @RequestParam(defaultValue = "0") int page,
+                                         @RequestParam(defaultValue = "10") int size) {
+        String username = userinfo.getUsername();
+        Long memberId = memberRepository.findByUsername(username).getId();
+
+        Pageable pageable = PageRequest.of(page,size);
+        return gameRecommendService.recommendGames(memberId, pageable);
     }
 }
