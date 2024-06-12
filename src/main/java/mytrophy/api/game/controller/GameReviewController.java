@@ -55,7 +55,7 @@ public class GameReviewController {
     }
 
     //내가 추천한 게임 조회하기
-    @GetMapping("reviews/my/recommended")
+    @GetMapping("reviews/myrecommended")
     public ResponseEntity<List<ResponseDTO.GetGameReviewDto>> getRecommendedGames(@AuthenticationPrincipal CustomUserDetails userinfo) {
         String username = userinfo.getUsername();
         Long memberId = memberRepository.findByUsername(username).getId();
