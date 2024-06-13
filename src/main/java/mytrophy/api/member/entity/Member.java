@@ -55,11 +55,6 @@ public class Member extends BaseEntity {
     @JsonIgnoreProperties("member") // Prevent circular reference
     private List<Article> articles = new ArrayList<>();
 
-    @ManyToMany(fetch = FetchType.LAZY)
-    @JoinTable(
-            name = "Member_categories",
-            joinColumns = @JoinColumn(name = "member_id"),
-            inverseJoinColumns = @JoinColumn(name = "category_id")
-    )
-    private List<Category> categories = new ArrayList<>();
+    @OneToMany(mappedBy = "member", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<MemberCategory> memberCategories = new ArrayList<>();
 }
