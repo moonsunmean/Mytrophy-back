@@ -44,7 +44,12 @@ public interface ArticleService {
     // 좋아요 수 증가
     void articleLikeUp(Long articleId, Long memberId);
 
+    // 좋아요 수 감소
     void articleLikeDown(Long articleId, Long memberId);
 
+    // appId로 게시글 조회
     Page<ArticleResponseDto> findByAppId(int appId, Pageable pageable);
+
+    // 회원 id로 게시글 조회
+    Page<ArticleResponseDto> findByMemberId(Long memberId, Pageable pageable);
 }
