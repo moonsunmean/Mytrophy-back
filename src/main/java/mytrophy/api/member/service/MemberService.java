@@ -180,13 +180,33 @@ public class MemberService {
 
 
     private void mapDtoToMember(MemberDto memberDto, Member member) {
-        member.setUsername(memberDto.getUsername());
-        member.setName(memberDto.getName());
-        member.setNickname(memberDto.getNickname());
-        member.setEmail(memberDto.getEmail());
-        member.setSteamId(memberDto.getSteamId());
-        member.setLoginType(memberDto.getLoginType());
-        member.setImagePath(memberDto.getImagePath());
+        if (memberDto.getUsername() != null) {
+            member.setUsername(memberDto.getUsername());
+        }
+        if (memberDto.getPassword() != null) {
+            member.setPassword(memberDto.getPassword());
+        }
+        if (memberDto.getRole() != null) {
+            member.setRole(memberDto.getRole());
+        }
+        if (memberDto.getName() != null) {
+            member.setName(memberDto.getName());
+        }
+        if (memberDto.getNickname() != null) {
+            member.setNickname(memberDto.getNickname());
+        }
+        if (memberDto.getEmail() != null) {
+            member.setEmail(memberDto.getEmail());
+        }
+        if (memberDto.getSteamId() != null) {
+            member.setSteamId(memberDto.getSteamId());
+        }
+        if (memberDto.getLoginType() != null) {
+            member.setLoginType(memberDto.getLoginType());
+        }
+        if (memberDto.getImagePath() != null) {
+            member.setImagePath(memberDto.getImagePath());
+        }
     }
 
     private String encodePassword(String password) {
