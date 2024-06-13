@@ -105,7 +105,7 @@ pipeline {
             steps {
                 script {
                     // 새로운 컨테이너 실행
-                    sh "sshpass -p ${SERVER_CREDENTIALS_PSW} ssh -o StrictHostKeyChecking=no ${SERVER_CREDENTIALS_USR}@${SERVER_IP} 'docker run -d --name mytrophy-service -p 8080:8080 ${DOCKER_IMAGE_TAG}'"
+                    sh "sshpass -p ${SERVER_CREDENTIALS_PSW} ssh -o StrictHostKeyChecking=no ${SERVER_CREDENTIALS_USR}@${SERVER_IP} 'docker run -d --name mytrophy-service --network monitoring -p 8080:8080 ${DOCKER_IMAGE_TAG}'"
                 }
             }
         }
