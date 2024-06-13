@@ -48,6 +48,9 @@ public class Article extends BaseEntity {
     @OneToMany(mappedBy = "article", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<Comment> comments;
 
+    @OneToMany(mappedBy = "article", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ArticleLike> likes;
+
     @Builder // 빌더 패턴 적용
     public Article(Long id, Header header, String name, String content, int cntUp, String imagePath, Member member, Long appId) {
         this.id = id;

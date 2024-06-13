@@ -220,4 +220,16 @@ public class ArticleController {
         return ResponseEntity.ok().body(article);
     }
 
+    // memberId로 좋아요 누른 게시물 조회
+    @GetMapping("/liked/{memberId}")
+    public ResponseEntity<Page<ArticleResponseDto>> getLikedArticles(@AuthenticationPrincipal CustomUserDetails userInfo,
+                                                                     @PathVariable Long memberId,
+                                                                     @PageableDefault(size = 10) Pageable pageable) {
+        //토큰에서 username 빼내기
+        String username = userInfo.getUsername();
+        Member member = memberService.findMemberByUsername(username);
+
+        Page<ArticleResponseDto> likedArticles = articleQueryService.getLikedArticlesByMemberId(memberId, pageable);
+        return ResponseEntity.ok().body(likedArticles);
+    }
 }
