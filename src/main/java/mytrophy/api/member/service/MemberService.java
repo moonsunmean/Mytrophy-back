@@ -3,6 +3,7 @@ package mytrophy.api.member.service;
 import lombok.extern.slf4j.Slf4j;
 import mytrophy.api.game.entity.Category;
 import mytrophy.api.game.repository.CategoryRepository;
+import mytrophy.api.member.dto.CategoryUpdateDto;
 import mytrophy.api.member.dto.MemberDto;
 import mytrophy.api.member.dto.MemberResponseDto;
 import mytrophy.api.member.entity.Member;
@@ -63,6 +64,16 @@ public class MemberService {
         signupMember.setImagePath(memberDto.getImagePath());
 
         memberRepository.save(signupMember);
+    }
+
+    @Transactional
+    public void updateMemberCategories(Long memberId, CategoryUpdateDto categoryUpdateDto) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new IllegalArgumentException("다음 ID에 해당하는 회원을 찾을 수 없습니다: " + memberId));
+
+        List<Category> categories = categoryRepository.findAllById(categoryUpdateDto.getCategoryIds());
+        member.setCategories(categories);
+        memberRepository.save(member);
     }
 
     // 회원 조회
@@ -176,13 +187,6 @@ public class MemberService {
         member.setSteamId(memberDto.getSteamId());
         member.setLoginType(memberDto.getLoginType());
         member.setImagePath(memberDto.getImagePath());
-        if (memberDto.getCategoryIds() != null) {
-            List<Category> categories = memberDto.getCategoryIds().stream()
-                    .map(categoryId -> categoryRepository.findById(categoryId)
-                            .orElseThrow(() -> new IllegalArgumentException("Invalid category ID: " + categoryId)))
-                    .collect(Collectors.toList());
-            member.setCategories(categories);
-        }
     }
 
     private String encodePassword(String password) {

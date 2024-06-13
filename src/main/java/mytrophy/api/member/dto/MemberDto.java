@@ -20,5 +20,4 @@ public class MemberDto {
     private String steamId; // 스팀 ID 값
     private String loginType; // 로그인 형태 (소셜로그인, 일반로그인)
     private String imagePath; // 프로필 이미지
-    private List<Long> categoryIds;
 }

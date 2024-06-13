@@ -2,7 +2,6 @@ package mytrophy.api.member.entity;
 
 
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -10,16 +9,8 @@ import lombok.Setter;
 import mytrophy.api.article.entity.Article;
 import mytrophy.api.common.base.BaseEntity;
 import mytrophy.api.game.entity.Category;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Pattern;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.time.LocalDate;
 @Getter
 @Setter
 @Entity
@@ -50,7 +41,6 @@ public class Member extends BaseEntity {
     @Column(nullable = true)
     private String loginType;// 로그인 형태 (소셜로그인, 일반로그인)
 
-
     @Column(nullable = true)
     private String imagePath;;// 프로필 이미지
 
@@ -66,5 +56,10 @@ public class Member extends BaseEntity {
     private List<Article> articles = new ArrayList<>();
 
     @ManyToMany(fetch = FetchType.LAZY)
-    private List<Category> categories;
+    @JoinTable(
+            name = "Member_categories",
+            joinColumns = @JoinColumn(name = "member_id"),
+            inverseJoinColumns = @JoinColumn(name = "category_id")
+    )
+    private List<Category> categories = new ArrayList<>();
 }
