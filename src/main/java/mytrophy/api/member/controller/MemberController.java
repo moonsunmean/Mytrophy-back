@@ -230,15 +230,15 @@ public class MemberController {
 
     // 회원 사진 추가
     @PostMapping("/files")
-    public ResponseEntity<String> uploadOnlyFiles(@RequestPart(value = "file", required = false) List<MultipartFile> files) throws IOException {
-        imageService.uploadFiles(files);
-        return ResponseEntity.ok("파일 업로드 성공");
+    public ResponseEntity uploadOnlyFiles(@RequestPart ("file") List<MultipartFile> files) throws IOException {
+        List<String> uploadFiles = imageService.uploadFiles(files);
+        return ResponseEntity.status(HttpStatus.CREATED).body(uploadFiles);
     }
 
     // 회원 사진 삭제
     @DeleteMapping("/files")
-    public ResponseEntity<String> removeOnlyFiles(List<String> files) {
+    public ResponseEntity removeOnlyFiles(List<String> files) {
         imageService.removeFile(files);
-        return ResponseEntity.ok("파일 삭제 성공");
+        return ResponseEntity.ok().build();
     }
 }
