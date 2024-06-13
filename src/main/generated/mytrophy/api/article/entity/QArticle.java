@@ -43,6 +43,8 @@ public class QArticle extends EntityPathBase<Article> {
 
     public final StringPath imagePath = createString("imagePath");
 
+    public final ListPath<ArticleLike, QArticleLike> likes = this.<ArticleLike, QArticleLike>createList("likes", ArticleLike.class, QArticleLike.class, PathInits.DIRECT2);
+
     public final mytrophy.api.member.entity.QMember member;
 
     public final StringPath name = createString("name");
