@@ -4,6 +4,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import mytrophy.api.member.dto.CategoryUpdateDto;
 import mytrophy.global.jwt.CustomSuccessHandler;
 import mytrophy.api.member.dto.MemberDto;
 import mytrophy.api.member.dto.MemberResponseDto;
@@ -61,6 +62,14 @@ public class MemberController {
     public ResponseEntity<String> signupMember(@RequestBody MemberDto memberDto) {
         memberService.signupMember(memberDto);
         return new ResponseEntity<>("회원 가입 성공", HttpStatus.CREATED);
+    }
+
+    // 카테고리 업데이트
+    @PatchMapping("/{id}/categories")
+    public ResponseEntity<String> updateMemberCategories(@PathVariable("id") Long id,
+                                                         @RequestBody CategoryUpdateDto categoryUpdateDto) {
+        memberService.updateMemberCategories(id, categoryUpdateDto);
+        return new ResponseEntity<>("카테고리 업데이트 성공", HttpStatus.OK);
     }
 
     // 회원 조회 (토큰)
@@ -146,13 +155,12 @@ public class MemberController {
         }
     }
 
+
     @GetMapping("/steam/login")
     public void login(HttpServletRequest request, HttpServletResponse response, @RequestHeader("access") String token) throws IOException {
 
             response.sendRedirect("http://localhost:8080/steam-login");
     }
-
-
 
     @GetMapping("/steam/login/redirect")
     public ResponseEntity<?> loginRedirect(HttpServletRequest request, HttpServletResponse response,@RequestParam Map<String, String> allRequestParams) {
