@@ -103,7 +103,7 @@ public class ArticleController {
             case INFORMATION:
             case GUIDE:
             case REVIEW:
-            case CHATING:
+            case CHATTING:
                 // 유효한 헤더인 경우 해당 헤더로 게시글 조회
                 Sort sort = Sort.by("createdAt").descending();
                 pageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sort);
