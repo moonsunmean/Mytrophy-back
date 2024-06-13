@@ -3,6 +3,7 @@ package mytrophy.api.article.service;
 import mytrophy.api.article.dto.ArticleResponseDto;
 import mytrophy.api.article.entity.ArticleLike;
 import mytrophy.api.article.repository.ArticleLikeRepository;
+import mytrophy.api.querydsl.repository.ArticleQueryRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,6 +29,7 @@ public class ArticleServiceImpl implements ArticleService {
     private final ArticleRepository articleRepository;
     private final MemberRepository memberRepository;
     private final ArticleLikeRepository articleLikeRepository;
+    private final ArticleQueryRepository articleQueryRepository;
 
     // 게시글 생성
     @Override
@@ -110,7 +112,8 @@ public class ArticleServiceImpl implements ArticleService {
             .orElseThrow(() -> new ResourceNotFoundException("해당 게시글이 존재하지 않습니다."));
 
         // 게시글 정보 업데이트
-        article.updateArticle(articleRequestDto.getHeader(), articleRequestDto.getName(), articleRequestDto.getContent(), articleRequestDto.getImagePath(), articleRequestDto.getAppId());
+        article.updateArticle(articleRequestDto.getHeader(), articleRequestDto.getName(),
+            articleRequestDto.getContent(), articleRequestDto.getImagePath(), articleRequestDto.getAppId());
 
         // 엔티티를 저장하고, 저장된 엔티티를 기반으로 DTO 객체 생성하여 반환
         return ArticleResponseDto.fromEntity(articleRepository.save(article));
@@ -198,5 +201,4 @@ public class ArticleServiceImpl implements ArticleService {
             return ArticleResponseDto.fromEntityWithCommentCount(article, commentCount);
         });
     }
-
 }
