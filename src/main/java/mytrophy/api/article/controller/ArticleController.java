@@ -62,11 +62,19 @@ public class ArticleController {
 
     // 게시글 리스트 조회
     @GetMapping
-    public ResponseEntity<Page<ArticleResponseDto>> getAllArticles(@PageableDefault(size = 10) Pageable pageable) {
+    public ResponseEntity<Page<ArticleResponseDto>> getAllArticles(@PageableDefault(size = 10) Pageable pageable,
+                                                                   @RequestParam(required = false) Long memberId) {
         Sort sort = Sort.by("createdAt").descending();
         pageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sort);
 
-        Page<ArticleResponseDto> articles = articleService.findAll(pageable);
+        Page<ArticleResponseDto> articles;
+
+        if (memberId != null) {
+            articles = articleService.findByMemberId(memberId, pageable);
+        } else {
+            articles = articleService.findAll(pageable);
+        }
+
         return ResponseEntity.ok().body(articles);
     }
 

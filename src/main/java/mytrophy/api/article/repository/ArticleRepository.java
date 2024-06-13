@@ -20,4 +20,6 @@ public interface ArticleRepository extends JpaRepository<Article, Long> {
     Article findByIdAndHeader(Long id, Header header);
 
     Page<Article> findByAppId(int appId, Pageable pageable);
+
+    Page<Article> findByMemberId(Long memberId, Pageable pageable);
 }
