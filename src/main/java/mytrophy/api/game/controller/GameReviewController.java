@@ -80,13 +80,13 @@ public class GameReviewController {
     }
 
     @GetMapping("/recommendations")
-    public Page<ResponseDTO.GetGameReviewDto> getRecommendations(@AuthenticationPrincipal CustomUserDetails userinfo,
-                                         @RequestParam(defaultValue = "0") int page,
-                                         @RequestParam(defaultValue = "10") int size) {
+    public Page<ResponseDTO.GetGameDetailDTO> getRecommendations(@AuthenticationPrincipal CustomUserDetails userinfo,
+                                                                 @RequestParam(defaultValue = "0") int page,
+                                                                 @RequestParam(defaultValue = "10") int size) {
         String username = userinfo.getUsername();
         Long memberId = memberRepository.findByUsername(username).getId();
 
-        Pageable pageable = PageRequest.of(page,size);
-        return gameRecommendService.recommendGames(memberId, pageable);
+        Pageable pageable = PageRequest.of(page, size);
+        return gameRecommendService.recommendGamesForMember(memberId, pageable);
     }
 }
