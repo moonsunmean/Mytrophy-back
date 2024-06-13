@@ -190,4 +190,13 @@ public class ArticleServiceImpl implements ArticleService {
         });
     }
 
+    // memberId로 게시글 조회
+    @Override
+    public Page<ArticleResponseDto> findByMemberId(Long memberId, Pageable pageable) {
+        return articleRepository.findByMemberId(memberId, pageable).map(article -> {
+            int commentCount = article.getComments().size();
+            return ArticleResponseDto.fromEntityWithCommentCount(article, commentCount);
+        });
+    }
+
 }
