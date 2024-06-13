@@ -1,5 +1,6 @@
 package mytrophy.api.member.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
@@ -52,12 +53,14 @@ public class MemberController {
 
 
     // 중복 회원 검증
+    @Operation(summary = "중복회원검증",description = "회원가입시 중복회원이있는지 검증합니다.")
     @GetMapping("/checkUsername")
     public boolean isUsernameExists(@RequestParam String username) {
         return memberService.isUsernameExists(username);
     }
 
     // 회원 가입
+    @Operation(summary = "회원가입",description = "회원 정보를 받아 회원가입을 진행해 서버에 정보를 저장합니다.")
     @PostMapping("/signup")
     public ResponseEntity<String> signupMember(@RequestBody MemberDto memberDto) {
         memberService.signupMember(memberDto);
@@ -65,6 +68,7 @@ public class MemberController {
     }
 
     // 카테고리 업데이트
+    @Operation(summary = "카테고리 업데이트",description = "회원이 선택 카테고리정보를 받아 갱신합니다.")
     @PatchMapping("/{id}/categories")
     public ResponseEntity<String> updateMemberCategories(@PathVariable("id") Long id,
                                                          @RequestBody CategoryUpdateDto categoryUpdateDto) {
@@ -73,6 +77,7 @@ public class MemberController {
     }
 
     // 회원 조회 (토큰)
+    @Operation(summary = "회원정보조회(토큰)",description = "헤더에서 토큰을 통해 회원정보를 반환합니다.")
     @GetMapping("/get-userinfo")
     public ResponseEntity<MemberResponseDto> getMemberById(@AuthenticationPrincipal CustomUserDetails userInfo) {
         String username = userInfo.getUsername();
@@ -84,6 +89,7 @@ public class MemberController {
     }
 
     // 회원 조회 (id)
+    @Operation(summary = "회원정보조회",description = "회원정보를 반환합니다.")
     @GetMapping("/{id}")
     public ResponseEntity<MemberResponseDto> getMemberById(@PathVariable("id") Long id) {
         MemberResponseDto member = memberService.getMemberDtoById(id);
@@ -94,6 +100,7 @@ public class MemberController {
     }
 
     // 회원 수 조회
+    @Operation(summary = "회원 수 조회",description = "전체 회원 수를 반환합니다.")
     @GetMapping("/count")
     public ResponseEntity<Long> getMemberCount() {
         long count = memberService.getMemberCount();
@@ -101,6 +108,7 @@ public class MemberController {
     }
 
     // 회원 리스트 조회
+    @Operation(summary = "전체 회원 리스트 조회",description = "전체 회원을 조회합니다.")
     @GetMapping("/list")
     public ResponseEntity<Page<MemberResponseDto>> getAllMembers(@PageableDefault(size = 10) Pageable pageable) {
         Page<MemberResponseDto> members = memberService.findAll(pageable);
@@ -108,6 +116,7 @@ public class MemberController {
     }
 
     // 회원 수정 (토큰)
+    @Operation(summary = "회원정보수정(토큰)",description = "회원정보를 수정합니다.")
     @PatchMapping("/modify-userinfo")
     public ResponseEntity<String> updateMember(@AuthenticationPrincipal CustomUserDetails userInfo,
                                                @RequestBody MemberDto memberDto) {
@@ -122,6 +131,7 @@ public class MemberController {
     }
 
     // 회원 수정 (id)
+    @Operation(summary = "회원정보조회",description = "회원정보를 수정합니다.")
     @PatchMapping("/{id}")
     public ResponseEntity<String> updateMemberById(@PathVariable("id") Long id, @RequestBody MemberDto memberDto) {
         boolean isUpdated = memberService.updateMemberById(id, memberDto);
@@ -133,6 +143,7 @@ public class MemberController {
     }
 
     // 회원 삭제 (토큰)
+    @Operation(summary = "회원정보삭제(토큰)",description = "회원정보를 삭제합니다.")
     @DeleteMapping("/delete-userinfo")
     public ResponseEntity<String> deleteMember(@AuthenticationPrincipal CustomUserDetails userInfo) {
         String username = userInfo.getUsername();
@@ -145,6 +156,7 @@ public class MemberController {
     }
 
     // 회원 삭제 (id)
+    @Operation(summary = "회원정보삭제",description = "회원정보를 삭제합니다.")
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteMemberById(@PathVariable("id") Long id) {
         boolean isDeleted = memberService.deleteMemberById(id);
@@ -156,14 +168,9 @@ public class MemberController {
     }
 
 
-    @GetMapping("/steam/login")
-    public void login(HttpServletRequest request, HttpServletResponse response, @RequestHeader("access") String token) throws IOException {
-
-            response.sendRedirect("http://localhost:8080/steam-login");
-    }
-
+    @Operation(summary = "스트로그인창에서 리다이렉션 URL",description = "스팀로그인 정보를 가지고 로그인 및 연동을 진행합니다.")
     @GetMapping("/steam/login/redirect")
-    public ResponseEntity<?> loginRedirect(HttpServletRequest request, HttpServletResponse response,@RequestParam Map<String, String> allRequestParams) {
+    public ResponseEntity<?> loginRedirect(HttpServletRequest request, HttpServletResponse response,@RequestParam Map<String, String> allRequestParams) throws IOException {
         SteamOpenidLoginDto dto = new SteamOpenidLoginDto(
                 allRequestParams.get("openid.ns"),
                 allRequestParams.get("openid.op_endpoint"),
@@ -213,45 +220,25 @@ public class MemberController {
 
             } catch (Exception e) {
                 e.printStackTrace();
+                response.sendRedirect("http://localhost:3000?error=steam-link-failed");
                 return new ResponseEntity<>("스팀 로그인 실패", HttpStatus.BAD_REQUEST);
             }
         }
 
     }
 
-    @GetMapping("/steam/login/profile")
-    @ResponseBody
-    public ResponseEntity<Object> success() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
-        if (authentication instanceof SteamAutenticationToken) {
-            SteamAutenticationToken steamAuth = (SteamAutenticationToken) authentication;
-            SteamUserPrincipal principal = steamAuth.getPrincipal();
-            return ResponseEntity.ok(principal);
-        } else {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized");
-        }
-    }
-
-
-    @GetMapping("/steam/failed")
-    public String failed() {
-        return "failed";
-    }
-
-
 
     // 회원 사진 추가
     @PostMapping("/files")
-    public ResponseEntity<String> uploadOnlyFiles(@RequestPart(value = "file", required = false) List<MultipartFile> files) throws IOException {
-        imageService.uploadFiles(files);
-        return ResponseEntity.ok("파일 업로드 성공");
+    public ResponseEntity uploadOnlyFiles(@RequestPart ("file") List<MultipartFile> files) throws IOException {
+        List<String> uploadFiles = imageService.uploadFiles(files);
+        return ResponseEntity.status(HttpStatus.CREATED).body(uploadFiles);
     }
 
     // 회원 사진 삭제
     @DeleteMapping("/files")
-    public ResponseEntity<String> removeOnlyFiles(List<String> files) {
+    public ResponseEntity removeOnlyFiles(List<String> files) {
         imageService.removeFile(files);
-        return ResponseEntity.ok("파일 삭제 성공");
+        return ResponseEntity.ok().build();
     }
 }

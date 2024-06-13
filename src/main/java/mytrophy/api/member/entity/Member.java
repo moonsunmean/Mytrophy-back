@@ -9,6 +9,8 @@ import lombok.Setter;
 import mytrophy.api.article.entity.Article;
 import mytrophy.api.common.base.BaseEntity;
 import mytrophy.api.game.entity.Category;
+import mytrophy.api.game.entity.GameReview;
+
 import java.util.ArrayList;
 import java.util.List;
 @Getter
@@ -51,8 +53,8 @@ public class Member extends BaseEntity {
     @Getter
     private boolean firstLogin = true; // 기본값을 true(첫로그인이후 false로 변경)
 
-    @OneToMany(mappedBy = "member", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    @JsonIgnoreProperties("member") // Prevent circular reference
+    @OneToMany(mappedBy = "member", fetch = FetchType.LAZY, cascade = CascadeType.REMOVE, orphanRemoval = true)
+    @JsonIgnoreProperties("member")
     private List<Article> articles = new ArrayList<>();
 
     @OneToMany(mappedBy = "member", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
