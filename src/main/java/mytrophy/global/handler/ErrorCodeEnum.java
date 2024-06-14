@@ -19,8 +19,10 @@ public enum ErrorCodeEnum {
     NOT_PARENT_COMMENT(HttpStatus.BAD_REQUEST, "C-005", "답글에는 추가 답글을 달 수 없습니다."),
 
     NOT_EXISTS_GAME_ID(HttpStatus.NOT_FOUND, "G-001", "해당하는 게임을 찾을 수 없습니다."),
-    NOT_FOUND_GAME(HttpStatus.NOT_FOUND,"G-002","조회된 게임이 없습니다." );
+    NOT_FOUND_GAME(HttpStatus.NOT_FOUND,"G-002","조회된 게임이 없습니다." ),
 
+    NOT_DIFFERENT_PASSWORD(HttpStatus.BAD_REQUEST, "M-003", "비밀번호가 일치하지 않습니다."),
+    NOT_SAVED_GAME(HttpStatus.BAD_REQUEST, "G-003", "Mytrophy에 저장되지 않은 게임입니다.");
 
     private final HttpStatus httpStatus;
     private final String errorCode;
