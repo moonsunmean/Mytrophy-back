@@ -14,6 +14,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -77,13 +79,21 @@ public class MemberGameService {
         JsonNode games = objectMapper.readTree(response).path("response").path("games");
 
         // DB에 저장되지 않은 게임 확인
+        List<JsonNode> notSavedGames = new ArrayList<>();
         for (JsonNode game : games) {
             Long gameId = game.path("appid").asLong();
             if (!memberGameRepository.existsById(gameId)) {
-                throw new CustomException(ErrorCodeEnum.NOT_SAVED_GAME);
+                // DB에 저장되지 않은 게임이면 예외를 발생시키지 않고 따로 리스트에 추가
+                notSavedGames.add(game);
             }
         }
 
+        // 만약 DB에 저장되지 않은 게임이 있는 경우 예외를 발생시킬 수도 있음
+        if (!notSavedGames.isEmpty()) {
+            throw new CustomException(ErrorCodeEnum.NOT_SAVED_GAME);
+        }
+
+        // DB에 저장되지 않은 게임이 없으면 조회된 게임들을 반환
         return games;
     }
 
