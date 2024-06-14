@@ -35,6 +35,8 @@ public class QComment extends EntityPathBase<Comment> {
 
     public final NumberPath<Long> id = createNumber("id", Long.class);
 
+    public final ListPath<CommentLike, QCommentLike> likeList = this.<CommentLike, QCommentLike>createList("likeList", CommentLike.class, QCommentLike.class, PathInits.DIRECT2);
+
     public final NumberPath<Integer> likes = createNumber("likes", Integer.class);
 
     public final mytrophy.api.member.entity.QMember member;
