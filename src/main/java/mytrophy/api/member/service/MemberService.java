@@ -7,6 +7,8 @@ import mytrophy.api.member.dto.CategoryUpdateDto;
 import mytrophy.api.member.dto.MemberDto;
 import mytrophy.api.member.dto.MemberResponseDto;
 import mytrophy.api.member.entity.Member;
+import mytrophy.api.member.entity.MemberCategory;
+import mytrophy.api.member.repository.MemberCategoryRepository;
 import mytrophy.api.member.repository.MemberRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -27,10 +29,13 @@ public class MemberService {
     private final MemberRepository memberRepository;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
     private final CategoryRepository categoryRepository;
-    public MemberService(MemberRepository memberRepository, BCryptPasswordEncoder bCryptPasswordEncoder, CategoryRepository categoryRepository) {
+    private final MemberCategoryRepository memberCategoryRepository;
+
+    public MemberService(MemberRepository memberRepository, BCryptPasswordEncoder bCryptPasswordEncoder, CategoryRepository categoryRepository, MemberCategoryRepository memberCategoryRepository) {
         this.memberRepository = memberRepository;
         this.bCryptPasswordEncoder = bCryptPasswordEncoder;
         this.categoryRepository = categoryRepository;
+        this.memberCategoryRepository = memberCategoryRepository;
     }
 
 
@@ -66,14 +71,23 @@ public class MemberService {
         memberRepository.save(signupMember);
     }
 
+    //관심 카테고리 설정
     @Transactional
     public void updateMemberCategories(Long memberId, CategoryUpdateDto categoryUpdateDto) {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new IllegalArgumentException("다음 ID에 해당하는 회원을 찾을 수 없습니다: " + memberId));
 
-        List<Category> categories = categoryRepository.findAllById(categoryUpdateDto.getCategoryIds());
-        member.setCategories(categories);
-        memberRepository.save(member);
+        for (Long categoryId : categoryUpdateDto.getCategoryIds()) {
+            Category category = categoryRepository.findById(categoryId)
+                    .orElseThrow(() -> new IllegalArgumentException("다음 ID에 해당하는 카테고리를 찾을 수 없습니다: " + categoryId));
+
+            MemberCategory memberCategory = MemberCategory.builder()
+                    .member(member)
+                    .category(category)
+                    .build();
+
+            memberCategoryRepository.save(memberCategory);
+        }
     }
 
     // 회원 조회
@@ -169,8 +183,8 @@ public class MemberService {
         dto.setCreatedAt(member.getCreatedAt());
         dto.setUpdatedAt(member.getUpdatedAt());
 
-        List<Long> categoryIds = member.getCategories().stream()
-                .map(Category::getId)
+        List<Long> categoryIds = member.getMemberCategories().stream()
+                .map(memberCategory -> memberCategory.getCategory().getId())
                 .collect(Collectors.toList());
         dto.setCategoryIds(categoryIds);
 

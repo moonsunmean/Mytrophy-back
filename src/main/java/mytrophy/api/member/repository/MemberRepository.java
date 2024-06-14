@@ -15,6 +15,7 @@ public interface MemberRepository  extends JpaRepository<Member,Long> {
     Member deleteByUsername(String username);
     Boolean existsByUsername(String username);
     Optional<Member> findBySteamId(String id);
-    @Query("SELECT m FROM Member m LEFT JOIN FETCH m.categories WHERE m.username = :username")
+
+    @Query("SELECT DISTINCT m FROM Member m LEFT JOIN FETCH m.memberCategories mc LEFT JOIN FETCH mc.category WHERE m.username = :username")
     Optional<Member> findByUsernameWithCategories(@Param("username") String username);
 }
