@@ -18,6 +18,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import static mytrophy.global.handler.ErrorCodeEnum.NOT_SAVED_GAME;
+
 @Service
 public class MemberGameService {
     @Value("${steam.api-key}")
@@ -51,6 +53,9 @@ public class MemberGameService {
 
         // API 호출 및 응답 처리
         String response = restTemplate.getForObject(url, String.class);
+        if (response == null) {
+            throw new CustomException(ErrorCodeEnum.NOT_SAVED_GAME);
+        }
         ObjectMapper objectMapper = new ObjectMapper();
         return objectMapper.readTree(response);
     }
