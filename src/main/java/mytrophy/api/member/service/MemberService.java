@@ -77,6 +77,8 @@ public class MemberService {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new IllegalArgumentException("다음 ID에 해당하는 회원을 찾을 수 없습니다: " + memberId));
 
+        memberCategoryRepository.deleteByMember(member);
+
         for (Long categoryId : categoryUpdateDto.getCategoryIds()) {
             Category category = categoryRepository.findById(categoryId)
                     .orElseThrow(() -> new IllegalArgumentException("다음 ID에 해당하는 카테고리를 찾을 수 없습니다: " + categoryId));
