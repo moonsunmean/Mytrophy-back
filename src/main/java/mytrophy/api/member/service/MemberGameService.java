@@ -7,13 +7,17 @@ import mytrophy.api.member.entity.Member;
 import mytrophy.api.member.entity.MemberGame;
 import mytrophy.api.member.repository.MemberGameRepository;
 import mytrophy.api.member.repository.MemberRepository;
+import mytrophy.global.handler.CustomException;
+import mytrophy.global.handler.ErrorCodeEnum;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.Optional;
 
 @Service
+@Transactional
 public class MemberGameService {
     @Value("${steam.api-key}")
     private String steamKey;
@@ -25,6 +29,30 @@ public class MemberGameService {
         this.memberRepository = memberRepository;
         this.memberGameRepository = memberGameRepository;
     }
+
+//    public JsonNode findMemberSteamGames(Long id) throws JsonProcessingException {
+//        RestTemplate restTemplate = new RestTemplate();
+//
+//        // 디비에서 회원 정보 가져옴
+//        Optional<Member> memberOptional = memberRepository.findById(id);
+//        if (memberOptional.isEmpty()) {
+//            throw new IllegalArgumentException("Invalid memberId: " + id);
+//        }
+//
+//        Member member = memberOptional.get();
+//        String steamId = member.getSteamId();
+//
+//        // Steam API 호출 URL 구성
+//        String url = "https://api.steampowered.com/IPlayerService/GetOwnedGames/v0001/"
+//                + "?key=" + steamKey
+//                + "&steamid=" + steamId
+//                + "&format=json";
+//
+//        // API 호출 및 응답 처리
+//        String response = restTemplate.getForObject(url, String.class);
+//        ObjectMapper objectMapper = new ObjectMapper();
+//        return objectMapper.readTree(response);
+//    }
 
     public JsonNode findMemberSteamGames(Long id) throws JsonProcessingException {
         RestTemplate restTemplate = new RestTemplate();
@@ -40,14 +68,24 @@ public class MemberGameService {
 
         // Steam API 호출 URL 구성
         String url = "https://api.steampowered.com/IPlayerService/GetOwnedGames/v0001/"
-                + "?key=" + steamKey
-                + "&steamid=" + steamId
-                + "&format=json";
+            + "?key=" + steamKey
+            + "&steamid=" + steamId
+            + "&format=json";
 
         // API 호출 및 응답 처리
         String response = restTemplate.getForObject(url, String.class);
         ObjectMapper objectMapper = new ObjectMapper();
-        return objectMapper.readTree(response);
+        JsonNode games = objectMapper.readTree(response).path("response").path("games");
+
+        // DB에 저장되지 않은 게임 확인
+        for (JsonNode game : games) {
+            Long gameId = game.path("appid").asLong();
+            if (!memberGameRepository.existsById(gameId)) {
+                throw new CustomException(ErrorCodeEnum.NOT_SAVED_GAME);
+            }
+        }
+
+        return games;
     }
 
     public void saveMemberSteamGameList(Long id) throws JsonProcessingException {
