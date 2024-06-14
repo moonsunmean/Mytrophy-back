@@ -90,7 +90,7 @@ public class GameController {
             @Parameter(description = "페이지 번호") @RequestParam(name = "page", defaultValue = "1") int page,
             @Parameter(description = " 한 페이지의 데이터 개수") @RequestParam(name = "size", defaultValue = "10") int size) throws JsonProcessingException {
 
-        return ResponseEntity.ok(gameService.getTopGameDTO(page-1,size,gameDataService.receiveTopSteamGameList(100,"request")));
+        return ResponseEntity.ok(gameService.getTopGameDTO(page-1,size));
     }
 
     @GetMapping("/release")
@@ -192,7 +192,7 @@ public class GameController {
     @Operation(summary = "TOP100 게임 상세정보 다운",description = "스팀에 있는 TOP100 게임의 상세정보를 서버로 다운받습니다.")
     public ResponseEntity<String> readTopSteamGameData() {
         try {
-            gameDataService.receiveTopSteamGameList(100,"read");
+            gameDataService.receiveTopSteamGameList(100);
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }

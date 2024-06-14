@@ -37,6 +37,7 @@ public class GameDataService {
     private final GameCategoryRepository gameCategoryRepository;
     private final GameDataRepository gameDataRepository;
     private final GameReadRepository gameReadRepository;
+    private final TopGameRepository topGameRepository;
 
     // application.properties에서 설정된 값 주입
     @Value("${steam.api-key}")
@@ -46,7 +47,7 @@ public class GameDataService {
     public GameDataService(GameRepository gameRepository, AchievementRepository achievementRepository,
                            CategoryRepository categoryRepository, ScreenshotRepository screenshotRepository,
                            GameCategoryRepository gameCategoryRepository, GameDataRepository gameDataRepository,
-                           GameReadRepository gameReadRepository) {
+                           GameReadRepository gameReadRepository, TopGameRepository topGameRepository) {
         this.gameRepository = gameRepository;
         this.achievementRepository = achievementRepository;
         this.categoryRepository = categoryRepository;
@@ -54,6 +55,7 @@ public class GameDataService {
         this.gameCategoryRepository = gameCategoryRepository;
         this.gameDataRepository = gameDataRepository;
         this.gameReadRepository = gameReadRepository;
+        this.topGameRepository = topGameRepository;
     }
 
     // 스팀 게임 목록을 받아와 DB에 저장하는 메서드
@@ -124,7 +126,7 @@ public class GameDataService {
     }
 
     // 스팀 게임 top100 목록을 저장하는 메서드
-    public List<Integer> receiveTopSteamGameList(int size, String type) throws JsonProcessingException {
+    public void receiveTopSteamGameList(int size) throws JsonProcessingException {
 
         RestTemplate restTemplate = new RestTemplate();
         String url = "https://steamspy.com/api.php?request=top100in2weeks";
@@ -132,23 +134,19 @@ public class GameDataService {
         JsonNode rootNode = new ObjectMapper().readTree(response.getBody());
 
         int count = 1;
-        List<Integer> appList = new ArrayList<>();
+        List<TopGameRead> appList = new ArrayList<>();
 
         for (JsonNode appNode : rootNode) {
             int appId = appNode.get("appid").asInt();
+            System.out.println("Rank : " +  count);
             System.out.println(appId);
-            System.out.println(count);
-            if(type.equals("read")){
-                gameDetail(appId);
-            }
-            else {
-                appList.add(appId);
-            }
-
+            TopGameRead topGameRead = new TopGameRead(Long.valueOf(count),appId);
+            gameDetail(appId);
+            appList.add(topGameRead);
             if (count >= size) break;
             count++;
         }
-        return appList;
+        topGameRepository.saveAll(appList);
     }
 
     // 특정 게임의 상세 정보를 받아와 DB에 저장하는 메서드
