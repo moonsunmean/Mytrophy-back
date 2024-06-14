@@ -31,30 +31,6 @@ public class MemberGameService {
         this.memberGameRepository = memberGameRepository;
     }
 
-//    public JsonNode findMemberSteamGames(Long id) throws JsonProcessingException {
-//        RestTemplate restTemplate = new RestTemplate();
-//
-//        // 디비에서 회원 정보 가져옴
-//        Optional<Member> memberOptional = memberRepository.findById(id);
-//        if (memberOptional.isEmpty()) {
-//            throw new IllegalArgumentException("Invalid memberId: " + id);
-//        }
-//
-//        Member member = memberOptional.get();
-//        String steamId = member.getSteamId();
-//
-//        // Steam API 호출 URL 구성
-//        String url = "https://api.steampowered.com/IPlayerService/GetOwnedGames/v0001/"
-//                + "?key=" + steamKey
-//                + "&steamid=" + steamId
-//                + "&format=json";
-//
-//        // API 호출 및 응답 처리
-//        String response = restTemplate.getForObject(url, String.class);
-//        ObjectMapper objectMapper = new ObjectMapper();
-//        return objectMapper.readTree(response);
-//    }
-
     public JsonNode findMemberSteamGames(Long id) throws JsonProcessingException {
         RestTemplate restTemplate = new RestTemplate();
 
@@ -69,32 +45,14 @@ public class MemberGameService {
 
         // Steam API 호출 URL 구성
         String url = "https://api.steampowered.com/IPlayerService/GetOwnedGames/v0001/"
-            + "?key=" + steamKey
-            + "&steamid=" + steamId
-            + "&format=json";
+                + "?key=" + steamKey
+                + "&steamid=" + steamId
+                + "&format=json";
 
         // API 호출 및 응답 처리
         String response = restTemplate.getForObject(url, String.class);
         ObjectMapper objectMapper = new ObjectMapper();
-        JsonNode games = objectMapper.readTree(response).path("response").path("games");
-
-        // DB에 저장되지 않은 게임 확인
-        List<JsonNode> notSavedGames = new ArrayList<>();
-        for (JsonNode game : games) {
-            Long gameId = game.path("appid").asLong();
-            if (!memberGameRepository.existsById(gameId)) {
-                // DB에 저장되지 않은 게임이면 예외를 발생시키지 않고 따로 리스트에 추가
-                notSavedGames.add(game);
-            }
-        }
-
-        // 만약 DB에 저장되지 않은 게임이 있는 경우 예외를 발생시킬 수도 있음
-        if (!notSavedGames.isEmpty()) {
-            throw new CustomException(ErrorCodeEnum.NOT_SAVED_GAME);
-        }
-
-        // DB에 저장되지 않은 게임이 없으면 조회된 게임들을 반환
-        return games;
+        return objectMapper.readTree(response);
     }
 
     public void saveMemberSteamGameList(Long id) throws JsonProcessingException {
