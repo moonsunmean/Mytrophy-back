@@ -17,7 +17,6 @@ import org.springframework.web.client.RestTemplate;
 import java.util.Optional;
 
 @Service
-@Transactional
 public class MemberGameService {
     @Value("${steam.api-key}")
     private String steamKey;
