@@ -44,7 +44,6 @@ public class GameController {
         this.gameDataScheduler = gameDataScheduler;
     }
 
-
     @GetMapping
     @Operation(summary = "게임 목록 조회",description = "게임 목록을 조회합니다.")
     public ResponseEntity<Page<GetGameDetailDTO>> getAllGame(@Parameter(description = "페이지 번호") @RequestParam(name = "page", defaultValue = "1") int page,
