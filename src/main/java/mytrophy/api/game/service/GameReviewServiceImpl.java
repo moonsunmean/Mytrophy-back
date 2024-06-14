@@ -58,6 +58,9 @@ public class GameReviewServiceImpl implements GameReviewService {
                 .orElseThrow(() -> new CustomException(ErrorCodeEnum.NOT_EXISTS_MEMBER_ID));
 
         List<GameReview> reviews = gameReviewRepository.findByMember(member);
+        if (reviews.isEmpty()) {
+             throw new CustomException(ErrorCodeEnum.NOT_REVIEWED);
+        }
 
         return reviews.stream()
                 .map(this::toGetGameReviewDto)
@@ -73,6 +76,9 @@ public class GameReviewServiceImpl implements GameReviewService {
         }
 
         List<GameReview> reviews = gameReviewRepository.findByGame(game);
+        if (reviews.isEmpty()) {
+            throw new CustomException(ErrorCodeEnum.NOT_REVIEWED);
+        }
 
         return reviews.stream()
                 .map(review -> new ResponseDTO.GetGameReviewsDto(review.getMember().getId(), review.getReviewStatus().name()))
