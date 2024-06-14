@@ -41,10 +41,14 @@ public class Comment extends BaseEntity {
     @JsonIgnore
     private Comment parentComment;     //부모 댓글
 
-    @OneToMany(mappedBy = "parentComment", orphanRemoval = true)
+    @OneToMany(mappedBy = "parentComment", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Comment> childrenComment = new ArrayList<>();      //자식 댓글
 
-    //추천수
+    // 좋아요 리스트
+    @OneToMany(mappedBy = "comment", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<CommentLike> likeList = new ArrayList<>();
+
+    //좋아요 수
     @Column(name = "likes", nullable = false)
     private int likes = 0;
 
