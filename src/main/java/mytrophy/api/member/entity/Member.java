@@ -57,15 +57,6 @@ public class Member extends BaseEntity {
     @JsonIgnoreProperties("member")
     private List<Article> articles = new ArrayList<>();
 
-    @OneToMany(mappedBy = "member", fetch = FetchType.LAZY, cascade = CascadeType.REMOVE, orphanRemoval = true)
-    @JsonIgnoreProperties("member")
-    private List<GameReview> gameReviews = new ArrayList<>();
-
-    @ManyToMany(fetch = FetchType.LAZY)
-    @JoinTable(
-            name = "Member_categories",
-            joinColumns = @JoinColumn(name = "member_id"),
-            inverseJoinColumns = @JoinColumn(name = "category_id")
-    )
-    private List<Category> categories = new ArrayList<>();
+    @OneToMany(mappedBy = "member", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<MemberCategory> memberCategories = new ArrayList<>();
 }
