@@ -66,8 +66,8 @@ public class CommentController {
     }
 
     //회원별 댓글 조회
-    @Operation(summary = "특정 회원의 댓글 조회", description = "특정 회원이 작성한 댓글과 대댓글을 조회합니다.")
-    @GetMapping("/members/{id}/comments")
+    @Operation(summary = "본인의 댓글 조회", description = "본인이 작성한 댓글과 대댓글을 조회합니다.")
+    @GetMapping("/members/comments")
     public ResponseEntity<List<CommentDto>> getCommentsByMemberId(@AuthenticationPrincipal CustomUserDetails userinfo) {
 
         String username = userinfo.getUsername();
