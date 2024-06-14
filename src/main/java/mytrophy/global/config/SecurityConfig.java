@@ -59,7 +59,7 @@ public class SecurityConfig {
         //프론트단과 Json데이토 통신을 위환 cors설정
         http.cors(corsCustomizer -> corsCustomizer.configurationSource(request -> {
             CorsConfiguration configuration = new CorsConfiguration();
-            configuration.setAllowedOrigins(Arrays.asList("http://localhost:3000", "http://34.64.52.132"));
+            configuration.setAllowedOrigins(Arrays.asList("http://localhost:3000", "http://34.64.52.132", "http://mytrophy.site"));
             configuration.setAllowedMethods(Collections.singletonList("*"));
             configuration.setAllowCredentials(true);
             configuration.setAllowedHeaders(Collections.singletonList("*"));
