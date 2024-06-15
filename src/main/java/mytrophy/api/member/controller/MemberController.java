@@ -194,13 +194,13 @@ public class MemberController {
             try {
                 String steamUserId = steamService.validateLoginParameters(dto);
                 memberService.linkSteamAccount(currentUsername, steamUserId);
-                response.sendRedirect("http://34.64.52.132:3000");
+                response.sendRedirect("http://34.64.52.132");
                 return new ResponseEntity<>("스팀 연동 성공", HttpStatus.OK);
 
             } catch (Exception e) {
                 e.printStackTrace();
                 try {
-                    response.sendRedirect("http://34.64.52.132:3000?error=steam-link-failed");
+                    response.sendRedirect("http://34.64.52.132?error=steam-link-failed");
                 } catch (IOException ioException) {
                     ioException.printStackTrace();
                 }
@@ -220,7 +220,7 @@ public class MemberController {
 
             } catch (Exception e) {
                 e.printStackTrace();
-                response.sendRedirect("http://34.64.52.132:3000?error=steam-link-failed");
+                response.sendRedirect("http://34.64.52.132?error=steam-link-failed");
                 return new ResponseEntity<>("스팀 로그인 실패", HttpStatus.BAD_REQUEST);
             }
         }
