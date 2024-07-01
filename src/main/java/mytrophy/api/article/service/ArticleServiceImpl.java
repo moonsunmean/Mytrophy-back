@@ -4,8 +4,13 @@ import mytrophy.api.article.dto.ArticleResponseDto;
 import mytrophy.api.article.entity.ArticleLike;
 import mytrophy.api.article.repository.ArticleLikeRepository;
 import mytrophy.api.querydsl.repository.ArticleQueryRepository;
+import mytrophy.global.handler.InvalidHeaderException;
+import mytrophy.global.handler.InvalidRequestException;
+import mytrophy.global.handler.UnauthorizedException;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import mytrophy.api.article.dto.ArticleRequestDto;
@@ -58,13 +63,26 @@ public class ArticleServiceImpl implements ArticleService {
         return ArticleResponseDto.fromEntity(savedArticle);
     }
 
+    // 게시글 리스트 조회 리펙토링
+    public Page<ArticleResponseDto> getArticles(Pageable pageable, Long memberId, boolean cntUp) {
+        Sort sort = cntUp ? Sort.by("cntUp").descending() : Sort.by("createdAt").descending();
+        pageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sort);
+
+        if (memberId != null) {
+            return findByMemberId(memberId, pageable);
+        } else {
+            return findAll(pageable);
+        }
+    }
+
     // 게시글 리스트 조회
     @Override
     public Page<ArticleResponseDto> findAll(Pageable pageable) {
-        return articleRepository.findAll(pageable).map(article -> {
-            int commentCount = article.getComments().size();
-            return ArticleResponseDto.fromEntityWithCommentCount(article, commentCount);
-        });
+        return articleRepository.findAll(pageable)
+            .map(article -> {
+                int commentCount = article.getComments().size();
+                return ArticleResponseDto.fromEntityWithCommentCount(article, commentCount);
+            });
     }
 
     // 해당 게시글 조회
@@ -78,10 +96,28 @@ public class ArticleServiceImpl implements ArticleService {
     // 말머리 별 게시글 리스트 조회
     @Override
     public Page<ArticleResponseDto> findAllByHeader(Header header, Pageable pageable) {
+        validateHeader(header);
+        Sort sort = Sort.by("createdAt").descending();
+        pageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sort);
         return articleRepository.findAllByHeader(header, pageable).map(article -> {
             int commentCount = article.getComments().size();
             return ArticleResponseDto.fromEntityWithCommentCount(article, commentCount);
         });
+    }
+
+    private void validateHeader(Header header) {
+        switch (header) {
+            case FREE_BOARD:
+            case INFORMATION:
+            case GUIDE:
+            case REVIEW:
+            case CHATING:
+                // 유효한 헤더
+                break;
+            default:
+                // 잘못된 헤더인 경우 예외 발생
+                throw new InvalidHeaderException("잘못된 헤더입니다.: " + header);
+        }
     }
 
     // 말머리 별 해당 게시글 조회
@@ -102,21 +138,37 @@ public class ArticleServiceImpl implements ArticleService {
 
     // 게시글 수정
     @Override
-    public ArticleResponseDto updateArticle(Long memberId, Long id, ArticleRequestDto articleRequestDto) {
-        // 회원 정보 가져오기
-        Member member = memberRepository.findById(memberId)
-            .orElseThrow(() -> new RuntimeException("회원 정보를 찾을 수 없습니다."));
+    public void updateArticle(Long memberId, Long id, ArticleRequestDto articleRequestDto, List<String> imagePath) {
 
-        // 게시글 조회
+        if (!isAuthorized(id, memberId)) {
+            throw new UnauthorizedException("해당 게시글에 대한 권한이 없습니다.");
+        }
+
+        validateArticleRequestDto(articleRequestDto);
+
+        if (imagePath != null) {
+            articleRequestDto.setImagePath(String.join(",", imagePath));
+        } else if (articleRequestDto.getImagePath() == null) {
+            ArticleResponseDto article = findById(id);
+            articleRequestDto.setImagePath(article.getImagePath());
+        }
+
+        Member member = memberRepository.findById(memberId)
+            .orElseThrow(() -> new ResourceNotFoundException("회원 정보를 찾을 수 없습니다."));
+
         Article article = articleRepository.findById(id)
             .orElseThrow(() -> new ResourceNotFoundException("해당 게시글이 존재하지 않습니다."));
 
-        // 게시글 정보 업데이트
         article.updateArticle(articleRequestDto.getHeader(), articleRequestDto.getName(),
             articleRequestDto.getContent(), articleRequestDto.getImagePath(), articleRequestDto.getAppId());
 
-        // 엔티티를 저장하고, 저장된 엔티티를 기반으로 DTO 객체 생성하여 반환
-        return ArticleResponseDto.fromEntity(articleRepository.save(article));
+        articleRepository.save(article);
+    }
+
+    private void validateArticleRequestDto(ArticleRequestDto articleRequestDto) {
+        if (articleRequestDto.getHeader() == null || articleRequestDto.getName() == null || articleRequestDto.getContent() == null) {
+            throw new InvalidRequestException("필수 요소가 누락되었습니다.");
+        }
     }
 
 
@@ -139,25 +191,36 @@ public class ArticleServiceImpl implements ArticleService {
     }
 
     // 게시글 추천 여부 확인
+    public String toggleArticleLike(Long articleId, Long memberId) {
+        if (checkLikeArticle(articleId, memberId)) {
+            articleLikeDown(articleId, memberId);
+            return "게시글 추천을 취소하였습니다.";
+        } else {
+            articleLikeUp(articleId, memberId);
+            return "게시글을 추천하였습니다.";
+        }
+    }
+
+    // 좋아요 확인
     @Override
     public boolean checkLikeArticle(Long articleId, Long memberId) {
         Article article = articleRepository.findById(articleId)
-            .orElseThrow(() -> new RuntimeException("게시글을 찾을 수 없습니다."));
+            .orElseThrow(() -> new ResourceNotFoundException("게시글을 찾을 수 없습니다."));
 
         Member member = memberRepository.findById(memberId)
-            .orElseThrow(() -> new RuntimeException("회원을 찾을 수 없습니다."));
+            .orElseThrow(() -> new ResourceNotFoundException("회원을 찾을 수 없습니다."));
 
         return articleLikeRepository.findByArticleAndMember(article, member).isPresent();
     }
 
-    // 게시글 추천 증가
+    // 좋아요 수 증가
     @Override
     public void articleLikeUp(Long articleId, Long memberId) {
         Article article = articleRepository.findById(articleId)
-            .orElseThrow(() -> new RuntimeException("게시글을 찾을 수 없습니다."));
+            .orElseThrow(() -> new ResourceNotFoundException("게시글을 찾을 수 없습니다."));
 
         Member member = memberRepository.findById(memberId)
-            .orElseThrow(() -> new RuntimeException("회원을 찾을 수 없습니다."));
+            .orElseThrow(() -> new ResourceNotFoundException("회원을 찾을 수 없습니다."));
 
         ArticleLike articleLike = ArticleLike.builder()
             .article(article)
@@ -168,17 +231,17 @@ public class ArticleServiceImpl implements ArticleService {
         article.likeUp();
     }
 
-    // 게시글 추천 감소
+    // 좋아요 수 감소
     @Override
     public void articleLikeDown(Long articleId, Long memberId) {
         Article article = articleRepository.findById(articleId)
-            .orElseThrow(() -> new RuntimeException("게시글을 찾을 수 없습니다."));
+            .orElseThrow(() -> new ResourceNotFoundException("게시글을 찾을 수 없습니다."));
 
         Member member = memberRepository.findById(memberId)
-            .orElseThrow(() -> new RuntimeException("회원을 찾을 수 없습니다."));
+            .orElseThrow(() -> new ResourceNotFoundException("회원을 찾을 수 없습니다."));
 
         ArticleLike articleLike = articleLikeRepository.findByArticleAndMember(article, member)
-            .orElseThrow(() -> new RuntimeException("게시글 추천 정보를 찾을 수 없습니다."));
+            .orElseThrow(() -> new ResourceNotFoundException("게시글 추천 정보를 찾을 수 없습니다."));
 
         articleLikeRepository.delete(articleLike);
         article.likeDown();
@@ -196,9 +259,10 @@ public class ArticleServiceImpl implements ArticleService {
     // memberId로 게시글 조회
     @Override
     public Page<ArticleResponseDto> findByMemberId(Long memberId, Pageable pageable) {
-        return articleRepository.findByMemberId(memberId, pageable).map(article -> {
-            int commentCount = article.getComments().size();
-            return ArticleResponseDto.fromEntityWithCommentCount(article, commentCount);
-        });
+        return articleRepository.findByMemberId(memberId, pageable)
+            .map(article -> {
+                int commentCount = article.getComments().size();
+                return ArticleResponseDto.fromEntityWithCommentCount(article, commentCount);
+            });
     }
 }
