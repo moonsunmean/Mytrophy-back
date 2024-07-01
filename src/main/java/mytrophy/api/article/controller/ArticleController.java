@@ -68,8 +68,15 @@ public class ArticleController {
     @GetMapping
     @Operation(summary = "게시글 리스트 조회", description = "페이지 번호와 사이즈를 입력받아 해당 페이지의 게시글 리스트를 조회한다.")
     public ResponseEntity<Page<ArticleResponseDto>> getAllArticles(@PageableDefault(size = 10) Pageable pageable,
-                                                                   @Parameter(description = "param으로 memberId를 입력하면 해당 Id가 생성한 게시글 리스트가 조회된다.") @RequestParam(required = false) Long memberId) {
-        Sort sort = Sort.by("createdAt").descending();
+                                                                   @Parameter(description = "param으로 memberId를 입력하면 해당 Id가 생성한 게시글 리스트가 조회된다.") @RequestParam(required = false) Long memberId,
+                                                                   @RequestParam(required = false, defaultValue = "false") boolean cntUp) {
+        Sort sort;
+        if (cntUp) {
+            sort = Sort.by("cntUp").descending();
+        } else {
+            sort = Sort.by("createdAt").descending();
+        }
+
         pageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sort);
 
         Page<ArticleResponseDto> articles;

@@ -116,7 +116,7 @@ public class MemberController {
     }
 
     // 회원 수정 (토큰)
-    @Operation(summary = "회원정보수정(토큰)",description = "회원정보를 수정합니다.")
+    @Operation(summary = "회원 정보 수정 (토큰)",description = "회원정보를 수정합니다.")
     @PatchMapping("/modify-userinfo")
     public ResponseEntity<String> updateMember(@AuthenticationPrincipal CustomUserDetails userInfo,
                                                @RequestBody MemberDto memberDto) {
@@ -131,7 +131,7 @@ public class MemberController {
     }
 
     // 회원 수정 (id)
-    @Operation(summary = "회원정보조회",description = "회원정보를 수정합니다.")
+    @Operation(summary = "회원 정보 수정 (id)",description = "회원정보를 수정합니다.")
     @PatchMapping("/{id}")
     public ResponseEntity<String> updateMemberById(@PathVariable("id") Long id, @RequestBody MemberDto memberDto) {
         boolean isUpdated = memberService.updateMemberById(id, memberDto);
@@ -143,7 +143,7 @@ public class MemberController {
     }
 
     // 회원 삭제 (토큰)
-    @Operation(summary = "회원정보삭제(토큰)",description = "회원정보를 삭제합니다.")
+    @Operation(summary = "회원 정보 삭제 (토큰)",description = "회원정보를 삭제합니다.")
     @DeleteMapping("/delete-userinfo")
     public ResponseEntity<String> deleteMember(@AuthenticationPrincipal CustomUserDetails userInfo) {
         String username = userInfo.getUsername();
@@ -156,7 +156,7 @@ public class MemberController {
     }
 
     // 회원 삭제 (id)
-    @Operation(summary = "회원정보삭제",description = "회원정보를 삭제합니다.")
+    @Operation(summary = "회원 정보 삭제 (id)",description = "회원정보를 삭제합니다.")
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteMemberById(@PathVariable("id") Long id) {
         boolean isDeleted = memberService.deleteMemberById(id);
@@ -168,7 +168,7 @@ public class MemberController {
     }
 
 
-    @Operation(summary = "스트로그인창에서 리다이렉션 URL",description = "스팀로그인 정보를 가지고 로그인 및 연동을 진행합니다.")
+    @Operation(summary = "스팀 로그인창에서 리다이렉션 URL",description = "스팀로그인 정보를 가지고 로그인 및 연동을 진행합니다.")
     @GetMapping("/steam/login/redirect")
     public ResponseEntity<?> loginRedirect(HttpServletRequest request, HttpServletResponse response,@RequestParam Map<String, String> allRequestParams) throws IOException {
         SteamOpenidLoginDto dto = new SteamOpenidLoginDto(
@@ -194,13 +194,13 @@ public class MemberController {
             try {
                 String steamUserId = steamService.validateLoginParameters(dto);
                 memberService.linkSteamAccount(currentUsername, steamUserId);
-                response.sendRedirect("http://localhost:3000");
+                response.sendRedirect("http://mytrophy.site");
                 return new ResponseEntity<>("스팀 연동 성공", HttpStatus.OK);
 
             } catch (Exception e) {
                 e.printStackTrace();
                 try {
-                    response.sendRedirect("http://localhost:3000?error=steam-link-failed");
+                    response.sendRedirect("http://mytrophy.site?error=steam-link-failed");
                 } catch (IOException ioException) {
                     ioException.printStackTrace();
                 }
@@ -220,7 +220,7 @@ public class MemberController {
 
             } catch (Exception e) {
                 e.printStackTrace();
-                response.sendRedirect("http://localhost:3000?error=steam-link-failed");
+                response.sendRedirect("http://mytrophy.site?error=steam-link-failed");
                 return new ResponseEntity<>("스팀 로그인 실패", HttpStatus.BAD_REQUEST);
             }
         }
@@ -229,6 +229,7 @@ public class MemberController {
 
 
     // 회원 사진 추가
+    @Operation(summary = "회원 사진 추가",description = "사진을 업로드하면 이미지 URL 을 반환합니다")
     @PostMapping("/files")
     public ResponseEntity uploadOnlyFiles(@RequestPart ("file") List<MultipartFile> files) throws IOException {
         List<String> uploadFiles = imageService.uploadFiles(files);
@@ -236,6 +237,7 @@ public class MemberController {
     }
 
     // 회원 사진 삭제
+    @Operation(summary = "회원 사진 삭제",description = "사진을 삭제합니다")
     @DeleteMapping("/files")
     public ResponseEntity removeOnlyFiles(List<String> files) {
         imageService.removeFile(files);

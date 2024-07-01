@@ -31,6 +31,8 @@ public class QMember extends EntityPathBase<Member> {
 
     public final BooleanPath firstLogin = createBoolean("firstLogin");
 
+    public final ListPath<mytrophy.api.game.entity.GameReview, mytrophy.api.game.entity.QGameReview> gameReviews = this.<mytrophy.api.game.entity.GameReview, mytrophy.api.game.entity.QGameReview>createList("gameReviews", mytrophy.api.game.entity.GameReview.class, mytrophy.api.game.entity.QGameReview.class, PathInits.DIRECT2);
+
     public final NumberPath<Long> id = createNumber("id", Long.class);
 
     public final StringPath imagePath = createString("imagePath");

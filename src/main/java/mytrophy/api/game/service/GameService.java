@@ -29,6 +29,7 @@ import mytrophy.global.jwt.CustomUserDetails;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.*;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.data.relational.core.sql.In;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -43,20 +44,16 @@ public class GameService {
     private final GameRepository gameRepository;
     private final GameQueryRepository gameQueryRepository;
     private final MemberService memberService;
-    private final MemberRepository memberRepository;
-    private final ArticleService articleService;
-    private final ArticleRepository articleRepository;
     private final GameCategoryRepository gameCategoryRepository;
     private final CategoryRepository categoryRepository;
+    private final TopGameRepository topGameRepository;
 
     @Autowired
-    public GameService(GameRepository gameRepository, GameQueryRepository gameQueryRepository, MemberService memberService, MemberRepository memberRepository, ArticleService articleService, ArticleRepository articleRepository, GameCategoryRepository gameCategoryRepository, CategoryRepository categoryRepository) {
+    public GameService(GameRepository gameRepository, GameQueryRepository gameQueryRepository, MemberService memberService, MemberRepository memberRepository, ArticleService articleService, ArticleRepository articleRepository, GameCategoryRepository gameCategoryRepository, CategoryRepository categoryRepository, TopGameRepository topGameRepository) {
         this.gameRepository = gameRepository;
         this.gameQueryRepository = gameQueryRepository;
         this.memberService = memberService;
-        this.memberRepository = memberRepository;
-        this.articleService = articleService;
-        this.articleRepository = articleRepository;
+        this.topGameRepository = topGameRepository;
         this.gameCategoryRepository = gameCategoryRepository;
         this.categoryRepository = categoryRepository;
     }
@@ -66,8 +63,13 @@ public class GameService {
         return gamePage.map(this::mapGameToDTO);
     }
 
-    public Page<GetTopGameDTO> getTopGameDTO(int page, int size,List<Integer> appList) {
+    public Page<GetTopGameDTO> getTopGameDTO(int page, int size) {
         int rank = 1;
+        List<TopGameRead> topGameReadList = topGameRepository.findAll();
+        List<Integer> appList = topGameReadList.stream()
+                .map(TopGameRead::getAppId)
+                .toList();
+
         List<GetTopGameDTO> topGameDTOList = new ArrayList<>();
         for (int appid : appList) {
             Game game = gameRepository.findByAppId(appid);
@@ -79,18 +81,18 @@ public class GameService {
                         .map(category -> new GetGameCategoryDTO(category.getId(), category.getName()))
                         .collect(Collectors.toList());
 
-                List<Screenshot> screenshotList = game.getScreenshotList();
-                List<Achievement> achievementList = game.getAchievementList();
-                List<GetGameScreenshotDTO> getGameScreenshotDTOList = screenshotList.stream()
-                        .map(screenshot -> new GetGameScreenshotDTO(screenshot.getId(),screenshot.getThumbnailImagePath(),screenshot.getFullImagePath()))
-                        .collect(Collectors.toList());
+//                List<Screenshot> screenshotList = game.getScreenshotList();
+//                List<Achievement> achievementList = game.getAchievementList();
+//                List<GetGameScreenshotDTO> getGameScreenshotDTOList = screenshotList.stream()
+//                        .map(screenshot -> new GetGameScreenshotDTO(screenshot.getId(),screenshot.getThumbnailImagePath(),screenshot.getFullImagePath()))
+//                        .collect(Collectors.toList());
+//
+//                List<GetGameAchievementDTO> getGameAchievementDTOList = achievementList.stream()
+//                        .map(achievement -> new GetGameAchievementDTO(achievement.getId(), achievement.getName(), achievement.getImagePath(),achievement.getHidden(),achievement.getDescription()))
+//                        .collect(Collectors.toList());
+//                dto = new GetTopGameDTO(game.getAppId(), game.getName(), game.getDescription(),game.getDeveloper(),game.getPublisher(),game.getRequirement(), game.getPrice(), game.getReleaseDate(),game.getRecommendation(),game.getPositive(),game.getHeaderImagePath(),game.getKoIsPosible(),game.getEnIsPosible(),game.getJpIsPosible(),getGameCategoryDTOList,getGameScreenshotDTOList,getGameAchievementDTOList,rank);
 
-                List<GetGameAchievementDTO> getGameAchievementDTOList = achievementList.stream()
-                        .map(achievement -> new GetGameAchievementDTO(achievement.getId(), achievement.getName(), achievement.getImagePath(),achievement.getHidden(),achievement.getDescription()))
-                        .collect(Collectors.toList());
-
-                dto = new GetTopGameDTO(game.getAppId(), game.getName(), game.getDescription(),game.getDeveloper(),game.getPublisher(),game.getRequirement(), game.getPrice(), game.getReleaseDate(),game.getRecommendation(),game.getPositive(),game.getHeaderImagePath(),game.getKoIsPosible(),game.getEnIsPosible(),game.getJpIsPosible(),getGameCategoryDTOList,getGameScreenshotDTOList,getGameAchievementDTOList,rank);
-
+                dto = new GetTopGameDTO(game.getAppId(), game.getName(), game.getDescription(), game.getDeveloper(), game.getPublisher(), game.getRequirement(), game.getPrice(), game.getReleaseDate(), game.getRecommendation(), game.getPositive(), game.getHeaderImagePath(), game.getKoIsPosible(), game.getEnIsPosible(), game.getJpIsPosible(), getGameCategoryDTOList, null, null, rank);
             } else {
                 dto = new GetTopGameDTO();
                 dto.setRank(rank);

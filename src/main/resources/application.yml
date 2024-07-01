@@ -24,14 +24,14 @@ spring:
             client-name: google
             client-id: 1076652919726-clghs8nj9nc6oq0461i9ii4iv90op41h.apps.googleusercontent.com
             client-secret: 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
-            redirect-uri: http://localhost:8080/login/oauth2/code/google
+            redirect-uri: http://34.64.52.132:8080/login/oauth2/code/google
             authorization-grant-type: authorization_code
             scope: profile,email
           naver:
             client-name: naver
             client-id: M__lwomWP26ogS9cROiz
             client-secret: KeeYEbPqoz
-            redirect-uri: http://localhost:8080/login/oauth2/code/naver
+            redirect-uri: http://34.64.52.132:8080/login/oauth2/code/naver
             authorization-grant-type: authorization_code
             scope: name,email
         provider:

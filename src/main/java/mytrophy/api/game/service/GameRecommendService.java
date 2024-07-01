@@ -1,14 +1,9 @@
 package mytrophy.api.game.service;
 
-import lombok.RequiredArgsConstructor;
 import mytrophy.api.game.dto.ResponseDTO;
 import mytrophy.api.game.entity.Category;
 import mytrophy.api.game.entity.Game;
-import mytrophy.api.game.entity.GameCategory;
-import mytrophy.api.game.entity.GameReview;
-import mytrophy.api.game.enums.ReviewStatus;
 import mytrophy.api.game.repository.GameRepository;
-import mytrophy.api.game.repository.GameReviewRepository;
 import mytrophy.api.member.entity.Member;
 import mytrophy.api.member.entity.MemberCategory;
 import mytrophy.api.member.repository.MemberRepository;
@@ -20,13 +15,8 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
-
 
 @Service
 @Transactional

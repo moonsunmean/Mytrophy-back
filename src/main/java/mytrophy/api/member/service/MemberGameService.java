@@ -7,11 +7,18 @@ import mytrophy.api.member.entity.Member;
 import mytrophy.api.member.entity.MemberGame;
 import mytrophy.api.member.repository.MemberGameRepository;
 import mytrophy.api.member.repository.MemberRepository;
+import mytrophy.global.handler.CustomException;
+import mytrophy.global.handler.ErrorCodeEnum;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
+
+import static mytrophy.global.handler.ErrorCodeEnum.NOT_SAVED_GAME;
 
 @Service
 public class MemberGameService {
@@ -46,6 +53,9 @@ public class MemberGameService {
 
         // API 호출 및 응답 처리
         String response = restTemplate.getForObject(url, String.class);
+        if (response == null) {
+            throw new CustomException(ErrorCodeEnum.NOT_SAVED_GAME);
+        }
         ObjectMapper objectMapper = new ObjectMapper();
         return objectMapper.readTree(response);
     }
