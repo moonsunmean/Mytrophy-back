@@ -34,20 +34,14 @@ public class CommentServiceImpl implements CommentService{
     //댓글 등록
     @Override
     public CommentDto createComment(Long memberId, Long articleId, CreateCommentDto createCommentDto, Long parentCommentId) {
-        Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new CustomException(ErrorCodeEnum.NOT_EXISTS_MEMBER_ID));
-        Article article = articleRepository.findById(articleId)
-                .orElseThrow(() -> new CustomException(ErrorCodeEnum.NOT_EXISTS_ARTICLE_ID));
+        Member member = findMemberById(memberId);
+        Article article = findArticleById(articleId);
 
         Comment parentComment = null;
 
         if (parentCommentId != null) {
-            parentComment = commentRepository.findById(parentCommentId)
-                    .orElseThrow(() -> new CustomException(ErrorCodeEnum.NOT_EXISTS_PARENT_COMMENT_ID));
-
-            if(parentComment.getParentComment() != null) {
-                throw new CustomException(ErrorCodeEnum.NOT_PARENT_COMMENT);
-            }
+            parentComment = findParentComment(parentCommentId);
+            validateParentComment(parentComment);
         }
 
         Comment comment = dtoToEntity(createCommentDto, member, article, parentComment);
@@ -58,12 +52,8 @@ public class CommentServiceImpl implements CommentService{
     //댓글 수정
     @Override
     public CommentDto updateComment(Long commentId, Long memberId, String content) {
-        Comment comment = commentRepository.findById(commentId)
-                .orElseThrow(() -> new CustomException(ErrorCodeEnum.NOT_EXISTS_COMMENT_ID));
-
-        if (!isAuthorized(commentId, memberId)) {
-            throw new CustomException(ErrorCodeEnum.UNAUTHORIZED);
-        }
+        Comment comment = findCommentById(commentId);
+        validateAuthorization(comment, memberId);
 
         comment.updateContent(content);
         return entityToDto(commentRepository.save(comment));
@@ -72,12 +62,8 @@ public class CommentServiceImpl implements CommentService{
     //댓글 삭제
     @Override
     public void deleteComment(Long commentId, Long memberId) {
-        Comment comment = commentRepository.findById(commentId)
-                .orElseThrow(() -> new CustomException(ErrorCodeEnum.NOT_EXISTS_COMMENT_ID));
-
-        if (!isAuthorized(commentId, memberId)) {
-            throw new CustomException(ErrorCodeEnum.UNAUTHORIZED);
-        }
+        Comment comment = findCommentById(commentId);
+        validateAuthorization(comment, memberId);
 
         if (!comment.getChildrenComment().isEmpty()) {
             commentRepository.deleteAllByParentComment(comment);
@@ -96,14 +82,11 @@ public class CommentServiceImpl implements CommentService{
                 .collect(Collectors.toList());
     }
 
-    //댓글 추천
+    //댓글 좋아요
     @Override
     public void toggleLikeComment(Long commentId, Long memberId) {
-        Comment comment = commentRepository.findById(commentId)
-                .orElseThrow(() -> new CustomException(ErrorCodeEnum.NOT_EXISTS_COMMENT_ID));
-
-        Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new CustomException(ErrorCodeEnum.NOT_EXISTS_MEMBER_ID));
+        Comment comment = findCommentById(commentId);
+        Member member = findMemberById(memberId);
 
         Optional<CommentLike> existingLike = commentLikeRepository.findByCommentAndMember(comment, member);
 
@@ -124,12 +107,42 @@ public class CommentServiceImpl implements CommentService{
         commentRepository.save(comment);
     }
 
-    //권한 확인
-    @Override
-    public boolean isAuthorized(Long commentId, Long memberId) {
-        Comment comment = commentRepository.findById(commentId)
+    //댓글 id로 댓글 조회
+    private Comment findCommentById(Long commentId) {
+        return commentRepository.findById(commentId)
                 .orElseThrow(() -> new CustomException(ErrorCodeEnum.NOT_EXISTS_COMMENT_ID));
-        return comment.getMember().getId().equals(memberId);
+    }
+
+    //회원 id로 회원 조회
+    private Member findMemberById(Long memberId){
+        return memberRepository.findById(memberId)
+                .orElseThrow(() -> new CustomException(ErrorCodeEnum.NOT_EXISTS_MEMBER_ID));
+    }
+
+    //게시글 id로 게시글 조회
+    private Article findArticleById(Long articleId){
+        return articleRepository.findById(articleId)
+                .orElseThrow(() -> new CustomException(ErrorCodeEnum.NOT_EXISTS_ARTICLE_ID));
+    }
+
+    //부모 댓글 id로 부모 댓글 조회
+    private Comment findParentComment(Long parentCommentId) {
+        return commentRepository.findById(parentCommentId)
+                .orElseThrow(() -> new CustomException(ErrorCodeEnum.NOT_EXISTS_PARENT_COMMENT_ID));
+    }
+
+    //부모 댓글 유효성 검사
+    private void validateParentComment(Comment parentComment) {
+        if (parentComment.getParentComment() != null) {
+            throw new CustomException(ErrorCodeEnum.NOT_PARENT_COMMENT);
+        }
+    }
+
+    //권한 확인
+    private void validateAuthorization(Comment comment, Long memberId){
+        if (!comment.getMember().getId().equals(memberId)){
+            throw new CustomException(ErrorCodeEnum.UNAUTHORIZED);
+        }
     }
 
     //entity -> dto
