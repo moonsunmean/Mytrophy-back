@@ -2,7 +2,7 @@ package mytrophy.api.comment.entity;
 
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import io.jsonwebtoken.lang.Assert;
+import com.google.common.base.Preconditions;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -65,17 +65,20 @@ public class Comment extends BaseEntity {
     //setter는 불변성 보장 x -> 사용 자제해야함. 대신에 Builder 패턴 사용
     @Builder
     public Comment(String content, Member member, Article article, Comment parentComment) {
-        Assert.notNull(content, "내용 필수 작성");    //null 이면 IllegalArgumentException
+        Preconditions.checkNotNull(content, "내용 필수 작성");    //null 이면 IllegalArgumentException
 
         // jpa 쓰니까 id는 세팅할 필요없음
         this.content = content;
         this.member = member;
         this.article = article;
         this.parentComment = parentComment;
+        this.childrenComment = new ArrayList<>();
+        this.likeList = new ArrayList<>();
     }
 
     //댓글 내용 업데이트
     public void updateContent(String content) {
+        Preconditions.checkNotNull(content, "내용 필수 작성");
         this.content = content;
     }
 }
