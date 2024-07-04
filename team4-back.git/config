@@ -1,0 +1,11 @@
+[core]
+	repositoryformatversion = 0
+	filemode = false
+	bare = true
+	symlinks = false
+	ignorecase = true
+[remote "origin"]
+	url = https://kdt-gitlab.elice.io/cloud_track/class_02/web_project3/team04/team4-back.git
+	fetch = +refs/*:refs/*
+	mirror = true
+	pushurl = https://github.com/Onesoonduck/GitLab-Mirroring-3.git
