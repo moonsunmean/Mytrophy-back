@@ -26,6 +26,7 @@ out/
 !**/src/main/**/out/
 !**/src/test/**/out/
 application.properties
+src/main/resources/serviceAccountKey.json
 
 ### NetBeans ###
 /nbproject/private/
@@ -36,5 +37,3 @@ application.properties
 
 ### VS Code ###
 .vscode/
-src/main/resources/serviceAccountKey.json
-src/main/resources/serviceAccountKey.json
