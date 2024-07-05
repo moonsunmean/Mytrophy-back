@@ -78,7 +78,7 @@ public class MemberController {
 
     // 회원 조회 (토큰)
     @Operation(summary = "회원정보조회(토큰)",description = "헤더에서 토큰을 통해 회원정보를 반환합니다.")
-    @GetMapping("/get-userinfo")
+    @GetMapping
     public ResponseEntity<MemberResponseDto> getMemberById(@AuthenticationPrincipal CustomUserDetails userInfo) {
         String username = userInfo.getUsername();
         MemberResponseDto member = memberService.findMemberDtoByUsername(username);
@@ -117,7 +117,7 @@ public class MemberController {
 
     // 회원 수정 (토큰)
     @Operation(summary = "회원 정보 수정 (토큰)",description = "회원정보를 수정합니다.")
-    @PatchMapping("/modify-userinfo")
+    @PatchMapping
     public ResponseEntity<String> updateMember(@AuthenticationPrincipal CustomUserDetails userInfo,
                                                @RequestBody MemberDto memberDto) {
         String username = userInfo.getUsername();
@@ -144,7 +144,7 @@ public class MemberController {
 
     // 회원 삭제 (토큰)
     @Operation(summary = "회원 정보 삭제 (토큰)",description = "회원정보를 삭제합니다.")
-    @DeleteMapping("/delete-userinfo")
+    @DeleteMapping
     public ResponseEntity<String> deleteMember(@AuthenticationPrincipal CustomUserDetails userInfo) {
         String username = userInfo.getUsername();
         boolean isDeleted = memberService.deleteMemberByUsername(username);
