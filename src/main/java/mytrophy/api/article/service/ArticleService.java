@@ -14,6 +14,9 @@ public interface ArticleService {
     // 게시글 생성
     ArticleResponseDto createArticle(Long memberId, ArticleRequestDto articleRequestDto, List<String> imagePath) throws IOException;
 
+    // 게시글 리스트 조회 리펙토링
+    Page<ArticleResponseDto> getArticles(Pageable pageable, Long memberId, boolean cntUp);
+
     // 게시글 리스트 조회
     Page<ArticleResponseDto> findAll(Pageable pageable);
 
@@ -30,7 +33,7 @@ public interface ArticleService {
     long getArticleCount();
 
     // 게시글 수정
-    ArticleResponseDto updateArticle(Long memberId, Long id, ArticleRequestDto articleRequestDto);
+    void updateArticle(Long memberId, Long id, ArticleRequestDto articleRequestDto, List<String> imagePath) throws IOException;
 
     // 게시글 삭제
     void deleteArticle(Long id);
@@ -46,6 +49,11 @@ public interface ArticleService {
 
     // 좋아요 수 감소
     void articleLikeDown(Long articleId, Long memberId);
+
+    // 좋아요 토글
+    String toggleArticleLike(Long articleId, Long memberId);
+
+
 
     // appId로 게시글 조회
     Page<ArticleResponseDto> findByAppId(int appId, Pageable pageable);

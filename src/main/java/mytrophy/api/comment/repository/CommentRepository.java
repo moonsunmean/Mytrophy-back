@@ -9,8 +9,7 @@ import java.util.List;
 @Repository
 public interface CommentRepository extends JpaRepository<Comment, Long> {
 
-    List<Comment> findByArticleId(Long articleId);
     List<Comment> findByMemberId(Long memberId);
-    int countByArticleId(Long articleId);
     void deleteAllByParentComment(Comment paretnComment);
+
 }
