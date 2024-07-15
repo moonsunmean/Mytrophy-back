@@ -56,13 +56,13 @@ public class Game extends BaseEntity {
     private String headerImagePath;
 
     @Column
-    private Boolean koIsPosible;
+    private Boolean koIsPossible;
 
     @Column
-    private Boolean enIsPosible;
+    private Boolean enIsPossible;
 
     @Column
-    private Boolean jpIsPosible;
+    private Boolean jpIsPossible;
 
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "game", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<GameCategory> gameCategoryList = new ArrayList<>();

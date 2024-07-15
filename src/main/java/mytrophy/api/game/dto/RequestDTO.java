@@ -18,16 +18,16 @@ public class RequestDTO {
         private int page = 1;
         private int size = 10;
         private String keyword = "";
-        private List<Long> categoryIds = new ArrayList<>();
-        private Integer minPrice = null;
-        private Integer maxPrice = null;
+        private List<Long> categoryIds;
+        private Integer minPrice;
+        private Integer maxPrice;
         private Boolean isFree = false;
-        private LocalDate startDate = null;
-        private LocalDate endDate = null;
-        private String priceSortDirection = null;
-        private String recommendationSortDirection = null;
-        private String nameSortDirection = null;
-        private String dateSortDirection = null;
+        private LocalDate startDate;
+        private LocalDate endDate;
+        private String priceSortDirection;
+        private String recommendationSortDirection;
+        private String nameSortDirection;
+        private String dateSortDirection;
     }
 
     @Data
@@ -43,9 +43,9 @@ public class RequestDTO {
         private LocalDate releaseDate;
         private Integer recommendation;
         private Positive positive;
-        private Boolean koIsPosible;
-        private Boolean enIsPosible;
-        private Boolean jpIsPosible;
+        private Boolean koIsPossible;
+        private Boolean enIsPossible;
+        private Boolean jpIsPossible;
         private List<UpdateGameCategoryDTO> updateGameCategoryDTOList;
     }
 

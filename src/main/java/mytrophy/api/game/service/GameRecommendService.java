@@ -75,9 +75,9 @@ public class GameRecommendService {
                 game.getRecommendation(),
                 game.getPositive(),
                 game.getHeaderImagePath(),
-                game.getKoIsPosible(),
-                game.getEnIsPosible(),
-                game.getJpIsPosible(),
+                game.getKoIsPossible(),
+                game.getEnIsPossible(),
+                game.getJpIsPossible(),
                 categoryDTOs,
                 screenshotDTOs,
                 achievementDTOs

@@ -26,9 +26,9 @@ public class ResponseDTO {
         private Integer recommendation;
         private Positive positive;
         private String headerImagePath;
-        private Boolean koIsPosible;
-        private Boolean enIsPosible;
-        private Boolean jpIsPosible;
+        private Boolean koIsPossible;
+        private Boolean enIsPossible;
+        private Boolean jpIsPossible;
         private List<GetGameCategoryDTO> getGameCategoryDTOList;
         private List<GetGameScreenshotDTO> getGameScreenshotDTOList;
         private List<GetGameAchievementDTO> getGameAchievementDTOList;
@@ -74,9 +74,9 @@ public class ResponseDTO {
         private Integer recommendation;
         private Positive positive;
         private String headerImagePath;
-        private Boolean koIsPosible;
-        private Boolean enIsPosible;
-        private Boolean jpIsPosible;
+        private Boolean koIsPossible;
+        private Boolean enIsPossible;
+        private Boolean jpIsPossible;
         private List<GetGameCategoryDTO> getGameCategoryDTOList;
         private List<GetGameScreenshotDTO> getGameScreenshotDTOList;
         private List<GetGameAchievementDTO> getGameAchievementDTOList;

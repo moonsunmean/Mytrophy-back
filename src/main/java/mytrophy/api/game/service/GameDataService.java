@@ -289,9 +289,9 @@ public class GameDataService {
             target.setRecommendation(recommandation);
             target.setPositive(positive);
             target.setHeaderImagePath(headerImagePath);
-            target.setKoIsPosible(koPosible);
-            target.setEnIsPosible(enPosible);
-            target.setJpIsPosible(jpPosible);
+            target.setKoIsPossible(koPosible);
+            target.setEnIsPossible(enPosible);
+            target.setJpIsPossible(jpPosible);
             return target;
         }
         return new Game(null,appId,name,description,gameDeveloper,gamePublisher,requirement,price,date,recommandation,positive,headerImagePath,koPosible,enPosible,jpPosible,null,null,null);
