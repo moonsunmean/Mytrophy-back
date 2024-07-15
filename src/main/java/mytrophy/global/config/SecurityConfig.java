@@ -86,10 +86,10 @@ public class SecurityConfig {
         //경로별 인가 작업
         http
                 .authorizeHttpRequests((auth) -> auth
-                        .requestMatchers("/login","/login/**", "/","/my", "/signup","/steam/failed","/api/**", "/v3/api-docs/**", "/swagger-ui/**").permitAll()
+                        .requestMatchers("/login/**", "/logout","/","/my", "/signup","/api/**", "/v3/api-docs/**","/swagger-ui/**").permitAll()
                         .requestMatchers("/admin").hasRole("ADMIN")
+                        .requestMatchers("/member/**").hasAnyRole("ROlE_USER", "ADMIN")
                         .requestMatchers("/reissue").permitAll()
-                        .requestMatchers("/**").permitAll()
                         .anyRequest().authenticated());
 
 
