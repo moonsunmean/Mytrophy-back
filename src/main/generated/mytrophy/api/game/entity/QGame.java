@@ -33,7 +33,7 @@ public class QGame extends EntityPathBase<Game> {
 
     public final StringPath developer = createString("developer");
 
-    public final BooleanPath enIsPosible = createBoolean("enIsPosible");
+    public final BooleanPath enIsPossible = createBoolean("enIsPossible");
 
     public final ListPath<GameCategory, QGameCategory> gameCategoryList = this.<GameCategory, QGameCategory>createList("gameCategoryList", GameCategory.class, QGameCategory.class, PathInits.DIRECT2);
 
@@ -41,9 +41,9 @@ public class QGame extends EntityPathBase<Game> {
 
     public final NumberPath<Long> id = createNumber("id", Long.class);
 
-    public final BooleanPath jpIsPosible = createBoolean("jpIsPosible");
+    public final BooleanPath jpIsPossible = createBoolean("jpIsPossible");
 
-    public final BooleanPath koIsPosible = createBoolean("koIsPosible");
+    public final BooleanPath koIsPossible = createBoolean("koIsPossible");
 
     public final StringPath name = createString("name");
 
