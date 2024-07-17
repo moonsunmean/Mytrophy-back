@@ -182,4 +182,14 @@ public class ArticleController {
         Page<ArticleResponseDto> likedArticles = articleQueryService.getLikedArticlesByMemberId(memberId, pageable);
         return ResponseEntity.ok().body(likedArticles);
     }
+
+    // 게시글 검색
+    @GetMapping("/keyword-search")
+    @Operation(summary = "게시글 검색", description = "검색어를 입력받아 해당 검색어가 포함된 게시글 리스트를 조회한다.")
+    public ResponseEntity<Page<ArticleResponseDto>> searchArticles(@Parameter(description = "검색어를 입력한다.") @RequestParam String keyword,
+                                                                   @Parameter(description = "검색할 타겟을 입력한다.") @RequestParam(required = false, defaultValue = "name") String target,
+                                                                   @PageableDefault(size = 10) Pageable pageable) {
+        Page<ArticleResponseDto> articles = articleService.findByNameArticles(keyword, target, pageable);
+        return ResponseEntity.ok().body(articles);
+    }
 }
