@@ -32,6 +32,12 @@ public class Article extends BaseEntity {
     @Column(nullable = false,length = 2000)
     private String content;
 
+    private int partySize; // 파티원 수
+
+    private String partyTime; // 파티 시간
+
+    private String partyOption; // 파티 조건
+
     private int cntUp; // 좋아요 수
 
     private String imagePath; // 이미지 경로
@@ -52,7 +58,7 @@ public class Article extends BaseEntity {
     private List<ArticleLike> likes;
 
     @Builder // 빌더 패턴 적용
-    public Article(Long id, Header header, String name, String content, int cntUp, String imagePath, Member member, Long appId) {
+    public Article(Long id, Header header, String name, String content, int cntUp, String imagePath, Member member, Long appId, int partySize, String partyTime, String partyOption) {
         this.id = id;
         this.header = header;
         this.name = name;
@@ -61,6 +67,9 @@ public class Article extends BaseEntity {
         this.imagePath = imagePath;
         this.member = member;
         this.appId = appId;
+        this.partySize = partySize;
+        this.partyTime = partyTime;
+        this.partyOption = partyOption;
     }
 
     // 게시글 생성 로직
