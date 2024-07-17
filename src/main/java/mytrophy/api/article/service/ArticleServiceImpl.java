@@ -265,4 +265,26 @@ public class ArticleServiceImpl implements ArticleService {
                 return ArticleResponseDto.fromEntityWithCommentCount(article, commentCount);
             });
     }
+
+    // 게시글 조회
+    @Override
+    public Page<ArticleResponseDto> findByNameArticles(String keyword, String target, Pageable pageable) {
+        Page<Article> articlesPage;
+
+        if ("name".equals(target)) {
+            articlesPage = articleRepository.findByNameContaining(keyword, pageable);
+        } else if ("content".equals(target)) {
+            articlesPage = articleRepository.findByContentContaining(keyword, pageable);
+        } else if ("nickname".equals(target)) {
+            articlesPage = articleRepository.findByMember_NicknameContaining(keyword, pageable);
+        } else {
+            // 기본적으로 제목을 기준으로 검색하도록 설정
+            articlesPage = articleRepository.findByNameContaining(keyword, pageable);
+        }
+
+        return articlesPage.map(article -> {
+            int commentCount = article.getComments().size();
+            return ArticleResponseDto.fromEntityWithCommentCount(article, commentCount);
+        });
+    }
 }
