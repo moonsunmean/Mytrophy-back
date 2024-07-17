@@ -49,6 +49,12 @@ public class QArticle extends EntityPathBase<Article> {
 
     public final StringPath name = createString("name");
 
+    public final StringPath partyOption = createString("partyOption");
+
+    public final NumberPath<Integer> partySize = createNumber("partySize", Integer.class);
+
+    public final StringPath partyTime = createString("partyTime");
+
     //inherited
     public final DateTimePath<java.time.LocalDateTime> updatedAt = _super.updatedAt;
 

@@ -19,6 +19,9 @@ public class ArticleResponseDto extends BaseEntity {
     private Header header;
     private String name;
     private String content;
+    private int partySize;
+    private String partyTime;
+    private String partyOption;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private String imagePath;
@@ -36,6 +39,9 @@ public class ArticleResponseDto extends BaseEntity {
         this.header = article.getHeader();
         this.name = article.getName();
         this.content = article.getContent();
+        this.partySize = article.getPartySize();
+        this.partyTime = article.getPartyTime();
+        this.partyOption = article.getPartyOption();
         this.createdAt = article.getCreatedAt();
         this.updatedAt = article.getUpdatedAt();
         this.imagePath = article.getImagePath();
@@ -62,6 +68,9 @@ public class ArticleResponseDto extends BaseEntity {
         this.header = article.getHeader();
         this.name = article.getName();
         this.content = article.getContent();
+        this.partySize = article.getPartySize();
+        this.partyTime = article.getPartyTime();
+        this.partyOption = article.getPartyOption();
         this.createdAt = article.getCreatedAt();
         this.updatedAt = article.getUpdatedAt();
         this.imagePath = article.getImagePath();
