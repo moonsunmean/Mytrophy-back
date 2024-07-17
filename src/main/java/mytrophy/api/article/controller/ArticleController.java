@@ -50,7 +50,7 @@ public class ArticleController {
     @Operation(summary = "게시글 생성", description = "로그인 되어있는 유저의 게시글 제목, 내용, 게임 appId, 이미지 경로를 받아 게시글을 생성한다.")
     public ResponseEntity<ArticleResponseDto> createArticle(@AuthenticationPrincipal CustomUserDetails userInfo,
                                                             @Parameter(description = "게시글 제목, 내용, 게임 appId를 입력한다.") @RequestBody ArticleRequestDto articleRequestDto,
-                                                            @Parameter(description = "firebase로 업로드된 파일 경로를 입력한다.") @RequestParam(value = "imagePath", required = false) List<String> imagePath) throws IOException {
+                                                            @Parameter(description = "firebase로 업로드 된 파일 경로를 입력한다.") @RequestParam(value = "imagePath", required = false) List<String> imagePath) throws IOException {
         // 토큰에서 username 빼내기
         String username = userInfo.getUsername();
         Member member = memberService.findMemberByUsername(username);
