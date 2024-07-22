@@ -73,5 +73,8 @@ public class Game extends BaseEntity {
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Screenshot> screenshotList = new ArrayList<>();
 
-
+    //평균 임베딩 벡터 (JSON)
+    @Lob
+    @Column(columnDefinition = "TEXT")
+    private String averageEmbeddingVector;
 }

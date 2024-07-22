@@ -26,6 +26,8 @@ public class QGame extends EntityPathBase<Game> {
 
     public final NumberPath<Integer> appId = createNumber("appId", Integer.class);
 
+    public final StringPath averageEmbeddingVector = createString("averageEmbeddingVector");
+
     //inherited
     public final DateTimePath<java.time.LocalDateTime> createdAt = _super.createdAt;
 

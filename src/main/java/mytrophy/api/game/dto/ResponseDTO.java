@@ -32,6 +32,7 @@ public class ResponseDTO {
         private List<GetGameCategoryDTO> getGameCategoryDTOList;
         private List<GetGameScreenshotDTO> getGameScreenshotDTOList;
         private List<GetGameAchievementDTO> getGameAchievementDTOList;
+        private String averageEmbeddingVector;
     }
 
     @Data
@@ -39,6 +40,7 @@ public class ResponseDTO {
     public static class GetGameCategoryDTO {
         private Long id;
         private String name;
+        private String embeddingVector;
     }
 
     @Data

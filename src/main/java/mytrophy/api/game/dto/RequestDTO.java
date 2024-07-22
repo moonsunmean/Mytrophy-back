@@ -47,6 +47,7 @@ public class RequestDTO {
         private Boolean enIsPossible;
         private Boolean jpIsPossible;
         private List<UpdateGameCategoryDTO> updateGameCategoryDTOList;
+        private String averageEmbeddingVector;
     }
 
     @Data
@@ -54,6 +55,7 @@ public class RequestDTO {
     public static class UpdateGameCategoryDTO {
         private Long id;
         private String name;
+        private String embeddingVector;
     }
 
     @Data

@@ -70,3 +70,12 @@ server:
 #logging:
 #  level:
 #    root: DEBUG
+
+clova:
+  api:
+    url: "https://clovastudio.apigw.ntruss.com/testapp/v1/api-tools/embedding/clir-emb-dolphin/2d99acdc264b42028346ee146ccb54a8"
+    key: "NTA0MjU2MWZlZTcxNDJiY7Tc7YqpiO5S8ZK3UrW5bdFB6gfdB0U0qxpT0u1+hU5y"
+    gateway:
+      key: "g2SFTEXXqVScW007z4mOTr46g3PBYFKy3Q8p021h"
+    request:
+      id: "812b32c6-2eb6-4657-8c2c-c762f40f50b7"

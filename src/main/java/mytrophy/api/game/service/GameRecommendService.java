@@ -52,7 +52,7 @@ public class GameRecommendService {
 
     private ResponseDTO.GetGameDetailDTO convertToGetGameDetailDTO(Game game) {
         List<ResponseDTO.GetGameCategoryDTO> categoryDTOs = game.getGameCategoryList().stream()
-                .map(gc -> new ResponseDTO.GetGameCategoryDTO(gc.getCategory().getId(), gc.getCategory().getName()))
+                .map(gc -> new ResponseDTO.GetGameCategoryDTO(gc.getCategory().getId(), gc.getCategory().getName(), gc.getCategory().getEmbeddingVector()))
                 .collect(Collectors.toList());
 
         List<ResponseDTO.GetGameScreenshotDTO> screenshotDTOs = game.getScreenshotList().stream()
@@ -80,7 +80,8 @@ public class GameRecommendService {
                 game.getJpIsPossible(),
                 categoryDTOs,
                 screenshotDTOs,
-                achievementDTOs
+                achievementDTOs,
+                game.getAverageEmbeddingVector()
         );
     }
 }

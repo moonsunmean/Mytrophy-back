@@ -127,7 +127,7 @@ public class GameReviewServiceImpl implements GameReviewService {
                 game.getHeaderImagePath(),
                 game.getKoIsPossible(),
                 game.getGameCategoryList().stream()
-                        .map(cat -> new ResponseDTO.GetGameCategoryDTO(cat.getCategory().getId(), cat.getCategory().getName()))
+                        .map(cat -> new ResponseDTO.GetGameCategoryDTO(cat.getCategory().getId(), cat.getCategory().getName(), cat.getCategory().getEmbeddingVector()))
                         .collect(Collectors.toList())
         );
     }
