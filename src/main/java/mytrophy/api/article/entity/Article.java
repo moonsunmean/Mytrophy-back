@@ -86,10 +86,13 @@ public class Article extends BaseEntity {
     }
 
     // 게시글 수정
-    public void updateArticle(Header header, String name, String content, String imagePath, Long appId) {
+    public void updateArticle(Header header, String name, String content, int partySize, String partyTime, String partyOption, String imagePath, Long appId) {
         this.header = header;
         this.name = name;
         this.content = content;
+        this.partySize = partySize;
+        this.partyTime = partyTime;
+        this.partyOption = partyOption;
         this.imagePath = imagePath;
         this.appId = appId;
     }

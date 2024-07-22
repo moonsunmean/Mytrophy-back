@@ -163,7 +163,8 @@ public class ArticleServiceImpl implements ArticleService {
             .orElseThrow(() -> new ResourceNotFoundException("해당 게시글이 존재하지 않습니다."));
 
         article.updateArticle(articleRequestDto.getHeader(), articleRequestDto.getName(),
-            articleRequestDto.getContent(), articleRequestDto.getImagePath(), articleRequestDto.getAppId());
+            articleRequestDto.getContent(), articleRequestDto.getPartySize(), articleRequestDto.getPartyTime(),
+            articleRequestDto.getPartyOption(), articleRequestDto.getImagePath(), articleRequestDto.getAppId());
 
         articleRepository.save(article);
     }
