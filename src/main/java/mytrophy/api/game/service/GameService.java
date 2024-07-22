@@ -78,7 +78,7 @@ public class GameService {
                 List<Category> categoryList = new ArrayList<>();
                 game.getGameCategoryList().forEach(gameCategory -> categoryList.add(gameCategory.getCategory()));
                 List<GetGameCategoryDTO> getGameCategoryDTOList = categoryList.stream()
-                        .map(category -> new GetGameCategoryDTO(category.getId(), category.getName()))
+                        .map(category -> new GetGameCategoryDTO(category.getId(), category.getName(), category.getEmbeddingVector()))
                         .collect(Collectors.toList());
 
 //                List<Screenshot> screenshotList = game.getScreenshotList();
@@ -92,7 +92,7 @@ public class GameService {
 //                        .collect(Collectors.toList());
 //                dto = new GetTopGameDTO(game.getAppId(), game.getName(), game.getDescription(),game.getDeveloper(),game.getPublisher(),game.getRequirement(), game.getPrice(), game.getReleaseDate(),game.getRecommendation(),game.getPositive(),game.getHeaderImagePath(),game.getKoIsPosible(),game.getEnIsPosible(),game.getJpIsPosible(),getGameCategoryDTOList,getGameScreenshotDTOList,getGameAchievementDTOList,rank);
 
-                dto = new GetTopGameDTO(game.getAppId(), game.getName(), game.getDescription(), game.getDeveloper(), game.getPublisher(), game.getRequirement(), game.getPrice(), game.getReleaseDate(), game.getRecommendation(), game.getPositive(), game.getHeaderImagePath(), game.getKoIsPosible(), game.getEnIsPosible(), game.getJpIsPosible(), getGameCategoryDTOList, null, null, rank);
+                dto = new GetTopGameDTO(game.getAppId(), game.getName(), game.getDescription(), game.getDeveloper(), game.getPublisher(), game.getRequirement(), game.getPrice(), game.getReleaseDate(), game.getRecommendation(), game.getPositive(), game.getHeaderImagePath(), game.getKoIsPossible(), game.getEnIsPossible(), game.getJpIsPossible(), getGameCategoryDTOList, null, null, rank);
             } else {
                 dto = new GetTopGameDTO();
                 dto.setRank(rank);
@@ -142,14 +142,14 @@ public class GameService {
         if (updateGameRequestDTO.getPositive() != null) {
             targetGame.setPositive(updateGameRequestDTO.getPositive());
         }
-        if (updateGameRequestDTO.getKoIsPosible() != null) {
-            targetGame.setKoIsPosible(updateGameRequestDTO.getKoIsPosible());
+        if (updateGameRequestDTO.getKoIsPossible() != null) {
+            targetGame.setKoIsPossible(updateGameRequestDTO.getKoIsPossible());
         }
-        if (updateGameRequestDTO.getEnIsPosible() != null) {
-            targetGame.setEnIsPosible(updateGameRequestDTO.getEnIsPosible());
+        if (updateGameRequestDTO.getEnIsPossible() != null) {
+            targetGame.setEnIsPossible(updateGameRequestDTO.getEnIsPossible());
         }
-        if (updateGameRequestDTO.getJpIsPosible() != null) {
-            targetGame.setJpIsPosible(updateGameRequestDTO.getJpIsPosible());
+        if (updateGameRequestDTO.getJpIsPossible() != null) {
+            targetGame.setJpIsPossible(updateGameRequestDTO.getJpIsPossible());
         }
         if (updateGameRequestDTO.getDeveloper() != null) {
             targetGame.setDeveloper(updateGameRequestDTO.getDeveloper());
@@ -395,7 +395,7 @@ public class GameService {
                 .collect(Collectors.toList());
 
         List<GetGameCategoryDTO> getGameCategoryDTOList = categoryList.stream()
-                .map(category -> new GetGameCategoryDTO(category.getId(), category.getName()))
+                .map(category -> new GetGameCategoryDTO(category.getId(), category.getName(), category.getEmbeddingVector()))
                 .collect(Collectors.toList());
 
         List<GetGameScreenshotDTO> getGameScreenshotDTOList = game.getScreenshotList().stream()
@@ -418,18 +418,19 @@ public class GameService {
                 game.getRecommendation(),
                 game.getPositive(),
                 game.getHeaderImagePath(),
-                game.getKoIsPosible(),
-                game.getEnIsPosible(),
-                game.getJpIsPosible(),
+                game.getKoIsPossible(),
+                game.getEnIsPossible(),
+                game.getJpIsPossible(),
                 getGameCategoryDTOList,
                 getGameScreenshotDTOList,
-                getGameAchievementDTOList
+                getGameAchievementDTOList,
+                game.getAverageEmbeddingVector()
         );
     }
 
     public List<GetGameCategoryDTO> getCategoryList() {
         return categoryRepository.findAll().stream()
-                .map(category -> new GetGameCategoryDTO(category.getId(), category.getName()))
+                .map(category -> new GetGameCategoryDTO(category.getId(), category.getName(), category.getEmbeddingVector()))
                 .collect(Collectors.toList());
     }
 

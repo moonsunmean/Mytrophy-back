@@ -26,12 +26,13 @@ public class ResponseDTO {
         private Integer recommendation;
         private Positive positive;
         private String headerImagePath;
-        private Boolean koIsPosible;
-        private Boolean enIsPosible;
-        private Boolean jpIsPosible;
+        private Boolean koIsPossible;
+        private Boolean enIsPossible;
+        private Boolean jpIsPossible;
         private List<GetGameCategoryDTO> getGameCategoryDTOList;
         private List<GetGameScreenshotDTO> getGameScreenshotDTOList;
         private List<GetGameAchievementDTO> getGameAchievementDTOList;
+        private String averageEmbeddingVector;
     }
 
     @Data
@@ -39,6 +40,7 @@ public class ResponseDTO {
     public static class GetGameCategoryDTO {
         private Long id;
         private String name;
+        private String embeddingVector;
     }
 
     @Data
@@ -74,9 +76,9 @@ public class ResponseDTO {
         private Integer recommendation;
         private Positive positive;
         private String headerImagePath;
-        private Boolean koIsPosible;
-        private Boolean enIsPosible;
-        private Boolean jpIsPosible;
+        private Boolean koIsPossible;
+        private Boolean enIsPossible;
+        private Boolean jpIsPossible;
         private List<GetGameCategoryDTO> getGameCategoryDTOList;
         private List<GetGameScreenshotDTO> getGameScreenshotDTOList;
         private List<GetGameAchievementDTO> getGameAchievementDTOList;

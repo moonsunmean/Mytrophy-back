@@ -56,13 +56,13 @@ public class Game extends BaseEntity {
     private String headerImagePath;
 
     @Column
-    private Boolean koIsPosible;
+    private Boolean koIsPossible;
 
     @Column
-    private Boolean enIsPosible;
+    private Boolean enIsPossible;
 
     @Column
-    private Boolean jpIsPosible;
+    private Boolean jpIsPossible;
 
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "game", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<GameCategory> gameCategoryList = new ArrayList<>();
@@ -73,5 +73,8 @@ public class Game extends BaseEntity {
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Screenshot> screenshotList = new ArrayList<>();
 
-
+    //평균 임베딩 벡터 (JSON)
+    @Lob
+    @Column(columnDefinition = "TEXT")
+    private String averageEmbeddingVector;
 }

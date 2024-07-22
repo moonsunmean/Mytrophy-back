@@ -25,6 +25,10 @@ public class Category {
     @Column
     private String name;
 
+    @Lob
+    @Column(columnDefinition = "TEXT")
+    private String embeddingVector;
+
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "category")
     @JsonIgnore
     private List<GameCategory> gameCategoryList = new ArrayList<>();

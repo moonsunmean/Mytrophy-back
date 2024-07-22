@@ -13,7 +13,6 @@ import java.util.List;
 public interface GameRepository extends JpaRepository<Game, Long> {
     Page<Game> findGameByNameContaining(String keyword, Pageable pageable);
 
-
     @Query("SELECT distinct g FROM Game g inner join GameCategory gc ON gc.game = g WHERE gc.category.id = :categoryId AND g.name LIKE CONCAT('%', :keyword, '%')")
     Page<Game> findGameByNameContainingByCategoryId(@Param("keyword") String keyword, Pageable pageable, @Param("categoryId") Long categoryId);
 
@@ -30,6 +29,9 @@ public interface GameRepository extends JpaRepository<Game, Long> {
             "GROUP BY g.id " +
             "ORDER BY COUNT(DISTINCT gc.category.id) DESC, g.recommendation DESC")
     Page<Game> findRecommendedGames(@Param("categoryIds") List<Long> categoryIds, @Param("memberId") Long memberId, Pageable pageable);
+
+    @Query(value = "SELECT g FROM Game g WHERE g.id >= :startId ORDER BY g.id ASC")
+    List<Game> findGamesInRange(Long startId, Pageable pageable);
 }
 
 
