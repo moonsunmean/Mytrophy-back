@@ -8,6 +8,8 @@ import mytrophy.api.game.entity.Category;
 import mytrophy.api.game.entity.Game;
 import mytrophy.api.game.repository.CategoryRepository;
 import mytrophy.api.game.repository.GameRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
@@ -17,12 +19,15 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -30,6 +35,8 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Transactional
 public class EmbeddingService {
+
+    private static final Logger logger = LoggerFactory.getLogger(EmbeddingService.class);
 
     @Value("${clova.api.url}")
     private String apiUrl;
@@ -49,9 +56,13 @@ public class EmbeddingService {
     @Autowired
     private GameRepository gameRepository;
 
-    private final RestTemplate restTemplate;
-    private final ObjectMapper objectMapper;
+    @Autowired
+    private RestTemplate restTemplate;
 
+    @Autowired
+    private ObjectMapper objectMapper;
+
+    //모든 카테고리 임베딩벡터 발급
     public void updateAllCategoryEmbeddings() {
         List<Category> categories = categoryRepository.findAll();
         for (Category category : categories) {
@@ -61,32 +72,33 @@ public class EmbeddingService {
                     category.setEmbeddingVector(objectMapper.writeValueAsString(embedding));
                     categoryRepository.save(category);
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    logger.error("Error saving category embedding vector for category: " + category.getName(), e);
                 }
             }
         }
     }
 
+    //특정 카테고리 임베딩벡터 발급
     public void updateCategoryEmbedding(Long categoryId) {
         Optional<Category> categoryOptional = categoryRepository.findById(categoryId);
-        if(categoryOptional.isPresent()) {
+        if (categoryOptional.isPresent()) {
             Category category = categoryOptional.get();
 
             double[] embedding = fetchEmbeddingFromApi(category.getName());
             if (embedding != null) {
-                try{
+                try {
                     category.setEmbeddingVector(objectMapper.writeValueAsString(embedding));
                     categoryRepository.save(category);
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    logger.error("Error saving category embedding vector for category: " + category.getName(), e);
                 }
             } else {
-                System.out.println("임베딩 벡터가 null입니다. 카테고리 이름: " + category.getName());
+                logger.warn("Embedding vector is null for category: " + category.getName());
             }
         }
     }
 
-    //카테고리에서 임베딩벡터 가져오기
+    // 카테고리에서 임베딩벡터 가져오기
     public double[] getCategoryEmbeddingById(Long categoryId) {
         Optional<Category> categoryOptional = categoryRepository.findById(categoryId);
         if (categoryOptional.isPresent()) {
@@ -95,11 +107,11 @@ public class EmbeddingService {
                 try {
                     return objectMapper.readValue(category.getEmbeddingVector(), new TypeReference<double[]>() {});
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    logger.error("Error reading embedding vector for category ID: " + categoryId, e);
                 }
             }
         } else {
-            System.out.println("카테고리가 데이터베이스에 존재하지 않습니다. 카테고리 ID: " + categoryId);
+            logger.warn("Category does not exist in the database. Category ID: " + categoryId);
         }
         return null;
     }
@@ -134,7 +146,7 @@ public class EmbeddingService {
                     retryCount++;
                     TimeUnit.SECONDS.sleep(5);
                 } else {
-                    throw new RuntimeException("임베딩 벡터 가져오기 실패");
+                    throw new RuntimeException("Failed to fetch embedding vector");
                 }
             } catch (HttpClientErrorException.TooManyRequests e) {
                 retryCount++;
@@ -145,10 +157,10 @@ public class EmbeddingService {
                     Thread.sleep(waitTime);
                     waitTime *= 2; // 대기 시간을 점진적으로 늘림
                 } catch (InterruptedException interruptedException) {
-                    interruptedException.printStackTrace();
+                    logger.error("Interrupted while waiting to retry", interruptedException);
                 }
             } catch (Exception e) {
-                e.printStackTrace();
+                logger.error("Error fetching embedding from API for category: " + categoryName, e);
                 break;
             }
         }
@@ -159,38 +171,26 @@ public class EmbeddingService {
     public double[] calculateAverageEmbedding(List<double[]> embeddings) {
         double[] avgEmbedding = new double[embeddings.get(0).length];
         for (double[] embedding : embeddings) {
-            for (int i=0; i<embedding.length; i++) {
+            for (int i = 0; i < embedding.length; i++) {
                 avgEmbedding[i] += embedding[i];
             }
         }
-        for (int i=0; i<avgEmbedding.length; i++) {
+        for (int i = 0; i < avgEmbedding.length; i++) {
             avgEmbedding[i] /= embeddings.size();
         }
         return avgEmbedding;
     }
 
-    //코사인 유사도 계산
-    public double cosineSimilarity(double[] vec1, double[] vec2) {
-        double dotProduct = 0.0;
-        double normA = 0.0;
-        double normB = 0.0;
-        for (int i=0; i<vec1.length; i++) {
-            dotProduct += vec1[i] * vec2[i];
-            normA += Math.pow(vec1[i], 2);
-            normB += Math.pow(vec2[i], 2);
-        }
-        return dotProduct / (Math.sqrt(normA) * Math.sqrt(normB));
-    }
-
     //비동기적으로 게임의 평균 임베딩 벡터 계산하고 저장
     @Async("taskExecutor")
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void calculateAndSaveGameAverageEmbedding(Game game) {
         List<double[]> embeddings = game.getGameCategoryList().stream()
                 .map(gameCategory -> {
                     Long categoryId = gameCategory.getCategory().getId();
                     double[] embedding = getCategoryEmbeddingById(categoryId);
                     if (embedding == null) {
-                        System.out.println("임베딩 벡터가 null이거나 카테고리가 데이터베이스에 없습니다. 카테고리 ID: " + categoryId);
+                        logger.warn("Embedding vector is null or category does not exist in the database. Category ID: " + categoryId);
                     }
                     return embedding;
                 })
@@ -203,10 +203,10 @@ public class EmbeddingService {
                 game.setAverageEmbeddingVector(objectMapper.writeValueAsString(avgEmbedding));
                 gameRepository.save(game);
             } catch (Exception e) {
-                e.printStackTrace();
+                logger.error("Error saving game average embedding vector for game ID: " + game.getId(), e);
             }
         } else {
-            System.out.println("임베딩 벡터가 유효한 카테고리가 없습니다.");
+            logger.warn("No valid category embedding vectors found for game ID: " + game.getId());
         }
     }
 

@@ -78,7 +78,7 @@ public class GameService {
                 List<Category> categoryList = new ArrayList<>();
                 game.getGameCategoryList().forEach(gameCategory -> categoryList.add(gameCategory.getCategory()));
                 List<GetGameCategoryDTO> getGameCategoryDTOList = categoryList.stream()
-                        .map(category -> new GetGameCategoryDTO(category.getId(), category.getName(), category.getEmbeddingVector()))
+                        .map(category -> new GetGameCategoryDTO(category.getId(), category.getName()))
                         .collect(Collectors.toList());
 
 //                List<Screenshot> screenshotList = game.getScreenshotList();
@@ -395,7 +395,7 @@ public class GameService {
                 .collect(Collectors.toList());
 
         List<GetGameCategoryDTO> getGameCategoryDTOList = categoryList.stream()
-                .map(category -> new GetGameCategoryDTO(category.getId(), category.getName(), category.getEmbeddingVector()))
+                .map(category -> new GetGameCategoryDTO(category.getId(), category.getName()))
                 .collect(Collectors.toList());
 
         List<GetGameScreenshotDTO> getGameScreenshotDTOList = game.getScreenshotList().stream()
@@ -430,7 +430,7 @@ public class GameService {
 
     public List<GetGameCategoryDTO> getCategoryList() {
         return categoryRepository.findAll().stream()
-                .map(category -> new GetGameCategoryDTO(category.getId(), category.getName(), category.getEmbeddingVector()))
+                .map(category -> new GetGameCategoryDTO(category.getId(), category.getName()))
                 .collect(Collectors.toList());
     }
 
