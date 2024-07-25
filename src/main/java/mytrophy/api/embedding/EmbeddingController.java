@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 @RestController
 @RequestMapping("/api/embedding")
@@ -30,7 +31,7 @@ public class EmbeddingController {
     }
 
     //모든 카테고리 임베딩 벡터 발급
-    @PostMapping("/update-all")
+    @PostMapping("/update-all-category")
     public ResponseEntity<String> updateAllCategoryEmbeddings() {
         embeddingService.updateAllCategoryEmbeddings();
         return ResponseEntity.ok("임베딩 벡터 발급 완료");
@@ -42,4 +43,5 @@ public class EmbeddingController {
         embeddingService.updateGameEmbeddingsInRange(startId, batchSize);
         return ResponseEntity.ok("평균 임베딩 벡터 저장 완료.");
     }
+
 }
