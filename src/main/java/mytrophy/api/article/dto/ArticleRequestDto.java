@@ -18,14 +18,14 @@ public class ArticleRequestDto {
     private Header header;
     private String name;
     private String content;
-    private int partySize;
+    private Integer partySize;
     private String partyTime;
     private String partyOption;
     private String imagePath;
     private Long appId;
 
     @Builder
-    public ArticleRequestDto(Header header, String name, String content, String imagePath, Long appId, int partySize, String partyTime, String partyOption) {
+    public ArticleRequestDto(Header header, String name, String content, String imagePath, Long appId, Integer partySize, String partyTime, String partyOption) {
         this.header = header;
         this.name = name;
         this.content = content;

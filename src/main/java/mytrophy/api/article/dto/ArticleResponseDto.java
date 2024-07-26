@@ -19,7 +19,7 @@ public class ArticleResponseDto extends BaseEntity {
     private Header header;
     private String name;
     private String content;
-    private int partySize;
+    private Integer partySize;
     private String partyTime;
     private String partyOption;
     private LocalDateTime createdAt;

@@ -32,10 +32,13 @@ public class Article extends BaseEntity {
     @Column(nullable = false,length = 2000)
     private String content;
 
-    private int partySize; // 파티원 수
+    @Column(nullable = true)
+    private Integer partySize; // 파티원 수
 
+    @Column(nullable = true)
     private String partyTime; // 파티 시간
 
+    @Column(nullable = true)
     private String partyOption; // 파티 조건
 
     private int cntUp; // 좋아요 수
@@ -58,7 +61,7 @@ public class Article extends BaseEntity {
     private List<ArticleLike> likes;
 
     @Builder // 빌더 패턴 적용
-    public Article(Long id, Header header, String name, String content, int cntUp, String imagePath, Member member, Long appId, int partySize, String partyTime, String partyOption) {
+    public Article(Long id, Header header, String name, String content, int cntUp, String imagePath, Member member, Long appId, Integer partySize, String partyTime, String partyOption) {
         this.id = id;
         this.header = header;
         this.name = name;
@@ -86,7 +89,7 @@ public class Article extends BaseEntity {
     }
 
     // 게시글 수정
-    public void updateArticle(Header header, String name, String content, int partySize, String partyTime, String partyOption, String imagePath, Long appId) {
+    public void updateArticle(Header header, String name, String content, Integer partySize, String partyTime, String partyOption, String imagePath, Long appId) {
         this.header = header;
         this.name = name;
         this.content = content;
