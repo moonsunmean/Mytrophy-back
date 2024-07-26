@@ -92,7 +92,7 @@ public class GameService {
 //                        .collect(Collectors.toList());
 //                dto = new GetTopGameDTO(game.getAppId(), game.getName(), game.getDescription(),game.getDeveloper(),game.getPublisher(),game.getRequirement(), game.getPrice(), game.getReleaseDate(),game.getRecommendation(),game.getPositive(),game.getHeaderImagePath(),game.getKoIsPosible(),game.getEnIsPosible(),game.getJpIsPosible(),getGameCategoryDTOList,getGameScreenshotDTOList,getGameAchievementDTOList,rank);
 
-                dto = new GetTopGameDTO(game.getAppId(), game.getName(), game.getDescription(), game.getDeveloper(), game.getPublisher(), game.getRequirement(), game.getPrice(), game.getReleaseDate(), game.getRecommendation(), game.getPositive(), game.getHeaderImagePath(), game.getKoIsPosible(), game.getEnIsPosible(), game.getJpIsPosible(), getGameCategoryDTOList, null, null, rank);
+                dto = new GetTopGameDTO(game.getAppId(), game.getName(), game.getDescription(), game.getDeveloper(), game.getPublisher(), game.getRequirement(), game.getPrice(), game.getReleaseDate(), game.getRecommendation(), game.getPositive(), game.getHeaderImagePath(), game.getKoIsPossible(), game.getEnIsPossible(), game.getJpIsPossible(), getGameCategoryDTOList, null, null, rank);
             } else {
                 dto = new GetTopGameDTO();
                 dto.setRank(rank);
@@ -142,14 +142,14 @@ public class GameService {
         if (updateGameRequestDTO.getPositive() != null) {
             targetGame.setPositive(updateGameRequestDTO.getPositive());
         }
-        if (updateGameRequestDTO.getKoIsPosible() != null) {
-            targetGame.setKoIsPosible(updateGameRequestDTO.getKoIsPosible());
+        if (updateGameRequestDTO.getKoIsPossible() != null) {
+            targetGame.setKoIsPossible(updateGameRequestDTO.getKoIsPossible());
         }
-        if (updateGameRequestDTO.getEnIsPosible() != null) {
-            targetGame.setEnIsPosible(updateGameRequestDTO.getEnIsPosible());
+        if (updateGameRequestDTO.getEnIsPossible() != null) {
+            targetGame.setEnIsPossible(updateGameRequestDTO.getEnIsPossible());
         }
-        if (updateGameRequestDTO.getJpIsPosible() != null) {
-            targetGame.setJpIsPosible(updateGameRequestDTO.getJpIsPosible());
+        if (updateGameRequestDTO.getJpIsPossible() != null) {
+            targetGame.setJpIsPossible(updateGameRequestDTO.getJpIsPossible());
         }
         if (updateGameRequestDTO.getDeveloper() != null) {
             targetGame.setDeveloper(updateGameRequestDTO.getDeveloper());
@@ -418,12 +418,13 @@ public class GameService {
                 game.getRecommendation(),
                 game.getPositive(),
                 game.getHeaderImagePath(),
-                game.getKoIsPosible(),
-                game.getEnIsPosible(),
-                game.getJpIsPosible(),
+                game.getKoIsPossible(),
+                game.getEnIsPossible(),
+                game.getJpIsPossible(),
                 getGameCategoryDTOList,
                 getGameScreenshotDTOList,
-                getGameAchievementDTOList
+                getGameAchievementDTOList,
+                game.getAverageEmbeddingVector()
         );
     }
 

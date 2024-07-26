@@ -22,8 +22,12 @@
         NOT_FOUND_GAME(HttpStatus.NOT_FOUND,"G-002","조회된 게임이 없습니다." ),
 
         NOT_DIFFERENT_PASSWORD(HttpStatus.BAD_REQUEST, "M-003", "비밀번호가 일치하지 않습니다."),
-        NOT_SAVED_GAME(HttpStatus.BAD_REQUEST, "G-003", "Mytrophy에 저장되지 않은 게임입니다.");
+        NOT_SAVED_GAME(HttpStatus.BAD_REQUEST, "G-003", "Mytrophy에 저장되지 않은 게임입니다."),
 
+        NOT_FOUND_GAME_REVIEW(HttpStatus.NOT_FOUND, "R-001", "평가를 남긴 게임이 없습니다."),
+
+        EMPTY_EMBEDDING_VECTOR(HttpStatus.NOT_FOUND, "E-001", "게임의 평균 임베딩 벡터가 null이거나 비어있습니다."),
+        FAILED_TO_PARSING_EMBEDDING_VECTOR(HttpStatus.BAD_REQUEST, "E-002", "게임의 임베딩 벡터를 파싱하는데 실패했습니다.");
 
         private final HttpStatus httpStatus;
         private final String errorCode;
