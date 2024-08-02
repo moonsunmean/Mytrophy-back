@@ -4,10 +4,12 @@ spring:
 #    url: jdbc:mysql://127.0.0.1:3306/mytrophy_db
 #    username: root
 #    password: 1234
-    url: jdbc:mysql://34.64.52.132:3306/mytrophy_db
-    username: mytrophy
-    password: mytrophy
-
+    #url: jdbc:mysql://34.64.52.132:3306/mytrophy_db
+    #username: mytrophy
+   # password: mytrophy
+    url: jdbc:mysql://fastcampus-rds-mysql8.c7wwkosygeqi.ap-northeast-2.rds.amazonaws.com:3306/projectdb
+    username: developer
+    password: developer123!
   jpa:
     hibernate:
       ddl-auto: update
