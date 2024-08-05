@@ -9,6 +9,7 @@ import mytrophy.api.article.dto.ArticleResponseDto;
 import mytrophy.api.article.enumentity.Header;
 import mytrophy.api.article.service.ArticleService;
 import mytrophy.api.image.service.ImageService;
+import mytrophy.api.member.dto.MemberResponseDto;
 import mytrophy.api.member.entity.Member;
 import mytrophy.api.member.service.MemberService;
 import mytrophy.api.querydsl.service.ArticleQueryService;
@@ -181,6 +182,19 @@ public class ArticleController {
 
         Page<ArticleResponseDto> likedArticles = articleQueryService.getLikedArticlesByMemberId(memberId, pageable);
         return ResponseEntity.ok().body(likedArticles);
+    }
+
+    // 현재 로그인 한 사용자가 좋아요 누른 게시물 boolean 값
+    @GetMapping("/liked-member/{articleId}")
+    @Operation(summary = "좋아요 누른 게시글 확인", description = "게시글 id를 입력받아 현재 로그인한 사용자가 해당 게시글을 좋아요 눌렀는지 확인한다.")
+    public ResponseEntity<Boolean> checkLikeArticle(@AuthenticationPrincipal CustomUserDetails userInfo,
+                                                    @Parameter(description = "게시글 id를 입력한다.") @RequestParam Long articleId,
+                                                    @Parameter(description = "현재 로그인한 사용자 id를 입력한다.") @RequestParam Long memberId) {
+        //토큰에서 username 빼내기
+        String username = userInfo.getUsername();
+        MemberResponseDto member = memberService.findMemberDtoByUsername(username);
+
+        return ResponseEntity.ok().body(articleService.checkIfArticleLikedByMember(articleId, member.getId()));
     }
 
     // 게시글 검색
