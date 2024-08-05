@@ -59,7 +59,7 @@ public class SecurityConfig {
         //프론트단과 Json데이토 통신을 위환 cors설정
         http.cors(corsCustomizer -> corsCustomizer.configurationSource(request -> {
             CorsConfiguration configuration = new CorsConfiguration();
-            configuration.setAllowedOrigins(Arrays.asList("http://localhost:3000", "http://34.64.52.132", "http://mytrophy.site"));
+            configuration.setAllowedOrigins(Arrays.asList("http://localhost:3000", "http://34.64.52.132", "http://3.37.122.106","http://mytrophy.site"));
             configuration.setAllowedMethods(Collections.singletonList("*"));
             configuration.setAllowCredentials(true);
             configuration.setAllowedHeaders(Collections.singletonList("*"));
@@ -102,7 +102,7 @@ public class SecurityConfig {
         //oauth2
         http
                 .oauth2Login((oauth2) -> oauth2
-                        .defaultSuccessUrl("/my", true)  // 로그인 성공 후 리디렉션 URL
+                        .defaultSuccessUrl("/", true)  // 로그인 성공 후 리디렉션 URL
                         .userInfoEndpoint((userInfoEndpointConfig) -> userInfoEndpointConfig
                                 .userService(customOAuth2UserService))
                         .successHandler(customSuccessHandler)

@@ -6,6 +6,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import mytrophy.api.comment.dto.CommentDto;
 import mytrophy.api.comment.dto.CreateCommentDto;
+import mytrophy.api.comment.repository.CommentRepository;
 import mytrophy.api.comment.service.CommentService;
 import mytrophy.api.member.repository.MemberRepository;
 import mytrophy.global.jwt.CustomUserDetails;
@@ -23,6 +24,7 @@ public class CommentController {
 
     private final CommentService commentService;
     private final MemberRepository memberRepository;
+    private final CommentRepository commentRepository;
 
     private Long getMemberIdFromUserDetails(CustomUserDetails userInfo){
         String username = userInfo.getUsername();
@@ -89,5 +91,11 @@ public class CommentController {
 
         commentService.toggleLikeComment(commentId, memberId);
         return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/comments/child/{id}")
+    public ResponseEntity<List<CommentDto>> getCommentByParentId( @PathVariable("id") Long commentId){
+        List<CommentDto> childComments = commentService.findByParentId(commentId);
+        return ResponseEntity.ok(childComments);
     }
 }
