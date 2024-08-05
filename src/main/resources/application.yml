@@ -4,7 +4,7 @@ spring:
 #    url: jdbc:mysql://127.0.0.1:3306/mytrophy_db
 #    username: root
 #    password: 1234
-    url: jdbc:mysql://43.202.45.186:3306/mytrophy_db
+    url: jdbc:mysql://3.37.122.106:3306/mytrophy
     username: mytrophy
     password: mytrophy
 

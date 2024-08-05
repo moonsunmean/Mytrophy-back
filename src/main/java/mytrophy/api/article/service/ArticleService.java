@@ -60,4 +60,6 @@ public interface ArticleService {
     Page<ArticleResponseDto> findByMemberId(Long memberId, Pageable pageable);
 
     Page<ArticleResponseDto> findByNameArticles(String keyword, String target, Pageable pageable);
+
+    boolean checkIfArticleLikedByMember(Long articleId, Long memberId);
 }
