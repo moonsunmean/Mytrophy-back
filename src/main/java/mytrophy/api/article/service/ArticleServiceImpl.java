@@ -291,4 +291,16 @@ public class ArticleServiceImpl implements ArticleService {
             return ArticleResponseDto.fromEntityWithCommentCount(article, commentCount);
         });
     }
+
+    // 게시글 좋아요 boolean 값 반환
+    @Override
+    public boolean checkIfArticleLikedByMember(Long articleId, Long memberId) {
+        Article article = articleRepository.findById(articleId)
+            .orElseThrow(() -> new ResourceNotFoundException("게시글을 찾을 수 없습니다."));
+
+        Member member = memberRepository.findById(memberId)
+            .orElseThrow(() -> new ResourceNotFoundException("회원을 찾을 수 없습니다."));
+
+        return articleLikeRepository.existsByArticleAndMember(article, member);
+    }
 }
