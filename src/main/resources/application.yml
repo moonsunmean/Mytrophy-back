@@ -4,10 +4,10 @@ spring:
 #    url: jdbc:mysql://127.0.0.1:3306/mytrophy_db
 #    username: root
 #    password: 1234
-    url: jdbc:mysql://3.37.122.106:3306/mytrophy
-    username: mytrophy
-    password: mytrophy
 
+    url: jdbc:mysql://3.37.122.106:3306/mytrophy
+    username: root
+    password: mytrophy
   jpa:
     hibernate:
       ddl-auto: update
@@ -31,7 +31,7 @@ spring:
             client-name: naver
             client-id: M__lwomWP26ogS9cROiz
             client-secret: KeeYEbPqoz
-            redirect-uri: http://34.64.52.132:8080/login/oauth2/code/naver
+            redirect-uri: http://3.37.122.106:8080/login/oauth2/code/naver
             authorization-grant-type: authorization_code
             scope: name,email
         provider:
