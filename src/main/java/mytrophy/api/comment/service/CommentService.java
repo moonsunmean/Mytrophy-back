@@ -16,4 +16,5 @@ public interface CommentService {
     List<CommentDto> findByMemberId(Long memberId);
 
     void toggleLikeComment(Long commentId, Long memberId);
+    List<CommentDto> findByParentId(Long parentCommentId);
 }

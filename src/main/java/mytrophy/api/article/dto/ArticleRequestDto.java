@@ -18,16 +18,22 @@ public class ArticleRequestDto {
     private Header header;
     private String name;
     private String content;
+    private Integer partySize;
+    private String partyTime;
+    private String partyOption;
     private String imagePath;
     private Long appId;
 
     @Builder
-    public ArticleRequestDto(Header header, String name, String content, String imagePath, Long appId) {
+    public ArticleRequestDto(Header header, String name, String content, String imagePath, Long appId, Integer partySize, String partyTime, String partyOption) {
         this.header = header;
         this.name = name;
         this.content = content;
         this.imagePath = imagePath;
         this.appId = appId;
+        this.partySize = partySize;
+        this.partyTime = partyTime;
+        this.partyOption = partyOption;
     }
 
     public Article toEntity() {
@@ -35,6 +41,9 @@ public class ArticleRequestDto {
                 .header(header)
                 .name(name)
                 .content(content)
+                .partySize(partySize)
+                .partyTime(partyTime)
+                .partyOption(partyOption)
                 .imagePath(imagePath)
                 .appId(appId)
                 .build();

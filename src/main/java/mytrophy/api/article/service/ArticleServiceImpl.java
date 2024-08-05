@@ -52,6 +52,9 @@ public class ArticleServiceImpl implements ArticleService {
             .header(articleRequestDto.getHeader())
             .name(articleRequestDto.getName())
             .content(articleRequestDto.getContent())
+            .partySize(articleRequestDto.getPartySize())
+            .partyTime(articleRequestDto.getPartyTime())
+            .partyOption(articleRequestDto.getPartyOption())
             .imagePath(imagePath != null && !imagePath.isEmpty() ? String.join(",", imagePath) : null)
             .appId(articleRequestDto.getAppId())
             .member(member)
@@ -160,7 +163,8 @@ public class ArticleServiceImpl implements ArticleService {
             .orElseThrow(() -> new ResourceNotFoundException("해당 게시글이 존재하지 않습니다."));
 
         article.updateArticle(articleRequestDto.getHeader(), articleRequestDto.getName(),
-            articleRequestDto.getContent(), articleRequestDto.getImagePath(), articleRequestDto.getAppId());
+            articleRequestDto.getContent(), articleRequestDto.getPartySize(), articleRequestDto.getPartyTime(),
+            articleRequestDto.getPartyOption(), articleRequestDto.getImagePath(), articleRequestDto.getAppId());
 
         articleRepository.save(article);
     }
@@ -264,5 +268,27 @@ public class ArticleServiceImpl implements ArticleService {
                 int commentCount = article.getComments().size();
                 return ArticleResponseDto.fromEntityWithCommentCount(article, commentCount);
             });
+    }
+
+    // 게시글 조회
+    @Override
+    public Page<ArticleResponseDto> findByNameArticles(String keyword, String target, Pageable pageable) {
+        Page<Article> articlesPage;
+
+        if ("name".equals(target)) {
+            articlesPage = articleRepository.findByNameContaining(keyword, pageable);
+        } else if ("content".equals(target)) {
+            articlesPage = articleRepository.findByContentContaining(keyword, pageable);
+        } else if ("nickname".equals(target)) {
+            articlesPage = articleRepository.findByMember_NicknameContaining(keyword, pageable);
+        } else {
+            // 기본적으로 제목을 기준으로 검색하도록 설정
+            articlesPage = articleRepository.findByNameContaining(keyword, pageable);
+        }
+
+        return articlesPage.map(article -> {
+            int commentCount = article.getComments().size();
+            return ArticleResponseDto.fromEntityWithCommentCount(article, commentCount);
+        });
     }
 }

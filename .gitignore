@@ -36,3 +36,6 @@ application.properties
 
 ### VS Code ###
 .vscode/
+
+# Firebase service account key
+serviceAccountKey.json

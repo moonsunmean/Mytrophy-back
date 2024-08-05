@@ -53,11 +53,11 @@ public interface ArticleService {
     // 좋아요 토글
     String toggleArticleLike(Long articleId, Long memberId);
 
-
-
     // appId로 게시글 조회
     Page<ArticleResponseDto> findByAppId(int appId, Pageable pageable);
 
     // 회원 id로 게시글 조회
     Page<ArticleResponseDto> findByMemberId(Long memberId, Pageable pageable);
+
+    Page<ArticleResponseDto> findByNameArticles(String keyword, String target, Pageable pageable);
 }

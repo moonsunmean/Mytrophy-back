@@ -26,12 +26,13 @@ public class ResponseDTO {
         private Integer recommendation;
         private Positive positive;
         private String headerImagePath;
-        private Boolean koIsPosible;
-        private Boolean enIsPosible;
-        private Boolean jpIsPosible;
+        private Boolean koIsPossible;
+        private Boolean enIsPossible;
+        private Boolean jpIsPossible;
         private List<GetGameCategoryDTO> getGameCategoryDTOList;
         private List<GetGameScreenshotDTO> getGameScreenshotDTOList;
         private List<GetGameAchievementDTO> getGameAchievementDTOList;
+        private String averageEmbeddingVector;
     }
 
     @Data
@@ -74,9 +75,9 @@ public class ResponseDTO {
         private Integer recommendation;
         private Positive positive;
         private String headerImagePath;
-        private Boolean koIsPosible;
-        private Boolean enIsPosible;
-        private Boolean jpIsPosible;
+        private Boolean koIsPossible;
+        private Boolean enIsPossible;
+        private Boolean jpIsPossible;
         private List<GetGameCategoryDTO> getGameCategoryDTOList;
         private List<GetGameScreenshotDTO> getGameScreenshotDTOList;
         private List<GetGameAchievementDTO> getGameAchievementDTOList;
@@ -101,7 +102,7 @@ public class ResponseDTO {
         private Integer recommendation;
         private Positive positive;
         private String headerImagePath;
-        private Boolean koIsPosible;
+        private Boolean koIsPossible;
         private List<GetGameCategoryDTO> getGameCategoryDTOList;
     }
 
@@ -110,5 +111,25 @@ public class ResponseDTO {
     public static class GetGameReviewsDto {
         private Long memberId;
         private String reviewStatus;
+    }
+
+    @Data
+    @AllArgsConstructor
+    public static class GetRecommendedGameDto {
+        private Integer id;
+        private String name;
+        private String description;
+        private String developer;
+        private String publisher;
+        private String requirement;
+        private Integer price;
+        private LocalDate releaseDate;
+        private Integer recommendation;
+        private Positive positive;
+        private String headerImagePath;
+        private Boolean koIsPossible;
+        private Boolean enIsPossible;
+        private Boolean jpIsPossible;
+        private List<GetGameCategoryDTO> getGameCategoryDTOList;
     }
 }

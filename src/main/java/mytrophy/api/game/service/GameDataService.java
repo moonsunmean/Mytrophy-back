@@ -243,9 +243,9 @@ public class GameDataService {
         // 지원하는 언어
         String languages = appNode.hasNonNull("supported_languages") ? appNode.get("supported_languages").asText() : null;
         List<Boolean> checkList = languagePosible(languages);
-        Boolean enPosible = checkList.get(0);
-        Boolean koPosible = checkList.get(1);
-        Boolean jpPosible = checkList.get(2);
+        Boolean enPossible = checkList.get(0);
+        Boolean koPossible = checkList.get(1);
+        Boolean jpPossible = checkList.get(2);
 
         // 출시 날짜
         LocalDate date = null;
@@ -289,12 +289,12 @@ public class GameDataService {
             target.setRecommendation(recommandation);
             target.setPositive(positive);
             target.setHeaderImagePath(headerImagePath);
-            target.setKoIsPosible(koPosible);
-            target.setEnIsPosible(enPosible);
-            target.setJpIsPosible(jpPosible);
+            target.setKoIsPossible(koPossible);
+            target.setEnIsPossible(enPossible);
+            target.setJpIsPossible(jpPossible);
             return target;
         }
-        return new Game(null,appId,name,description,gameDeveloper,gamePublisher,requirement,price,date,recommandation,positive,headerImagePath,koPosible,enPosible,jpPosible,null,null,null);
+        return new Game(null, appId, name, description, gameDeveloper, gamePublisher, requirement, price, date, recommandation, positive, headerImagePath, koPossible, enPossible, jpPossible, new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), null);
     }
 
     // 게임 업적을 받아와서 업적 리스트를 반환하는 메서드
@@ -436,7 +436,7 @@ public class GameDataService {
 
             Category existingCategory = categoryRepository.findById(categoryId).orElse(null);
             if (existingCategory == null) {
-                existingCategory = new Category(categoryId, categoryName, null);
+                existingCategory = new Category(categoryId, categoryName, null, null);
                 existingCategory = categoryRepository.save(existingCategory);
             }
 
@@ -483,7 +483,7 @@ public class GameDataService {
 
             Category existingCategory = categoryRepository.findById(categoryId).orElse(null);
             if (existingCategory == null) {
-                existingCategory = new Category(categoryId, categoryName, null);
+                existingCategory = new Category(categoryId, categoryName, null, null);
                 existingCategory = categoryRepository.save(existingCategory);
             }
 

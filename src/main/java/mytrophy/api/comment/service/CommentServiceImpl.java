@@ -106,7 +106,14 @@ public class CommentServiceImpl implements CommentService{
 
         commentRepository.save(comment);
     }
-
+    @Override
+    @Transactional(readOnly = true)
+    public List<CommentDto> findByParentId(Long parentId) {
+        List<Comment> comments = commentRepository.findByParentComment_Id(parentId);
+        return comments.stream()
+                .map(this::entityToDto)
+                .collect(Collectors.toList());
+    }
     //댓글 id로 댓글 조회
     private Comment findCommentById(Long commentId) {
         return commentRepository.findById(commentId)

@@ -22,4 +22,10 @@ public interface ArticleRepository extends JpaRepository<Article, Long> {
     Page<Article> findByAppId(int appId, Pageable pageable);
 
     Page<Article> findByMemberId(Long memberId, Pageable pageable);
+
+    Page<Article> findByNameContaining(String keyword, Pageable pageable);
+
+    Page<Article> findByContentContaining(String keyword, Pageable pageable);
+
+    Page<Article> findByMember_NicknameContaining(String keyword, Pageable pageable);
 }

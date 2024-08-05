@@ -5,8 +5,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import lombok.RequiredArgsConstructor;
 import mytrophy.api.game.dto.RequestDTO;
 import mytrophy.api.game.dto.ResponseDTO;
-import mytrophy.api.game.entity.Game;
-import mytrophy.api.game.service.GameRecommendService;
+import mytrophy.api.recommend.GameRecommendService;
 import mytrophy.api.game.service.GameReviewService;
 import mytrophy.api.member.repository.MemberRepository;
 import mytrophy.global.jwt.CustomUserDetails;
@@ -84,17 +83,5 @@ public class GameReviewController {
 
         ResponseDTO.GetGameReviewsDto reviewDto = gameReviewService.getMyReviewByAppId(memberId, appId);
         return ResponseEntity.ok(reviewDto);
-    }
-
-    @Operation(summary = "맞춤형 추천게임 조회", description = "회원의 관심 카테고리, 게임 평가를 기반으로 추천된 게임을 조회합니다.")
-    @GetMapping("/recommendations")
-    public Page<ResponseDTO.GetGameDetailDTO> getRecommendations(@AuthenticationPrincipal CustomUserDetails userinfo,
-                                                                 @Parameter(description = "페이지 번호") @RequestParam(defaultValue = "0") int page,
-                                                                 @Parameter(description = " 한 페이지의 데이터 개수") int size) {
-        String username = userinfo.getUsername();
-        Long memberId = memberRepository.findByUsername(username).getId();
-
-        Pageable pageable = PageRequest.of(page, size);
-        return gameRecommendService.recommendGamesForMember(memberId, pageable);
     }
 }
