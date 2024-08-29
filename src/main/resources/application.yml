@@ -5,8 +5,8 @@ spring:
 #    username: root
 #    password: 1234
 
-    url: jdbc:mysql://3.37.122.106:3306/mytrophy
-    username: root
+    url: jdbc:mysql://34.64.52.132:3306/mytrophy_db
+    username: mytrohpy
     password: mytrophy
   jpa:
     hibernate:

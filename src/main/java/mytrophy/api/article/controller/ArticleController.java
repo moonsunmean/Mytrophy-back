@@ -135,7 +135,8 @@ public class ArticleController {
     // 파일만 업로드
     @PostMapping(value = "/files", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Operation(summary = "파일 업로드", description = "MultipartFile로 파일을 firebase에 업로드 시켜 URL을 가져온다")
-    public ResponseEntity uploadOnlyFiles(@Parameter(description = "업로드할 파일을 MultipartFile로 받습니다.") @RequestPart ("file") List<MultipartFile> files) throws IOException {
+    public ResponseEntity uploadOnlyFiles(@Parameter(description = "업로드할 파일을 MultipartFile로 받습니다.")
+                                              @RequestPart ("file") List<MultipartFile> files) throws IOException {
         List<String> uploadFiles = imageService.uploadFiles(files);
         return ResponseEntity.status(HttpStatus.CREATED).body(uploadFiles);
     }
@@ -185,11 +186,10 @@ public class ArticleController {
     }
 
     // 현재 로그인 한 사용자가 좋아요 누른 게시물 boolean 값
-    @GetMapping("/liked-member/{articleId}")
+    @GetMapping("/isLiked/{articleId}")
     @Operation(summary = "좋아요 누른 게시글 확인", description = "게시글 id를 입력받아 현재 로그인한 사용자가 해당 게시글을 좋아요 눌렀는지 확인한다.")
     public ResponseEntity<Boolean> checkLikeArticle(@AuthenticationPrincipal CustomUserDetails userInfo,
-                                                    @Parameter(description = "게시글 id를 입력한다.") @RequestParam Long articleId,
-                                                    @Parameter(description = "현재 로그인한 사용자 id를 입력한다.") @RequestParam Long memberId) {
+                                                    @Parameter(description = "게시글 id를 입력한다.") @RequestParam Long articleId) {
         //토큰에서 username 빼내기
         String username = userInfo.getUsername();
         MemberResponseDto member = memberService.findMemberDtoByUsername(username);
